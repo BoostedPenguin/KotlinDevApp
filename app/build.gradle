@@ -67,4 +67,6 @@ dependencies {
     // Navigation component
     implementation("androidx.navigation:navigation-fragment-ktx:2.3.5")
     implementation("androidx.navigation:navigation-ui-ktx:2.3.5")
+
+    implementation 'com.andrognito.patternlockview:patternlockview:1.0.0'
 }

@@ -1,12 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.verify.PatternUnlockFragment">
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Fragment pattern unlock (priority)" />
 
+    <TextView
+        android:id="@+id/patternHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter pattern to unlock"
+        android:textColor="@color/on_primary_light"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.andrognito.patternlockview.PatternLockView
+        android:id="@+id/pattern_lock_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:normalStateColor="@color/black"
+        app:correctStateColor="@color/success"
+        app:wrongStateColor="@color/error"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/patternHint"
+        android:layout_width="280dp"
+        android:layout_height="280dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
