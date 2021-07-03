@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/splashFragment">
+
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.penguinstudio.safecrypt.ui.main.SplashFragment"
+        android:label="fragment_splash"
+        tools:layout="@layout/fragment_splash" >
+        <action
+            android:id="@+id/action_splashFragment_to_patternUnlockFragment"
+            app:destination="@id/patternUnlockFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/passwordUnlockFragment"
+        android:name="com.penguinstudio.safecrypt.ui.verify.PasswordUnlockFragment"
+        android:label="fragment_password_unlock"
+        tools:layout="@layout/fragment_password_unlock" >
+        <action
+            android:id="@+id/action_passwordUnlockFragment_to_patternUnlockFragment"
+            app:destination="@id/patternUnlockFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/patternUnlockFragment"
+        android:name="com.penguinstudio.safecrypt.ui.verify.PatternUnlockFragment"
+        android:label="fragment_pattern_unlock"
+        tools:layout="@layout/fragment_pattern_unlock" >
+        <action
+            android:id="@+id/action_patternUnlockFragment_to_passwordUnlockFragment"
+            app:destination="@id/passwordUnlockFragment" />
+    </fragment>
+</navigation>

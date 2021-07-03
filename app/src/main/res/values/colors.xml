@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--  Material defaults  -->
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
@@ -7,4 +8,27 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+
+    <!-- Light mode values   -->
+    <color name="primary_light_50">#E0E0E0</color>
+    <color name="primary_light_400">#E9E9E9</color>
+    <color name="primary_light_500">#E0E0E0</color>
+    <color name="primary_light_600">#B3B3B3</color>
+    <color name="primary_light_700">#9E9E9E</color>
+    <color name="primary_light_800">#7C7C7C</color>
+    <color name="primary_light_900">#575757</color>
+
+    <color name="on_primary_light">#000000</color>
+
+    <!-- Dark mode values   -->
+    <color name="primary_dark_50">#5A5A5A</color>
+    <color name="primary_dark_100">#555555</color>
+    <color name="primary_dark_200">#515151</color>
+    <color name="primary_dark_300">#454545</color>
+    <color name="primary_dark_400">#282828</color>
+    <color name="primary_dark_500">#121212</color>
+    <color name="primary_dark_600">#000000</color>
+
+    <color name="on_primary_dark">#ffffff</color>
 </resources>
