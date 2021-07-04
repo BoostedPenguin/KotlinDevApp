@@ -2,6 +2,7 @@ package com.penguinstudio.safecrypt.ui.main
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import androidx.appcompat.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
@@ -14,6 +15,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -46,7 +48,17 @@ class SplashFragment : Fragment() {
     }
 
     private fun navigateToPasswordUnlock() {
-        findNavController().navigate(R.id.action_splashFragment_to_patternUnlockFragment)
+
+        val sp = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
+        val storedPattern = sp.getString(getString(R.string.pattern), null)
+
+        var action: NavDirections = if(storedPattern == null) {
+            SplashFragmentDirections.actionSplashFragmentToPatternUnlockFragment(true)
+        } else {
+            SplashFragmentDirections.actionSplashFragmentToPatternUnlockFragment(false)
+        }
+
+        findNavController().navigate(action)
     }
 
 

@@ -14,7 +14,8 @@
             app:popUpTo="@id/patternUnlockFragment"
             app:popUpToInclusive="true"
             android:id="@+id/action_splashFragment_to_patternUnlockFragment"
-            app:destination="@id/patternUnlockFragment" />
+            app:destination="@id/patternUnlockFragment">
+        </action>
     </fragment>
     <fragment
         android:id="@+id/passwordUnlockFragment"
@@ -33,5 +34,9 @@
         <action
             android:id="@+id/action_patternUnlockFragment_to_passwordUnlockFragment"
             app:destination="@id/passwordUnlockFragment" />
+        <argument
+            android:name="isRegistering"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </fragment>
 </navigation>
