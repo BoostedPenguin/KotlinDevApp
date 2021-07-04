@@ -15,5 +15,43 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+        <item name="alertDialogTheme">@style/AlertDialogTheme</item>
+
     </style>
+
+    <style name="TextView.Default" parent="Widget.AppCompat.TextView">
+        <item name="android:textColor">@color/on_primary_dark</item>
+    </style>
+
+    <style name="PatternView.Default" parent="Theme.AppCompat">
+        <item name="normalStateColor">@color/on_primary_dark</item>
+        <item name="correctStateColor">@color/success</item>
+        <item name="wrongStateColor">@color/error</item>
+    </style>
+
+    <style name="AlertDialogTheme" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+        <item name="buttonBarPositiveButtonStyle">@style/Alert.Button.Positive</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Alert.Button.Neutral</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Alert.Button.Neutral</item>
+    </style>
+
+    <style name="Alert.Button.Positive" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/on_primary_dark</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Alert.Button.Neutral" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/primary_light_600</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Theme.SafeCrypt.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.SafeCrypt.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.SafeCrypt.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
 </resources>

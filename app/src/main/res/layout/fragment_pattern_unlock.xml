@@ -6,12 +6,30 @@
     android:layout_height="match_parent"
     tools:context=".ui.verify.PatternUnlockFragment">
 
+
+    <TextView
+        android:id="@+id/patternWarning"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/error"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/patternHint"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        android:textSize="18sp"
+        android:layout_marginHorizontal="20dp"
+        android:textAlignment="center"
+        android:text="Remember this pattern. If you forget it, you won't be able to access your encrypted data" />
+
+
     <TextView
         android:id="@+id/patternHint"
+        style="@style/TextView.Default"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Enter pattern to unlock"
-        android:textColor="@color/on_primary_light"
+        tools:text="Enter pattern to unlock"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -22,11 +40,10 @@
         android:id="@+id/pattern_lock_view"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:normalStateColor="@color/black"
-        app:correctStateColor="@color/success"
-        app:wrongStateColor="@color/error"
         app:layout_constraintBottom_toBottomOf="parent"
+        style="@style/PatternView.Default"
+        android:layout_margin="50dp"
         app:layout_constraintTop_toBottomOf="@id/patternHint"
-        android:layout_width="280dp"
-        android:layout_height="280dp"/>
+        android:layout_width="0dp"
+        android:layout_height="0dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

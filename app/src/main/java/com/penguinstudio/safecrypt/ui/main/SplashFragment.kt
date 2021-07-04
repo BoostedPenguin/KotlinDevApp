@@ -1,19 +1,16 @@
 package com.penguinstudio.safecrypt.ui.main
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
-import androidx.appcompat.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
@@ -23,23 +20,30 @@ import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.penguinstudio.safecrypt.R
+import com.penguinstudio.safecrypt.databinding.FragmentSplashBinding
 
 
 /**
  * Initial loaded fragment
  * Checks for required permissions on every app load.
- * Checks if it's the first time use of the app. If it is it it should ask for
- * - Default save location for file encryption
- * - Password / PIN unlock code (2 times)
- * - Pattern unlock (future)
+ * Checks if it's the first time use of the app.
  */
 class SplashFragment : Fragment() {
+    private lateinit var binding: FragmentSplashBinding
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_splash, container, false)
+        setHasOptionsMenu(true)
+
+        binding = FragmentSplashBinding.inflate(layoutInflater)
+
+
+        (activity as AppCompatActivity?)?.supportActionBar?.hide()
+
+        return binding.root
     }
 
     override fun onStart() {
@@ -52,7 +56,8 @@ class SplashFragment : Fragment() {
         val sp = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
         val storedPattern = sp.getString(getString(R.string.pattern), null)
 
-        var action: NavDirections = if(storedPattern == null) {
+        // Checks if user is a first timer
+        val action: NavDirections = if(storedPattern == null) {
             SplashFragmentDirections.actionSplashFragmentToPatternUnlockFragment(true)
         } else {
             SplashFragmentDirections.actionSplashFragmentToPatternUnlockFragment(false)
@@ -76,7 +81,6 @@ class SplashFragment : Fragment() {
                 override fun onPermissionsChecked(report: MultiplePermissionsReport) {
                     if(report.areAllPermissionsGranted()) {
                         navigateToPasswordUnlock()
-                        //Toast.makeText(context, "All the permissions are granted..", Toast.LENGTH_SHORT).show();
                     }
                     else {
                         showSettingsDialog();
@@ -119,17 +123,12 @@ class SplashFragment : Fragment() {
         }
         builder.setNegativeButton(
             "Exit"
-        ) { dialog, which -> // this method is called when
+        ) { dialog, _ -> // this method is called when
             // user click on negative button.
             activity?.finishAndRemoveTask();
 
             dialog.cancel()
         }
         builder.show()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d("encrypt", "Resumed?")
     }
 }

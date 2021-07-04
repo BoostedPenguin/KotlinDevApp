@@ -4,14 +4,14 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.navArgs
 import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.PatternLockView.Dot
 import com.andrognito.patternlockview.listener.PatternLockViewListener
@@ -41,11 +41,37 @@ class PatternUnlockFragment : Fragment() {
             val safeArgs = PatternUnlockFragmentArgs.fromBundle(it)
             model.isRegistering = safeArgs.isRegistering
 
-            val displayText = if(model.isRegistering) "Create a pattern" else "Enter pattern to unlock"
-            binding.patternHint.text = displayText
+            if(model.isRegistering) {
+                binding.patternHint.text = getString(R.string.pattern_create)
+            }
+            else {
+                binding.patternHint.text = getString(R.string.pattern_enter)
+                binding.patternWarning.visibility = View.INVISIBLE
+            }
         }
+
+        (activity as AppCompatActivity?)?.supportActionBar?.hide()
+
         return binding.root
     }
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val callback: OnBackPressedCallback =
+            object : OnBackPressedCallback(true /* enabled by default */) {
+                override fun handleOnBackPressed() {
+                    // Handle the back button event
+                    activity?.finishAndRemoveTask()
+                }
+            }
+        requireActivity().onBackPressedDispatcher.addCallback(this, callback)
+
+        // The callback can be enabled or disabled here or in handleOnBackPressed()
+    }
+
+
 
     /**
      * Triggered on app first time pattern creation
@@ -60,18 +86,21 @@ class PatternUnlockFragment : Fragment() {
             }
 
             Toast.makeText(context, "Patterns match!!!", Toast.LENGTH_SHORT).show()
+            // TODO
             // Continue to next component
+        }
+
+        if(pattern.length < 4) {
+            binding.patternHint.text = getString(R.string.pattern_4dots_required)
+            binding.patternLockView.setViewMode(PatternLockView.PatternViewMode.WRONG)
+            return
         }
 
         if(model.isRegisteringCounter == 1) {
             binding.patternLockView.setViewMode(PatternLockView.PatternViewMode.CORRECT)
+            binding.patternLockView.clearPattern()
 
-            Handler(Looper.getMainLooper()).postDelayed(
-                { binding.patternLockView.clearPattern() },
-                500
-            )
-
-            binding.patternHint.text = "Confirm your pattern"
+            binding.patternHint.text = getString(R.string.pattern_confirm)
             model.pattern = pattern
             model.isRegisteringCounter++
         }
@@ -80,7 +109,7 @@ class PatternUnlockFragment : Fragment() {
                 registerPattern()
             }
             else {
-                Toast.makeText(context, "Patterns don't match", Toast.LENGTH_SHORT).show()
+                binding.patternHint.text = getString(R.string.pattern_not_match)
                 binding.patternLockView.setViewMode(PatternLockView.PatternViewMode.WRONG)
 
                 Handler(Looper.getMainLooper()).postDelayed(
@@ -88,7 +117,6 @@ class PatternUnlockFragment : Fragment() {
                     500
                 )
 
-                binding.patternHint.text = "Create a pattern"
                 model.pattern = ""
                 model.isRegisteringCounter = 1
             }
@@ -108,11 +136,13 @@ class PatternUnlockFragment : Fragment() {
             binding.patternLockView.setViewMode(PatternLockView.PatternViewMode.CORRECT)
             Toast.makeText(context, "Patterns match", Toast.LENGTH_SHORT).show()
 
+            // TODO
             // Navigate
         }
         else {
             // Wrong
             binding.patternLockView.setViewMode(PatternLockView.PatternViewMode.WRONG)
+            binding.patternHint.text = getString(R.string.pattern_incorrect)
 
             Handler(Looper.getMainLooper()).postDelayed(
                 { binding.patternLockView.clearPattern() },
