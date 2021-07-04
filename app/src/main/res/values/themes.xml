@@ -30,6 +30,16 @@
         <item name="wrongStateColor">@color/error</item>
     </style>
 
+    <style name="TabLayout.Default" parent="Widget.MaterialComponents.TabLayout">
+        <item name="android:background">@color/primary_light_400</item>
+        <item name="tabIndicatorColor">@color/on_primary_light</item>
+
+        <item name="tabIconTint">@color/tab_item_color_selector_light</item>
+        <item name="tabSelectedTextColor">@color/on_primary_light</item>
+
+        <item name="tabTextColor">@color/primary_light_800</item>
+    </style>
+
     <style name="AlertDialogTheme" parent="Theme.MaterialComponents.Light.Dialog.Alert">
         <item name="buttonBarPositiveButtonStyle">@style/Alert.Button.Positive</item>
         <item name="buttonBarNegativeButtonStyle">@style/Alert.Button.Neutral</item>

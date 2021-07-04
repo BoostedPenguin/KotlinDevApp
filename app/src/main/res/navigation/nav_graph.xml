@@ -38,5 +38,13 @@
             android:name="isRegistering"
             app:argType="boolean"
             android:defaultValue="false" />
+        <action
+            android:id="@+id/action_patternUnlockFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.penguinstudio.safecrypt.ui.home.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" />
 </navigation>

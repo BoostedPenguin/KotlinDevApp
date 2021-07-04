@@ -12,6 +12,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.PatternLockView.Dot
 import com.andrognito.patternlockview.listener.PatternLockViewListener
@@ -87,7 +88,8 @@ class PatternUnlockFragment : Fragment() {
 
             Toast.makeText(context, "Patterns match!!!", Toast.LENGTH_SHORT).show()
             // TODO
-            // Continue to next component
+            findNavController().navigate(R.id.action_patternUnlockFragment_to_homeFragment)
+
         }
 
         if(pattern.length < 4) {
@@ -138,6 +140,7 @@ class PatternUnlockFragment : Fragment() {
 
             // TODO
             // Navigate
+            findNavController().navigate(R.id.action_patternUnlockFragment_to_homeFragment)
         }
         else {
             // Wrong

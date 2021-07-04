@@ -42,6 +42,18 @@
             <LayoutPositions>
               <option name="myPositions">
                 <map>
+                  <entry key="homeFragment">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="403" />
+                            <option name="y" value="789" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
                   <entry key="passwordUnlockFragment">
                     <value>
                       <LayoutPositions>
@@ -74,6 +86,11 @@
                         </option>
                         <option name="myPositions">
                           <map>
+                            <entry key="action_patternUnlockFragment_to_homeFragment">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
                             <entry key="action_patternUnlockFragment_to_passwordUnlockFragment">
                               <value>
                                 <LayoutPositions />
