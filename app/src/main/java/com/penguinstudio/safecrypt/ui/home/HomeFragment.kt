@@ -10,8 +10,9 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.HomeTabPagerAdapter
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class HomeFragment : Fragment() {
     private lateinit var pagerAdapter: HomeTabPagerAdapter
     private lateinit var viewPager: ViewPager2
@@ -38,6 +39,9 @@ class HomeFragment : Fragment() {
 
         pagerAdapter = HomeTabPagerAdapter(this)
         viewPager = view.findViewById(R.id.pager)
+
+        // Disable user-swipe
+        viewPager.isUserInputEnabled = false;
         viewPager.adapter = pagerAdapter
 
         val tabLayout = view.findViewById<TabLayout>(R.id.tabLayout)
