@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -32,19 +33,14 @@ class AlbumGridAdapter : RecyclerView.Adapter<AlbumGridAdapter.AlbumHolder>() {
     override fun onBindViewHolder(holder: AlbumHolder, position: Int) {
         val currentAlbum = albums[position]
         holder.image = currentAlbum
-        val startTime = System.currentTimeMillis()
+        holder.mainText.text = albums[position].name.toString()
+        holder.secondaryText.text = albums[position].albumPhotos.size.toString()
 
         Glide.with(holder.itemView)
             .load(currentAlbum.coverUri)
             .fitCenter()
             .apply(RequestOptions().override(100, 100))
             .into(holder.imageView);
-
-        Log.d(
-            "loadTime",
-            "Time it took to create bitmap: ${System.currentTimeMillis() - startTime}ms"
-        )
-
     }
 
     override fun getItemCount(): Int {
@@ -62,6 +58,8 @@ class AlbumGridAdapter : RecyclerView.Adapter<AlbumGridAdapter.AlbumHolder>() {
     inner class AlbumHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         internal lateinit var image: AlbumModel
         internal var imageView: ImageView = itemView.findViewById(R.id.albumInnerImage)
+        internal var mainText: TextView = itemView.findViewById(R.id.albumMainContent)
+        internal var secondaryText: TextView = itemView.findViewById(R.id.albumSecondaryContent)
 
         init {
             imageView.setOnClickListener {

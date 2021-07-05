@@ -26,7 +26,6 @@ class HomeFragment : Fragment() {
         // Inflate the layout for this fragment
         setHasOptionsMenu(true)
         (activity as AppCompatActivity?)?.supportActionBar?.show()
-        (activity as AppCompatActivity?)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
 
         return inflater.inflate(R.layout.fragment_home, container, false)

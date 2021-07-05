@@ -31,6 +31,18 @@
     <color name="primary_dark_600">#000000</color>
 
     <color name="on_primary_dark">#ffffff</color>
+    
+    <!-- Secondary   -->
+    <color name="secondary_light_50">#E9E9E9</color>
+    <color name="secondary_light_100">#C3D6E0</color>
+    <color name="secondary_light_200">#99C6DF</color>
+    <color name="secondary_light_300">#6EB3DA</color>
+    <color name="secondary_light_400">#4BA3D9</color>
+    <color name="secondary_light_500">#2396D9</color>
+    <color name="secondary_light_600">#1588CC</color>
+    <color name="secondary_light_700">#0277BD</color>
+    <color name="secondary_light_800">#0067AD</color>
+    <color name="secondary_light_900">#1B4A80</color>
 
     <!-- Error   -->
     <color name="error">#ff0033</color>

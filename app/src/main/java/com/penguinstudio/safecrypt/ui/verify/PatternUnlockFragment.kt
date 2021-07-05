@@ -86,8 +86,6 @@ class PatternUnlockFragment : Fragment() {
                 apply()
             }
 
-            Toast.makeText(context, "Patterns match!!!", Toast.LENGTH_SHORT).show()
-            // TODO
             findNavController().navigate(R.id.action_patternUnlockFragment_to_homeFragment)
 
         }
@@ -136,10 +134,7 @@ class PatternUnlockFragment : Fragment() {
         if(inputPattern == storedPattern) {
             // Correct
             binding.patternLockView.setViewMode(PatternLockView.PatternViewMode.CORRECT)
-            Toast.makeText(context, "Patterns match", Toast.LENGTH_SHORT).show()
 
-            // TODO
-            // Navigate
             findNavController().navigate(R.id.action_patternUnlockFragment_to_homeFragment)
         }
         else {

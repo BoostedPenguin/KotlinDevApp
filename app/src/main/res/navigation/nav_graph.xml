@@ -8,10 +8,12 @@
     <fragment
         android:id="@+id/splashFragment"
         android:name="com.penguinstudio.safecrypt.ui.main.SplashFragment"
-        android:label="fragment_splash"
+        android:label="Splash"
         tools:layout="@layout/fragment_splash" >
         <action
 
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="true"
             android:id="@+id/action_splashFragment_to_patternUnlockFragment"
             app:destination="@id/patternUnlockFragment">
         </action>
@@ -20,7 +22,7 @@
     <fragment
         android:id="@+id/passwordUnlockFragment"
         android:name="com.penguinstudio.safecrypt.ui.verify.PasswordUnlockFragment"
-        android:label="fragment_password_unlock"
+        android:label="Password Lock"
         tools:layout="@layout/fragment_password_unlock" >
         <action
             android:id="@+id/action_passwordUnlockFragment_to_patternUnlockFragment"
@@ -30,7 +32,7 @@
     <fragment
         android:id="@+id/patternUnlockFragment"
         android:name="com.penguinstudio.safecrypt.ui.verify.PatternUnlockFragment"
-        android:label="fragment_pattern_unlock"
+        android:label="Pattern Lock"
         tools:layout="@layout/fragment_pattern_unlock" >
         <action
             android:id="@+id/action_patternUnlockFragment_to_passwordUnlockFragment"
@@ -40,16 +42,16 @@
             app:argType="boolean"
             android:defaultValue="false" />
         <action
-            app:popUpTo="@id/patternUnlockFragment"
             app:launchSingleTop="true"
             app:popUpToInclusive="true"
+            app:popUpTo="@id/nav_graph"
             android:id="@+id/action_patternUnlockFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
     </fragment>
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.penguinstudio.safecrypt.ui.home.HomeFragment"
-        android:label="fragment_home"
+        android:label="@string/app_name"
         tools:layout="@layout/fragment_home" >
         <action
             android:id="@+id/action_homeFragment_to_settingsFragment"

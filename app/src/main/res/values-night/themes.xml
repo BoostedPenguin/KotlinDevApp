@@ -23,6 +23,8 @@
         <item name="android:textColor">@color/on_primary_dark</item>
     </style>
 
+    <style name="Toolbar.Default" parent="Widget.MaterialComponents.Toolbar.Primary" />
+
     <style name="PatternView.Default" parent="Theme.AppCompat">
         <item name="normalStateColor">@color/on_primary_dark</item>
         <item name="correctStateColor">@color/success</item>
