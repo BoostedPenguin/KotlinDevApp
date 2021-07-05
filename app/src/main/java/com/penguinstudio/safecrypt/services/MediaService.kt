@@ -94,7 +94,6 @@ class MediaService @Inject constructor() {
                     }
                 }
             }
-            Thread.sleep(5000)
             return@withContext phoneAlbums
         }
     }
