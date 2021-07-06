@@ -6,13 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.snackbar.Snackbar
+import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.AlbumGridAdapter
-import com.penguinstudio.safecrypt.adapters.GalleryType
 import com.penguinstudio.safecrypt.databinding.FragmentGalleryBinding
 import com.penguinstudio.safecrypt.models.AlbumModel
+import com.penguinstudio.safecrypt.utilities.GalleryType
 import com.penguinstudio.safecrypt.utilities.Status
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -20,7 +22,7 @@ import dagger.hilt.android.AndroidEntryPoint
 //TODO("scrolling, clicking, interaction with recyclerview needs to be DISABLED IF MEDIA FILES ARE LOADING")
 @AndroidEntryPoint
 class GalleryFragment : Fragment() {
-    private val model: GalleryViewModel by viewModels()
+    private val model: GalleryViewModel by activityViewModels()
     private lateinit var binding: FragmentGalleryBinding
 
     //private lateinit var galleryAdapter: PhotoGridAdapter
@@ -66,7 +68,8 @@ class GalleryFragment : Fragment() {
         // On image click
         galleryAdapter.setOnItemClickListener(object : AlbumGridAdapter.OnItemClickListener {
             override fun onContactButtonClick(position: Int, image: AlbumModel) {
-                TODO("Not yet implemented")
+                model.setSelectedAlbum(image)
+                findNavController().navigate(R.id.action_homeFragment_to_picturesFragment)
             }
         })
 
@@ -114,7 +117,7 @@ class GalleryFragment : Fragment() {
 
     private fun initGrid() {
         galleryAdapter = AlbumGridAdapter()
-        binding.galleryRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
+        binding.galleryRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
         binding.galleryRecyclerView.adapter = galleryAdapter
     }
 

@@ -42,6 +42,11 @@
             <LayoutPositions>
               <option name="myPositions">
                 <map>
+                  <entry key="action_to_SettingsFragment">
+                    <value>
+                      <LayoutPositions />
+                    </value>
+                  </entry>
                   <entry key="homeFragment">
                     <value>
                       <LayoutPositions>
@@ -53,7 +58,7 @@
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_homeFragment_to_settingsFragment">
+                            <entry key="action_homeFragment_to_picturesFragment">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -110,13 +115,25 @@
                       </LayoutPositions>
                     </value>
                   </entry>
+                  <entry key="picturesFragment">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="515" />
+                            <option name="y" value="1194" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
                   <entry key="settingsFragment">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="629" />
-                            <option name="y" value="782" />
+                            <option name="x" value="1254" />
+                            <option name="y" value="762" />
                           </Point>
                         </option>
                       </LayoutPositions>

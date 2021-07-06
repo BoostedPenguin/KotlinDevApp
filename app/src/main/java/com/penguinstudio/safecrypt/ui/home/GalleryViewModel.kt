@@ -5,8 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.penguinstudio.safecrypt.adapters.GalleryType
+import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.repository.MediaRepository
+import com.penguinstudio.safecrypt.utilities.GalleryType
 import com.penguinstudio.safecrypt.utilities.MediaResponse
 import com.penguinstudio.safecrypt.utilities.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,6 +27,19 @@ class GalleryViewModel @Inject constructor(private val mediaRepository: MediaRep
     private val _albums = MutableLiveData<Resource<MediaResponse>>()
     val albums: LiveData<Resource<MediaResponse>> = _albums
 
+    private var _selectedAlbum: AlbumModel? = null
+    val selectedAlbum: AlbumModel?
+        get() {
+            return _selectedAlbum
+        }
+
+    fun setSelectedAlbum(selectedAlbum: AlbumModel) {
+        _selectedAlbum = selectedAlbum
+    }
+
+    fun clearSelectedAlbum() {
+        _selectedAlbum = null
+    }
 
     fun setGalleryType(galleryType: GalleryType, context: Context) {
         this.gType = galleryType

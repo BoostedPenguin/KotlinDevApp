@@ -4,10 +4,9 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.penguinstudio.safecrypt.ui.home.GalleryFragment
+import com.penguinstudio.safecrypt.utilities.GalleryType
 
-enum class GalleryType {
-    NORMAL, ENCRYPTED
-}
+
 class HomeTabPagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
     override fun getItemCount(): Int {
         return 2

@@ -5,10 +5,12 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.navigation.NavGraph
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import com.penguinstudio.safecrypt.NavGraphDirections
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.HomeTabPagerAdapter
 import dagger.hilt.android.AndroidEntryPoint
@@ -38,7 +40,7 @@ class HomeFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             R.id.action_settings -> {
-                findNavController().navigate(R.id.action_homeFragment_to_settingsFragment)
+                findNavController().navigate(NavGraphDirections.actionToSettingsFragment())
                 true
             }
             else -> {

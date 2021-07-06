@@ -28,7 +28,7 @@ class PhotoGridAdapter : RecyclerView.Adapter<PhotoGridAdapter.ImageHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageHolder {
         val itemView: View = LayoutInflater.from(parent.context)
-            .inflate(R.layout.album_grid_item, parent, false)
+            .inflate(R.layout.pictures_grid_fragment, parent, false)
 
         return ImageHolder(itemView)
     }
@@ -62,7 +62,7 @@ class PhotoGridAdapter : RecyclerView.Adapter<PhotoGridAdapter.ImageHolder>() {
 
     inner class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         internal lateinit var image: PhotoModel
-        internal var imageView: ImageView = itemView.findViewById(R.id.albumInnerImage)
+        internal var imageView: ImageView = itemView.findViewById(R.id.picturesInnerImage)
 
         init {
             imageView.setOnClickListener {

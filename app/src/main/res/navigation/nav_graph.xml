@@ -5,6 +5,10 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/splashFragment">
 
+    <!-- Global actions -->
+    <action android:id="@+id/action_to_SettingsFragment"
+        app:destination="@id/settingsFragment"/>
+
     <fragment
         android:id="@+id/splashFragment"
         android:name="com.penguinstudio.safecrypt.ui.main.SplashFragment"
@@ -54,11 +58,16 @@
         android:label="@string/app_name"
         tools:layout="@layout/fragment_home" >
         <action
-            android:id="@+id/action_homeFragment_to_settingsFragment"
-            app:destination="@id/settingsFragment" />
+            android:id="@+id/action_homeFragment_to_picturesFragment"
+            app:destination="@id/picturesFragment" />
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.penguinstudio.safecrypt.ui.settings.SettingsFragment"
         android:label="SettingsFragment" />
+    <fragment
+        android:id="@+id/picturesFragment"
+        android:name="com.penguinstudio.safecrypt.ui.home.PicturesFragment"
+        android:label="PicturesFragment"
+        tools:layout="@layout/fragment_pictures" />
 </navigation>
