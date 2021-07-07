@@ -1,6 +1,7 @@
 package com.penguinstudio.safecrypt.repository
 
 import android.content.Context
+import android.util.Log
 import com.penguinstudio.safecrypt.services.MediaService
 import com.penguinstudio.safecrypt.utilities.MediaResponse
 import com.penguinstudio.safecrypt.utilities.Resource
@@ -12,7 +13,7 @@ class MediaRepository @Inject constructor(private val mediaService: MediaService
 
     suspend fun getMedia(context: Context): Resource<MediaResponse> {
         return try {
-            val result = mediaService.getPhoneAlbums(context)
+            val result = mediaService.getAllVideosWithAlbums(context)
             Resource.success(MediaResponse(result))
 
         } catch (ex: Exception) {

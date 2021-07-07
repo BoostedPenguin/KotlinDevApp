@@ -1,6 +1,5 @@
 package com.penguinstudio.safecrypt.adapters
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,12 +33,12 @@ class AlbumGridAdapter : RecyclerView.Adapter<AlbumGridAdapter.AlbumHolder>() {
         val currentAlbum = albums[position]
         holder.image = currentAlbum
         holder.mainText.text = albums[position].name.toString()
-        holder.secondaryText.text = albums[position].albumPhotos.size.toString()
+        holder.secondaryText.text = albums[position].albumMedia.size.toString()
 
         Glide.with(holder.itemView)
             .load(currentAlbum.coverUri)
+            .thumbnail(0.1f)
             .fitCenter()
-            .apply(RequestOptions().override(100, 100))
             .into(holder.imageView);
     }
 

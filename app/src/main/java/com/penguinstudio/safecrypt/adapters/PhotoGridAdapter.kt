@@ -4,22 +4,30 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.ImageView
+import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.penguinstudio.safecrypt.R
-import com.penguinstudio.safecrypt.models.PhotoModel
-
-class PhotoGridAdapter : RecyclerView.Adapter<PhotoGridAdapter.ImageHolder>() {
-
-    // Replace with data model
-    private var images: ArrayList<PhotoModel> = ArrayList()
-    private var itemClickListener: OnItemClickListener? = null
+import com.penguinstudio.safecrypt.models.MediaModel
+import com.penguinstudio.safecrypt.models.MediaType
+import java.util.concurrent.TimeUnit
 
 
+class PhotoGridAdapter constructor(private var listener: AdapterListeners?) : RecyclerView.Adapter<PhotoGridAdapter.ImageHolder>() {
+    interface AdapterListeners {
+        fun onClickListener(position: Int, image: MediaModel)
+        fun onLongClickListener(position: Int, image: MediaModel)
+    }
 
-    fun setImages(images: ArrayList<PhotoModel>?) {
+    private var images: ArrayList<MediaModel> = ArrayList()
+
+
+
+    fun setImages(images: ArrayList<MediaModel>?) {
         if (images != null) {
             this.images = images
             notifyDataSetChanged()
@@ -36,15 +44,29 @@ class PhotoGridAdapter : RecyclerView.Adapter<PhotoGridAdapter.ImageHolder>() {
     override fun onBindViewHolder(holder: ImageHolder, position: Int) {
         val currentImage = images[position]
         holder.image = currentImage
-        val startTime = System.currentTimeMillis()
+
+        when(holder.image.mediaType) {
+            MediaType.VIDEO -> {
+                holder.image.videoDuration?.let {
+
+                    val formattedDuration = String.format("%02d:%02d",
+                        TimeUnit.MILLISECONDS.toMinutes(it),
+                        TimeUnit.MILLISECONDS.toSeconds(it) -
+                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(it))
+                    )
+
+                    holder.videoTextViewDuration.text = formattedDuration
+                    holder.videoLayoutCard.visibility = View.VISIBLE
+                }
+            }
+            else -> holder.videoLayoutCard.visibility = View.GONE
+        }
 
         Glide.with(holder.itemView)
-            .load(currentImage.photoUri)
+            .load(currentImage.mediaUri)
             .fitCenter()
-            .apply(RequestOptions().override(100, 100))
+            .thumbnail(0.1f)
             .into(holder.imageView);
-
-        Log.d("loadTime", "Time it took to create bitmap: ${System.currentTimeMillis() - startTime}ms")
 
     }
 
@@ -52,25 +74,30 @@ class PhotoGridAdapter : RecyclerView.Adapter<PhotoGridAdapter.ImageHolder>() {
         return images.size
     }
 
-    interface OnItemClickListener {
-        fun onContactButtonClick(position: Int, image: PhotoModel)
-    }
-
-    fun setOnItemClickListener(listener: OnItemClickListener?) {
-        this.itemClickListener = listener
-    }
-
     inner class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        internal lateinit var image: PhotoModel
+        internal lateinit var image: MediaModel
         internal var imageView: ImageView = itemView.findViewById(R.id.picturesInnerImage)
+        internal var checkBox: CheckBox = itemView.findViewById(R.id.picturesCheckbox)
+        internal var videoLayoutCard: CardView = itemView.findViewById(R.id.videoLayoutParentCard)
+        internal var videoTextViewDuration: TextView = itemView.findViewById(R.id.videoDuration)
 
         init {
             imageView.setOnClickListener {
                 val position = adapterPosition
 
-                if( itemClickListener != null && position != RecyclerView.NO_POSITION) {
-                    itemClickListener!!.onContactButtonClick(position, image)
+                if( listener != null && position != RecyclerView.NO_POSITION) {
+                    listener!!.onClickListener(position, image)
                 }
+            }
+
+            imageView.setOnLongClickListener {
+                val position = adapterPosition
+
+                if( listener != null && position != RecyclerView.NO_POSITION) {
+                    listener!!.onLongClickListener(position, image)
+                }
+
+                true
             }
         }
     }

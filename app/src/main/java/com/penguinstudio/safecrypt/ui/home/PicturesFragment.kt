@@ -2,26 +2,40 @@ package com.penguinstudio.safecrypt.ui.home
 
 import android.os.Bundle
 import android.view.*
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.penguinstudio.safecrypt.NavGraphDirections
 import com.penguinstudio.safecrypt.R
-import com.penguinstudio.safecrypt.adapters.AlbumGridAdapter
 import com.penguinstudio.safecrypt.adapters.PhotoGridAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentPicturesBinding
-import com.penguinstudio.safecrypt.utilities.GalleryType
+import com.penguinstudio.safecrypt.models.MediaModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class PicturesFragment : Fragment() {
     private lateinit var binding: FragmentPicturesBinding
     private lateinit var photoAdapter: PhotoGridAdapter
-    private val model: GalleryViewModel by activityViewModels()
+    private val _baseModel: GalleryViewModel by activityViewModels()
 
+    private val model: IPicturesViewModel
+        get() {
+            return _baseModel
+        }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val callback: OnBackPressedCallback =
+            object : OnBackPressedCallback(true /* enabled by default */) {
+                override fun handleOnBackPressed() {
+                    // Handle the back button event
+                    activity?.finishAndRemoveTask()
+                }
+            }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,7 +49,7 @@ class PicturesFragment : Fragment() {
 
         registerEvents()
 
-        photoAdapter.setImages(model.selectedAlbum?.albumPhotos)
+        photoAdapter.setImages(model.selectedAlbum?.albumMedia)
 
         return binding.root
     }
@@ -57,7 +71,15 @@ class PicturesFragment : Fragment() {
     }
 
     private fun initGrid() {
-        photoAdapter = PhotoGridAdapter()
+        photoAdapter = PhotoGridAdapter(object: PhotoGridAdapter.AdapterListeners {
+            override fun onClickListener(position: Int, image: MediaModel) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onLongClickListener(position: Int, image: MediaModel) {
+                TODO("Not yet implemented")
+            }
+        })
         binding.picturesRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
         binding.picturesRecyclerView.adapter = photoAdapter
     }

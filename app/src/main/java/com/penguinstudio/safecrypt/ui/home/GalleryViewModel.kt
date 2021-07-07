@@ -14,38 +14,38 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+interface IPicturesViewModel {
+    val selectedAlbum: AlbumModel?
+
+    fun setSelectedAlbum(selectedAlbum: AlbumModel)
+
+    fun clearSelectedAlbum()
+}
+
 @HiltViewModel
 class GalleryViewModel @Inject constructor(private val mediaRepository: MediaRepository) :
-    ViewModel() {
+    ViewModel(), IPicturesViewModel {
 
+    private val _albums = MutableLiveData<Resource<MediaResponse>>()
+    val albums: LiveData<Resource<MediaResponse>> = _albums
+
+
+    /**
+     * Gallery type handler TODO Will create a new fragment and viewmodel for encrypted
+     */
     private var gType: GalleryType = GalleryType.NORMAL
     val galleryType: GalleryType
         get() {
             return gType
         }
 
-    private val _albums = MutableLiveData<Resource<MediaResponse>>()
-    val albums: LiveData<Resource<MediaResponse>> = _albums
-
-    private var _selectedAlbum: AlbumModel? = null
-    val selectedAlbum: AlbumModel?
-        get() {
-            return _selectedAlbum
-        }
-
-    fun setSelectedAlbum(selectedAlbum: AlbumModel) {
-        _selectedAlbum = selectedAlbum
-    }
-
-    fun clearSelectedAlbum() {
-        _selectedAlbum = null
-    }
 
     fun setGalleryType(galleryType: GalleryType, context: Context) {
         this.gType = galleryType
 
         getMedia(context)
     }
+
 
     fun getMedia(context: Context) {
         viewModelScope.launch {
@@ -56,5 +56,23 @@ class GalleryViewModel @Inject constructor(private val mediaRepository: MediaRep
                 _albums.postValue(it)
             }
         }
+    }
+
+
+    /**
+     * Pictures fragment data
+     */
+    private var _selectedAlbum: AlbumModel? = null
+    override val selectedAlbum: AlbumModel?
+        get() {
+            return _selectedAlbum
+        }
+
+    override fun setSelectedAlbum(selectedAlbum: AlbumModel) {
+        _selectedAlbum = selectedAlbum
+    }
+
+    override fun clearSelectedAlbum() {
+        _selectedAlbum = null
     }
 }
