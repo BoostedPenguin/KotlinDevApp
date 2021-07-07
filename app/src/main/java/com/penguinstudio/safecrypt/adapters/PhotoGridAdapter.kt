@@ -1,6 +1,9 @@
 package com.penguinstudio.safecrypt.adapters
 
-import android.util.Log
+import android.graphics.Color
+import android.graphics.ColorFilter
+import android.graphics.PorterDuff
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +13,6 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.models.MediaType
@@ -19,12 +21,20 @@ import java.util.concurrent.TimeUnit
 
 class PhotoGridAdapter constructor(private var listener: AdapterListeners?) : RecyclerView.Adapter<PhotoGridAdapter.ImageHolder>() {
     interface AdapterListeners {
-        fun onClickListener(position: Int, image: MediaModel)
-        fun onLongClickListener(position: Int, image: MediaModel)
+        fun onClickListener(position: Int, media: MediaModel)
+        fun onLongClickListener(position: Int, media: MediaModel)
     }
-
     private var images: ArrayList<MediaModel> = ArrayList()
+    private var isSelectionMode: Boolean = false
 
+
+    fun toggleSelectionMode(isSelectionMode: Boolean) {
+        this.isSelectionMode = isSelectionMode
+        images.forEach {
+            it.isSelected = false
+        }
+        notifyDataSetChanged()
+    }
 
 
     fun setImages(images: ArrayList<MediaModel>?) {
@@ -43,11 +53,34 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?) : Re
 
     override fun onBindViewHolder(holder: ImageHolder, position: Int) {
         val currentImage = images[position]
-        holder.image = currentImage
+        holder.media = currentImage
 
-        when(holder.image.mediaType) {
+        if(isSelectionMode) {
+            holder.checkBox.visibility = View.VISIBLE
+
+            holder.checkBox.isChecked = images[position].isSelected
+
+            if(images[position].isSelected) {
+                holder.imageView.setColorFilter(Color.parseColor("#4D000000"), PorterDuff.Mode.SRC_ATOP);
+
+                holder.checkBox.isChecked = true
+            }
+            else {
+                holder.imageView.clearColorFilter()
+
+                holder.checkBox.isChecked = false
+            }
+
+        }
+        else {
+            holder.imageView.clearColorFilter()
+            holder.checkBox.visibility = View.INVISIBLE
+            holder.checkBox.isChecked = false
+        }
+
+        when(holder.media.mediaType) {
             MediaType.VIDEO -> {
-                holder.image.videoDuration?.let {
+                holder.media.videoDuration?.let {
 
                     val formattedDuration = String.format("%02d:%02d",
                         TimeUnit.MILLISECONDS.toMinutes(it),
@@ -67,7 +100,6 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?) : Re
             .fitCenter()
             .thumbnail(0.1f)
             .into(holder.imageView);
-
     }
 
     override fun getItemCount(): Int {
@@ -75,7 +107,7 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?) : Re
     }
 
     inner class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        internal lateinit var image: MediaModel
+        internal lateinit var media: MediaModel
         internal var imageView: ImageView = itemView.findViewById(R.id.picturesInnerImage)
         internal var checkBox: CheckBox = itemView.findViewById(R.id.picturesCheckbox)
         internal var videoLayoutCard: CardView = itemView.findViewById(R.id.videoLayoutParentCard)
@@ -86,7 +118,7 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?) : Re
                 val position = adapterPosition
 
                 if( listener != null && position != RecyclerView.NO_POSITION) {
-                    listener!!.onClickListener(position, image)
+                    listener!!.onClickListener(position, media)
                 }
             }
 
@@ -94,10 +126,17 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?) : Re
                 val position = adapterPosition
 
                 if( listener != null && position != RecyclerView.NO_POSITION) {
-                    listener!!.onLongClickListener(position, image)
+                    listener!!.onLongClickListener(position, media)
                 }
 
                 true
+            }
+            checkBox.setOnClickListener {
+                val position = adapterPosition
+
+                if( listener != null && position != RecyclerView.NO_POSITION) {
+                    listener!!.onClickListener(position, media)
+                }
             }
         }
     }

@@ -10,4 +10,6 @@ class MediaModel {
     var mediaUri: Uri? = null
     var mediaType: MediaType? = null
     var videoDuration: Long? = null
+
+    var isSelected: Boolean = false
 }
