@@ -67,10 +67,6 @@ class PicturesFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
-            R.id.action_settings -> {
-                findNavController().navigate(NavGraphDirections.actionToSettingsFragment())
-                true
-            }
             R.id.action_select_all -> {
                 model.addAllMediaToSelection(photoAdapter.getImages())
                 photoAdapter.notifyItemRangeChanged(0, photoAdapter.itemCount)

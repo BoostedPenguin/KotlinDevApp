@@ -120,15 +120,4 @@ class GalleryFragment : Fragment() {
         binding.galleryRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
         binding.galleryRecyclerView.adapter = galleryAdapter
     }
-
-    private fun configureGalleryFragment() {
-        when (model.galleryType) {
-            GalleryType.NORMAL -> {
-
-            }
-            GalleryType.ENCRYPTED -> {
-
-            }
-        }
-    }
 }

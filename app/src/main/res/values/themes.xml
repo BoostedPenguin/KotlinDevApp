@@ -20,7 +20,12 @@
         <!-- Customize your theme here. -->
         <item name="alertDialogTheme">@style/AlertDialogTheme</item>
         <item name="drawerArrowStyle">@style/AppTheme.DrawerArrowToggle</item>
+        <item name="actionOverflowButtonStyle">@style/Theme.SafeCrypt.SettingsWhite</item>
 
+    </style>
+
+    <style name="Theme.SafeCrypt.SettingsWhite" parent="@style/Widget.AppCompat.ActionButton.Overflow" >
+        <item name="android:tint">@color/white</item>
     </style>
 
     <style name="TextView.Default" parent="Widget.AppCompat.TextView">

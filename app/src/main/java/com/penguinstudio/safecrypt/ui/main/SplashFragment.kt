@@ -36,15 +36,11 @@ class SplashFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        setHasOptionsMenu(true)
-
-        binding = FragmentSplashBinding.inflate(layoutInflater)
-
-
-        (activity as AppCompatActivity?)?.supportActionBar?.hide()
+        binding = FragmentSplashBinding.inflate(inflater, container, false)
 
         return binding.root
     }
+
 
     override fun onStart() {
         super.onStart()
@@ -64,6 +60,10 @@ class SplashFragment : Fragment() {
         }
 
         findNavController().navigate(action)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
     }
 
 
@@ -129,6 +129,8 @@ class SplashFragment : Fragment() {
 
             dialog.cancel()
         }
+
+        builder.setCancelable(false)
         builder.show()
     }
 }

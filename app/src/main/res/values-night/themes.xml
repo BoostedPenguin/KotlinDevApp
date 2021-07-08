@@ -17,13 +17,23 @@
         <!-- Customize your theme here. -->
         <item name="alertDialogTheme">@style/AlertDialogTheme</item>
 
+        <item name="android:itemTextAppearance">@style/Theme.SafeCrypt.SettingsWhiteText</item>
+
+    </style>
+
+    <style name="Theme.SafeCrypt.SettingsWhiteText" parent="@android:style/TextAppearance.Widget.IconMenu.Item">
+        <item name="android:textColor">@color/white</item>
     </style>
 
     <style name="TextView.Default" parent="Widget.AppCompat.TextView">
         <item name="android:textColor">@color/on_primary_dark</item>
     </style>
 
-    <style name="Toolbar.Default" parent="Widget.MaterialComponents.Toolbar.Primary" />
+    <style name="Toolbar.Default" parent="Widget.MaterialComponents.Toolbar.Primary" >
+        <item name="titleTextColor">@color/on_primary_dark</item>
+        <item name="subtitleTextColor">@color/on_primary_dark</item>
+        <item name="colorOnPrimary">@color/on_primary_dark</item>
+    </style>
 
     <style name="PatternView.Default" parent="Theme.AppCompat">
         <item name="normalStateColor">@color/on_primary_dark</item>

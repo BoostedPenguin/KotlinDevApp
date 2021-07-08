@@ -51,8 +51,8 @@ class PatternUnlockFragment : Fragment() {
             }
         }
 
-        (activity as AppCompatActivity?)?.supportActionBar?.hide()
-
+        val s = (activity as AppCompatActivity).supportActionBar
+        s?.hide()
         return binding.root
     }
 
