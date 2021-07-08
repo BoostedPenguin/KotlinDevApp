@@ -27,6 +27,7 @@ class SettingsFragment : Fragment(),
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         (activity as AppCompatActivity).supportActionBar?.show()
+        menu.clear()
         super.onCreateOptionsMenu(menu, inflater)
     }
 

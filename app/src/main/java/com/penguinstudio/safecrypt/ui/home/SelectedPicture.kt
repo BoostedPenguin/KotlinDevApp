@@ -2,23 +2,23 @@ package com.penguinstudio.safecrypt.ui.home
 
 import android.os.Bundle
 import android.os.Handler
-import android.os.Looper
 import android.util.Log
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.MediaController
+import android.view.*
+import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.SimpleExoPlayer
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.databinding.FragmentSelectedPictureBinding
 import com.penguinstudio.safecrypt.models.MediaType
 
+
 class SelectedPicture : Fragment() {
     private lateinit var binding: FragmentSelectedPictureBinding
-    private var mediaController: MediaController? = null
 
     private val _model: GalleryViewModel by activityViewModels()
     private val model: ISelectedMediaViewModel
@@ -26,66 +26,78 @@ class SelectedPicture : Fragment() {
             return _model
         }
 
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout for this fragment
         binding = FragmentSelectedPictureBinding.inflate(layoutInflater, container, false)
+        (activity as AppCompatActivity).supportActionBar?.hide()
 
         when(model.selectedMedia?.mediaType) {
             MediaType.IMAGE -> {
                 binding.selectedPicture.visibility = View.VISIBLE
 
-                Glide.with(this)
-                    .load(model.selectedMedia?.mediaUri)
-                    .thumbnail(0.1f)
-                    .into(binding.selectedPicture);
+                createPhotoSetup()
             }
             MediaType.VIDEO -> {
                 binding.selectedVideo.visibility = View.VISIBLE
 
-                binding.selectedVideo.setVideoURI(model.selectedMedia?.mediaUri)
-                mediaController = MediaController(requireContext())
-                mediaController?.setAnchorView(binding.selectedVideo)
-                binding.selectedVideo.setMediaController(mediaController)
-                binding.selectedVideo.start()
+                createVideoPlayback()
             }
             else -> {
                 Log.d("error", "Image Media type not provided")
             }
         }
-
-        //registerEvents()
-
         return binding.root
     }
 
-    private fun registerEvents() {
+    private fun createPhotoSetup() {
 
-        /*
-        Toolbar control:
-        If SHOWN -> click will HIDE IT
-        If HIDDEN -> click will SHOW IT for 5s
-         */
+        binding.selectedFragmentToolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+        binding.selectedFragmentToolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+        hideActionBarWithDelay()
 
-        val actionBar = (activity as AppCompatActivity).supportActionBar!!
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            actionBar.hide()
-        }, 2000)
+        Glide.with(this)
+            .load(model.selectedMedia?.mediaUri)
+            .thumbnail(0.1f)
+            .into(binding.selectedPicture)
 
-        binding.selectedVideo.setOnClickListener {
+        binding.selectedPicture.setOnClickListener {
+            hideActionBarWithDelay()
+        }
+    }
+    private val handler = Handler()
+    val r: Runnable = Runnable { binding.selectedFragmentToolbar.visibility = View.INVISIBLE }
+    private fun hideActionBarWithDelay(delay: Long = 2000) {
+        handler.removeCallbacks(r)
 
-            if(actionBar.isShowing) {
-                actionBar.hide()
-            }
-            else {
-                actionBar.show()
-                Handler(Looper.getMainLooper()).postDelayed({
-                    actionBar.hide()
-                }, 5000)
-            }
+        binding.selectedFragmentToolbar.visibility = View.VISIBLE
+        handler.postDelayed(r, delay)
+    }
+
+    private fun createVideoPlayback() {
+
+        val player = SimpleExoPlayer.Builder(requireContext()).build()
+
+        // Bind the player to the view.
+        binding.selectedVideo.player = player;
+
+        val mediaItem: MediaItem = MediaItem.fromUri(model.selectedMedia?.mediaUri!!)
+
+        player.setMediaItem(mediaItem)
+        player.prepare()
+        player.play()
+
+        binding.selectedVideo.findViewById<ImageButton>(R.id.video_back).setOnClickListener {
+            player.stop()
+            player.clearMediaItems()
+            player.release()
+            findNavController().popBackStack()
         }
     }
 }

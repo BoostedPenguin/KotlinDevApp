@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.exoplayer2.upstream.ByteArrayDataSource
 import com.penguinstudio.safecrypt.NavGraphDirections
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.PhotoGridAdapter
@@ -53,6 +54,7 @@ class PicturesFragment : Fragment() {
         setHasOptionsMenu(true)
 
         (activity as AppCompatActivity?)?.supportActionBar?.title = model.selectedAlbum?.name
+        (activity as AppCompatActivity).supportActionBar?.show()
 
         initGrid()
 
