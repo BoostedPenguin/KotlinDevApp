@@ -23,7 +23,7 @@
             android:layout_height="match_parent" >
 
             <CheckBox
-                android:buttonTint="@color/teal_200"
+                android:buttonTint="@color/white"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 android:id="@+id/picturesCheckbox"

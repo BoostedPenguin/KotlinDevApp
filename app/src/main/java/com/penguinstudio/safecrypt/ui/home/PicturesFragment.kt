@@ -13,6 +13,7 @@ import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.PhotoGridAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentPicturesBinding
 import com.penguinstudio.safecrypt.models.MediaModel
+import com.penguinstudio.safecrypt.ui.home.GalleryViewModel.Companion.notifyObserver
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -71,6 +72,11 @@ class PicturesFragment : Fragment() {
                 findNavController().navigate(NavGraphDirections.actionToSettingsFragment())
                 true
             }
+            R.id.action_select_all -> {
+                model.addAllMediaToSelection(photoAdapter.getImages())
+                photoAdapter.notifyItemRangeChanged(0, photoAdapter.itemCount)
+                true
+            }
             else -> {
                 super.onOptionsItemSelected(item)
             }
@@ -110,6 +116,7 @@ class PicturesFragment : Fragment() {
                 model.addMediaToSelection(position, media)
                 (activity as AppCompatActivity?)?.supportActionBar?.title = "Select Media"
                 // Notify adapter that this item has changed
+                activity?.invalidateOptionsMenu()
                 media.isSelected = true
                 photoAdapter.notifyItemChanged(position)
             }
@@ -135,6 +142,7 @@ class PicturesFragment : Fragment() {
     private fun exitSelectMode() {
         (activity as AppCompatActivity?)?.supportActionBar?.title = model.selectedAlbum?.name
 
+        activity?.invalidateOptionsMenu()
         model.itemSelectionMode = false
         model.selectedItems.value?.clear()
         photoAdapter.toggleSelectionMode(false)

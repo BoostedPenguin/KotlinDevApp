@@ -106,6 +106,10 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?) : Re
         return images.size
     }
 
+    fun getImages() : ArrayList<MediaModel> {
+        return this.images
+    }
+
     inner class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         internal lateinit var media: MediaModel
         internal var imageView: ImageView = itemView.findViewById(R.id.picturesInnerImage)

@@ -31,6 +31,8 @@ interface IPicturesViewModel {
 
     fun addMediaToSelection(position: Int, media: MediaModel)
 
+    fun addAllMediaToSelection(media: ArrayList<MediaModel>)
+
     fun removeMediaFromSelection(position: Int, media: MediaModel)
 }
 
@@ -54,7 +56,6 @@ class GalleryViewModel @Inject constructor(private val mediaRepository: MediaRep
 
     fun setGalleryType(galleryType: GalleryType, context: Context) {
         this.gType = galleryType
-
         getMedia(context)
     }
 
@@ -108,6 +109,24 @@ class GalleryViewModel @Inject constructor(private val mediaRepository: MediaRep
         }
     }
 
+    override fun addAllMediaToSelection(media: ArrayList<MediaModel>) {
+        if(selectedItems.value == null) {
+            selectedItems.value = media
+        }
+        else {
+            selectedItems.value!!.let {
+                for(obj in media) {
+                    if(!it.contains(obj)) {
+                        it.add(obj)
+                        obj.isSelected = true
+                    }
+                }
+            }
+
+            selectedItems.notifyObserver()
+        }
+    }
+
     override fun removeMediaFromSelection(position: Int, media: MediaModel) {
         selectedItems.value!!.removeAll {
             it.id == media.id
@@ -119,7 +138,9 @@ class GalleryViewModel @Inject constructor(private val mediaRepository: MediaRep
     /**
      * Re-assigns value to itself to trigger observers
      */
-    private fun <T> MutableLiveData<T>.notifyObserver() {
-        this.value = this.value
+    companion object {
+        fun <T> MutableLiveData<T>.notifyObserver() {
+            this.value = this.value
+        }
     }
 }
