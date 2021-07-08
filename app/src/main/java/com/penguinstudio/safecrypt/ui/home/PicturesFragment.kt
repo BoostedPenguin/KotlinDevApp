@@ -13,7 +13,6 @@ import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.PhotoGridAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentPicturesBinding
 import com.penguinstudio.safecrypt.models.MediaModel
-import com.penguinstudio.safecrypt.ui.home.GalleryViewModel.Companion.notifyObserver
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -103,9 +102,9 @@ class PicturesFragment : Fragment() {
                     photoAdapter.notifyItemChanged(position)
                 }
                 else {
-                    //findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
+                    model.setSelectedMedia(media)
+                    findNavController().navigate(R.id.action_picturesFragment_to_selectedPicture)
                 }
-
             }
             override fun onLongClickListener(position: Int, media: MediaModel) {
                 if(model.itemSelectionMode) return

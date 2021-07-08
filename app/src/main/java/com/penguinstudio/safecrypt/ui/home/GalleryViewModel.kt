@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.chrisbanes.photoview.PhotoView
 import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.repository.MediaRepository
@@ -34,11 +33,22 @@ interface IPicturesViewModel {
     fun addAllMediaToSelection(media: ArrayList<MediaModel>)
 
     fun removeMediaFromSelection(position: Int, media: MediaModel)
+
+    fun setSelectedMedia(selectedMedia: MediaModel)
+
+}
+
+interface ISelectedMediaViewModel {
+    val selectedMedia: MediaModel?
+
+    fun setSelectedMedia(selectedMedia: MediaModel)
+
+    fun clearSelectedMedia()
 }
 
 @HiltViewModel
 class GalleryViewModel @Inject constructor(private val mediaRepository: MediaRepository) :
-    ViewModel(), IPicturesViewModel {
+    ViewModel(), IPicturesViewModel, ISelectedMediaViewModel {
 
     private val _albums = MutableLiveData<Resource<MediaResponse>>()
     val albums: LiveData<Resource<MediaResponse>> = _albums
@@ -135,12 +145,29 @@ class GalleryViewModel @Inject constructor(private val mediaRepository: MediaRep
     }
 
 
-    /**
-     * Re-assigns value to itself to trigger observers
-     */
     companion object {
+        /**
+         * Re-assigns value to itself to trigger observers
+         */
         fun <T> MutableLiveData<T>.notifyObserver() {
             this.value = this.value
         }
+    }
+
+    /**
+     * Selected Media Implementation
+     */
+    private var _selectedMedia: MediaModel? = null
+    override val selectedMedia: MediaModel?
+        get() {
+            return _selectedMedia
+        }
+
+    override fun setSelectedMedia(selectedMedia: MediaModel) {
+        this._selectedMedia = selectedMedia
+    }
+
+    override fun clearSelectedMedia() {
+        _selectedMedia = null
     }
 }

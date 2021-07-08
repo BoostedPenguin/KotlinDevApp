@@ -124,6 +124,27 @@
                             <option name="y" value="1194" />
                           </Point>
                         </option>
+                        <option name="myPositions">
+                          <map>
+                            <entry key="action_picturesFragment_to_selectedPicture">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
+                          </map>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="selectedPicture">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="781" />
+                            <option name="y" value="1205" />
+                          </Point>
+                        </option>
                       </LayoutPositions>
                     </value>
                   </entry>

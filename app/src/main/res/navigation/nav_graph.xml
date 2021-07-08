@@ -69,5 +69,14 @@
         android:id="@+id/picturesFragment"
         android:name="com.penguinstudio.safecrypt.ui.home.PicturesFragment"
         android:label="PicturesFragment"
-        tools:layout="@layout/fragment_pictures" />
+        tools:layout="@layout/fragment_pictures" >
+        <action
+            android:id="@+id/action_picturesFragment_to_selectedPicture"
+            app:destination="@id/selectedPicture" />
+    </fragment>
+    <fragment
+        android:id="@+id/selectedPicture"
+        android:name="com.penguinstudio.safecrypt.ui.home.SelectedPicture"
+        android:label="SelectedPicture"
+        tools:layout="@layout/fragment_selected_picture" />
 </navigation>
