@@ -22,6 +22,13 @@
         <item name="drawerArrowStyle">@style/AppTheme.DrawerArrowToggle</item>
         <item name="actionOverflowButtonStyle">@style/Theme.SafeCrypt.SettingsWhite</item>
 
+
+        <item name="android:itemTextAppearance">@style/menuItem</item>
+
+    </style>
+
+    <style name="menuItem" parent="Widget.AppCompat.TextView.SpinnerItem">
+        <item name="android:textColor">@color/black</item>
     </style>
 
     <style name="Theme.SafeCrypt.SettingsWhite" parent="@style/Widget.AppCompat.ActionButton.Overflow" >
@@ -40,6 +47,13 @@
 
     <style name="Toolbar.Default" parent="Widget.MaterialComponents.Toolbar.Primary">
         <item name="android:backgroundTint">@color/secondary_light_500</item>
+        <item name="titleTextColor">@color/on_primary_dark</item>
+        <item name="subtitleTextColor">@color/on_primary_dark</item>
+        <item name="colorOnPrimary">@color/on_primary_dark</item>
+    </style>
+
+    <style name="Toolbar.SelectedPicture" parent="Widget.MaterialComponents.Toolbar.Primary">
+        <item name="android:backgroundTint">@color/black_overlay</item>
         <item name="titleTextColor">@color/on_primary_dark</item>
         <item name="subtitleTextColor">@color/on_primary_dark</item>
         <item name="colorOnPrimary">@color/on_primary_dark</item>

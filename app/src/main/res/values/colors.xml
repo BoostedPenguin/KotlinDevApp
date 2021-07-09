@@ -53,6 +53,6 @@
     <color name="white_50_transparent">#80ffffff</color>
     <color name="white_80_transparent">#CCffffff</color>
 
-    <color name="black_overlay">#66000000</color>
+    <color name="black_overlay">#CC131313</color>
 
 </resources>

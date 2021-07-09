@@ -1,9 +1,12 @@
 package com.penguinstudio.safecrypt.ui.home
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.*
+import android.view.animation.DecelerateInterpolator
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -59,7 +62,7 @@ class SelectedPicture : Fragment() {
         binding.selectedFragmentToolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
-        hideActionBarWithDelay()
+        binding.selectedFragmentToolbar.visibility = View.VISIBLE
 
 
         Glide.with(this)
@@ -68,16 +71,31 @@ class SelectedPicture : Fragment() {
             .into(binding.selectedPicture)
 
         binding.selectedPicture.setOnClickListener {
-            hideActionBarWithDelay()
+            handleToolbarOnImageClick()
         }
     }
-    private val handler = Handler()
-    val r: Runnable = Runnable { binding.selectedFragmentToolbar.visibility = View.INVISIBLE }
-    private fun hideActionBarWithDelay(delay: Long = 2000) {
-        handler.removeCallbacks(r)
 
-        binding.selectedFragmentToolbar.visibility = View.VISIBLE
-        handler.postDelayed(r, delay)
+    private fun handleToolbarOnImageClick() {
+        binding.selectedFragmentToolbar.apply {
+            if (visibility == View.VISIBLE) {
+                animate()
+                    .translationY(-height.toFloat())
+                    .alpha(0f)
+                    .setListener(object: AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            super.onAnimationEnd(animation)
+                            visibility = View.INVISIBLE
+                        }
+                    })
+            } else {
+                visibility = View.VISIBLE
+                alpha = 0f
+
+                animate().translationY(0f)
+                    .alpha(1f)
+                    .setListener(null)
+            }
+        }
     }
 
     private fun createVideoPlayback() {

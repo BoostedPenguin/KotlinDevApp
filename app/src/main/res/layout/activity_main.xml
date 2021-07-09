@@ -9,7 +9,6 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         app:elevation="0dp"
-        android:animateLayoutChanges="true"
         android:theme="@style/Theme.SafeCrypt.AppBarOverlay"
         android:layout_height="wrap_content">
 
