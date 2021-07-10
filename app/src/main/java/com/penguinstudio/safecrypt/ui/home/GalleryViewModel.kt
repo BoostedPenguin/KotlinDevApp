@@ -144,16 +144,6 @@ class GalleryViewModel @Inject constructor(private val mediaRepository: MediaRep
         selectedItems.notifyObserver()
     }
 
-
-    companion object {
-        /**
-         * Re-assigns value to itself to trigger observers
-         */
-        fun <T> MutableLiveData<T>.notifyObserver() {
-            this.value = this.value
-        }
-    }
-
     /**
      * Selected Media Implementation
      */
@@ -169,5 +159,15 @@ class GalleryViewModel @Inject constructor(private val mediaRepository: MediaRep
 
     override fun clearSelectedMedia() {
         _selectedMedia = null
+    }
+
+
+    companion object {
+        /**
+         * Re-assigns value to itself to trigger observers
+         */
+        fun <T> MutableLiveData<T>.notifyObserver() {
+            this.value = this.value
+        }
     }
 }

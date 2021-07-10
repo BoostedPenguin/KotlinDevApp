@@ -10,12 +10,15 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.AlbumModel
+import com.penguinstudio.safecrypt.models.MediaModel
 
-class AlbumGridAdapter : RecyclerView.Adapter<AlbumGridAdapter.AlbumHolder>() {
+class AlbumGridAdapter(private var listener: AdapterListeners?) : RecyclerView.Adapter<AlbumGridAdapter.AlbumHolder>() {
+    interface AdapterListeners {
+        fun onImageClickListener(position: Int, album: AlbumModel)
+    }
 
     // Replace with data model
     private var albums: ArrayList<AlbumModel> = ArrayList()
-    private var itemClickListener: OnItemClickListener? = null
 
     fun setAlbums(albums: ArrayList<AlbumModel>) {
         this.albums = albums
@@ -46,14 +49,6 @@ class AlbumGridAdapter : RecyclerView.Adapter<AlbumGridAdapter.AlbumHolder>() {
         return albums.size
     }
 
-    interface OnItemClickListener {
-        fun onContactButtonClick(position: Int, image: AlbumModel)
-    }
-
-    fun setOnItemClickListener(listener: OnItemClickListener?) {
-        this.itemClickListener = listener
-    }
-
     inner class AlbumHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         internal lateinit var image: AlbumModel
         internal var imageView: ImageView = itemView.findViewById(R.id.albumInnerImage)
@@ -64,8 +59,8 @@ class AlbumGridAdapter : RecyclerView.Adapter<AlbumGridAdapter.AlbumHolder>() {
             imageView.setOnClickListener {
                 val position = adapterPosition
 
-                if (itemClickListener != null && position != RecyclerView.NO_POSITION) {
-                    itemClickListener!!.onContactButtonClick(position, image)
+                if (listener != null && position != RecyclerView.NO_POSITION) {
+                    listener!!.onImageClickListener(position, image)
                 }
             }
         }

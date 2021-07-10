@@ -26,8 +26,6 @@ import dagger.hilt.android.AndroidEntryPoint
 class GalleryFragment : Fragment() {
     private val model: GalleryViewModel by activityViewModels()
     private lateinit var binding: FragmentGalleryBinding
-
-    //private lateinit var galleryAdapter: PhotoGridAdapter
     private lateinit var galleryAdapter: AlbumGridAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,14 +64,6 @@ class GalleryFragment : Fragment() {
     }
 
     private fun registerEvents() {
-
-        // On image click
-        galleryAdapter.setOnItemClickListener(object : AlbumGridAdapter.OnItemClickListener {
-            override fun onContactButtonClick(position: Int, image: AlbumModel) {
-                model.setSelectedAlbum(image)
-                findNavController().navigate(R.id.action_homeFragment_to_picturesFragment)
-            }
-        })
 
         // On user manual refresh
         binding.gallerySwipeToRefresh.setOnRefreshListener {
@@ -118,7 +108,13 @@ class GalleryFragment : Fragment() {
 
 
     private fun initGrid() {
-        galleryAdapter = AlbumGridAdapter()
+        galleryAdapter = AlbumGridAdapter(object : AlbumGridAdapter.AdapterListeners {
+            override fun onImageClickListener(position: Int, album: AlbumModel) {
+                model.setSelectedAlbum(album)
+                findNavController().navigate(R.id.action_homeFragment_to_picturesFragment)
+            }
+        })
+
         when(resources.configuration.orientation) {
 
             Configuration.ORIENTATION_LANDSCAPE -> {

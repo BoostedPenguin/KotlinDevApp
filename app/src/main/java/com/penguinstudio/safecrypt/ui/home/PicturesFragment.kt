@@ -53,16 +53,20 @@ class PicturesFragment : Fragment(), LifecycleObserver {
         val callback: OnBackPressedCallback =
             object : OnBackPressedCallback(true /* enabled by default */) {
                 override fun handleOnBackPressed() {
-                    // Handle the back button event
-                    if(model.itemSelectionMode) {
-                        exitSelectMode()
-                        return
-                    }
-                    findNavController().popBackStack()
+                    onBackPress()
                 }
             }
 
         requireActivity().onBackPressedDispatcher.addCallback(this, callback)
+    }
+
+    private fun onBackPress() {
+        // Handle the back button event
+        if(model.itemSelectionMode) {
+            exitSelectMode()
+            return
+        }
+        findNavController().popBackStack()
     }
 
     override fun onCreateView(
@@ -92,6 +96,10 @@ class PicturesFragment : Fragment(), LifecycleObserver {
             R.id.action_select_all -> {
                 model.addAllMediaToSelection(photoAdapter.getImages())
                 photoAdapter.notifyItemRangeChanged(0, photoAdapter.itemCount)
+                true
+            }
+            android.R.id.home -> {
+                onBackPress()
                 true
             }
             else -> {

@@ -62,11 +62,6 @@ class SplashFragment : Fragment() {
         findNavController().navigate(action)
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-    }
-
-
     /**
      * Validates if storage permissions were given
      * Requests them at runtime if they are required

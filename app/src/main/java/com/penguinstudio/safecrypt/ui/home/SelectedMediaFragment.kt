@@ -26,7 +26,7 @@ import com.penguinstudio.safecrypt.databinding.FragmentSelectedPictureBinding
 import com.penguinstudio.safecrypt.models.MediaType
 
 
-class SelectedPicture : Fragment(), LifecycleObserver {
+class SelectedMediaFragment : Fragment(), LifecycleObserver {
     private lateinit var binding: FragmentSelectedPictureBinding
 
     private val _model: GalleryViewModel by activityViewModels()

@@ -76,7 +76,7 @@
     </fragment>
     <fragment
         android:id="@+id/selectedPicture"
-        android:name="com.penguinstudio.safecrypt.ui.home.SelectedPicture"
+        android:name="com.penguinstudio.safecrypt.ui.home.SelectedMediaFragment"
         android:label="SelectedPicture"
         tools:layout="@layout/fragment_selected_picture" />
 </navigation>
