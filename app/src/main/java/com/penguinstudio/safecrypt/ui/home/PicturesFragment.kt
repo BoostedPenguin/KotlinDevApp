@@ -1,15 +1,18 @@
 package com.penguinstudio.safecrypt.ui.home
 
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.*
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import com.google.android.exoplayer2.upstream.ByteArrayDataSource
-import com.penguinstudio.safecrypt.NavGraphDirections
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.PhotoGridAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentPicturesBinding
@@ -17,7 +20,7 @@ import com.penguinstudio.safecrypt.models.MediaModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class PicturesFragment : Fragment() {
+class PicturesFragment : Fragment(), LifecycleObserver {
     private lateinit var binding: FragmentPicturesBinding
     private lateinit var photoAdapter: PhotoGridAdapter
     private val _model: GalleryViewModel by activityViewModels()
@@ -25,6 +28,23 @@ class PicturesFragment : Fragment() {
         get() {
             return _model
         }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    fun onCreated(){
+        (activity as AppCompatActivity?)?.supportActionBar?.title = model.selectedAlbum?.name
+        (activity as AppCompatActivity).supportActionBar?.show()
+        activity?.lifecycle?.removeObserver(this)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        activity?.lifecycle?.addObserver(this)
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        activity?.lifecycle?.removeObserver(this)
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,7 +138,17 @@ class PicturesFragment : Fragment() {
                 photoAdapter.notifyItemChanged(position)
             }
         })
-        binding.picturesRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
+
+        when(resources.configuration.orientation) {
+
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                binding.picturesRecyclerView.layoutManager = GridLayoutManager(requireContext(), 5)
+            }
+            else -> {
+                binding.picturesRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
+
+            }
+        }
         binding.picturesRecyclerView.adapter = photoAdapter
     }
 

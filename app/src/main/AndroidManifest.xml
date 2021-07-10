@@ -16,7 +16,7 @@
         android:theme="@style/Theme.SafeCrypt">
         <activity
             android:name=".MainActivity"
-            android:configChanges="orientation|screenSize|layoutDirection"
+            android:configChanges="screenSize|layoutDirection"
             android:label="@string/app_name"
             android:theme="@style/Theme.SafeCrypt.NoActionBar">
             <intent-filter>

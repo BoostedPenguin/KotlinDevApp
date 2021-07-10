@@ -9,6 +9,9 @@
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         style="@style/TabLayout.Default"
+        app:tabGravity="fill"
+        app:tabMode="fixed"
+        app:tabMaxWidth="0dp"
         android:elevation="0dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

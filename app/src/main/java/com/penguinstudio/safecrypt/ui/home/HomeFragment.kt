@@ -1,34 +1,51 @@
 package com.penguinstudio.safecrypt.ui.home
 
-import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.navigation.NavGraph
-import androidx.navigation.fragment.findNavController
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import com.penguinstudio.safecrypt.NavGraphDirections
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.HomeTabPagerAdapter
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(), LifecycleObserver {
     private lateinit var pagerAdapter: HomeTabPagerAdapter
     private lateinit var viewPager: ViewPager2
 
 
-    @SuppressLint("RestrictedApi")
+    /**
+     * After activity onCreate is completed
+     */
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    fun onCreated(){
+        (activity as AppCompatActivity).supportActionBar?.show()
+        activity?.lifecycle?.removeObserver(this)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        activity?.lifecycle?.addObserver(this)
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        activity?.lifecycle?.removeObserver(this)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        (activity as AppCompatActivity?)?.supportActionBar?.show()
 
 
         return inflater.inflate(R.layout.fragment_home, container, false)
@@ -37,6 +54,7 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        (activity as AppCompatActivity).supportActionBar?.show()
 
         pagerAdapter = HomeTabPagerAdapter(this)
         viewPager = view.findViewById(R.id.pager)

@@ -1,10 +1,12 @@
 package com.penguinstudio.safecrypt.ui.home
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -117,7 +119,16 @@ class GalleryFragment : Fragment() {
 
     private fun initGrid() {
         galleryAdapter = AlbumGridAdapter()
-        binding.galleryRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
+        when(resources.configuration.orientation) {
+
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                binding.galleryRecyclerView.layoutManager = GridLayoutManager(requireContext(), 5)
+            }
+            else -> {
+                binding.galleryRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
+
+            }
+        }
         binding.galleryRecyclerView.adapter = galleryAdapter
     }
 }

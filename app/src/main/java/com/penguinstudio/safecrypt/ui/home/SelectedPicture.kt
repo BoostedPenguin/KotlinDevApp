@@ -2,6 +2,7 @@ package com.penguinstudio.safecrypt.ui.home
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -11,16 +12,21 @@ import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.databinding.FragmentSelectedPictureBinding
 import com.penguinstudio.safecrypt.models.MediaType
 
 
-class SelectedPicture : Fragment() {
+class SelectedPicture : Fragment(), LifecycleObserver {
     private lateinit var binding: FragmentSelectedPictureBinding
 
     private val _model: GalleryViewModel by activityViewModels()
@@ -29,6 +35,15 @@ class SelectedPicture : Fragment() {
             return _model
         }
 
+    private var player: SimpleExoPlayer? = null
+
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        (activity as AppCompatActivity).supportActionBar?.hide()
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,7 +51,7 @@ class SelectedPicture : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentSelectedPictureBinding.inflate(layoutInflater, container, false)
-        (activity as AppCompatActivity).supportActionBar?.hide()
+        activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         when(model.selectedMedia?.mediaType) {
             MediaType.IMAGE -> {
@@ -54,6 +69,14 @@ class SelectedPicture : Fragment() {
             }
         }
         return binding.root
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        if(player != null) {
+            player?.pause()
+        }
     }
 
     private fun createPhotoSetup() {
@@ -100,22 +123,27 @@ class SelectedPicture : Fragment() {
 
     private fun createVideoPlayback() {
 
-        val player = SimpleExoPlayer.Builder(requireContext()).build()
+        player = SimpleExoPlayer.Builder(requireContext()).build()
 
         // Bind the player to the view.
         binding.selectedVideo.player = player;
 
         val mediaItem: MediaItem = MediaItem.fromUri(model.selectedMedia?.mediaUri!!)
 
-        player.setMediaItem(mediaItem)
-        player.prepare()
-        player.play()
+        player?.setMediaItem(mediaItem)
+        player?.prepare()
+        player?.play()
 
         binding.selectedVideo.findViewById<ImageButton>(R.id.video_back).setOnClickListener {
-            player.stop()
-            player.clearMediaItems()
-            player.release()
+            player?.stop()
+            player?.clearMediaItems()
+            player?.release()
             findNavController().popBackStack()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 }
