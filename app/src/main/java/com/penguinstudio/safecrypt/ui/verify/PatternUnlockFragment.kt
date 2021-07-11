@@ -7,7 +7,6 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -19,6 +18,7 @@ import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.andrognito.patternlockview.utils.PatternLockUtils
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.databinding.FragmentPatternUnlockBinding
+import com.penguinstudio.safecrypt.services.EncryptionService
 
 
 /**
@@ -85,6 +85,10 @@ class PatternUnlockFragment : Fragment() {
                 putString(getString(R.string.pattern), pattern)
                 apply()
             }
+
+            // Generate key for encrypting media
+            // Stores securely in KeyStore
+            EncryptionService.generateKey()
 
             findNavController().navigate(R.id.action_patternUnlockFragment_to_homeFragment)
 

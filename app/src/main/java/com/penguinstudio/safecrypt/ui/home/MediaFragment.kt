@@ -20,7 +20,7 @@ import com.penguinstudio.safecrypt.models.MediaModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class PicturesFragment : Fragment(), LifecycleObserver {
+class MediaFragment : Fragment(), LifecycleObserver {
     private lateinit var binding: FragmentPicturesBinding
     private lateinit var photoAdapter: PhotoGridAdapter
     private val _model: GalleryViewModel by activityViewModels()

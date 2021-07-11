@@ -4,12 +4,12 @@ import android.net.Uri
 enum class MediaType {
     IMAGE, VIDEO
 }
-class MediaModel {
-    var id = 0
-    var albumName: String? = null
-    var mediaUri: Uri? = null
-    var mediaType: MediaType? = null
-    var videoDuration: Long? = null
-
+data class MediaModel(
+    var id: Int,
+    val mediaUri: Uri,
+    var albumName: String?,
+    var mediaType: MediaType?,
+    var videoDuration: Long?,
+    var mediaName: String,
     var isSelected: Boolean = false
-}
+)
