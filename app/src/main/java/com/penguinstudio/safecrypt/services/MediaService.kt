@@ -3,11 +3,11 @@ package com.penguinstudio.safecrypt.services
 import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
-import android.os.Build
 import android.provider.MediaStore
 import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.models.MediaType
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.lang.IllegalArgumentException
@@ -15,8 +15,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class MediaService @Inject constructor() {
-    suspend fun getAllVideosWithAlbums(context: Context): ArrayList<AlbumModel> {
+class MediaService @Inject constructor(
+    @ApplicationContext private val context: Context
+    ) {
+    suspend fun getAllVideosWithAlbums(): ArrayList<AlbumModel> {
         return withContext(Dispatchers.IO) {
 
             val allAlbums: ArrayList<AlbumModel> = ArrayList()
@@ -53,7 +55,7 @@ class MediaService @Inject constructor() {
                 val bucketNameColumn: Int = it.getColumnIndex(
                     MediaStore.Files.FileColumns.BUCKET_DISPLAY_NAME
                 )
-                var mediaName = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME)
+                val mediaNameColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME)
                 val idColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
                 val mediaType = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)
                 val durationColumn: Int =
@@ -64,15 +66,12 @@ class MediaService @Inject constructor() {
                     // Get the field values
                     val bucketName = it.getString(bucketNameColumn)
                     val imageId = it.getLong(idColumn)
-                    val mediaName = it.getString(mediaName)
-
-
+                    val mediaName = it.getString(mediaNameColumn)
 
                     val contentUri: Uri = ContentUris.withAppendedId(
                         MediaStore.Files.getContentUri("external"),
                         imageId
                     )
-
 
                     var media: MediaModel
 

@@ -1,9 +1,7 @@
 package com.penguinstudio.safecrypt.adapters
 
 import android.graphics.Color
-import android.graphics.ColorFilter
 import android.graphics.PorterDuff
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,6 +34,11 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?) : Re
         notifyDataSetChanged()
     }
 
+    fun removeImage(position: Int) {
+        this.images.removeAt(position)
+        notifyItemRemoved(position)
+    }
+
 
     fun setImages(images: ArrayList<MediaModel>?) {
         if (images != null) {
@@ -61,7 +64,7 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?) : Re
             holder.checkBox.isChecked = images[position].isSelected
 
             if(images[position].isSelected) {
-                holder.imageView.setColorFilter(Color.parseColor("#4D000000"), PorterDuff.Mode.SRC_ATOP);
+                holder.imageView.setColorFilter(Color.parseColor("#4D000000"), PorterDuff.Mode.SRC_ATOP)
 
                 holder.checkBox.isChecked = true
             }
@@ -99,7 +102,7 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?) : Re
             .load(currentImage.mediaUri)
             .fitCenter()
             .thumbnail(0.1f)
-            .into(holder.imageView);
+            .into(holder.imageView)
     }
 
     override fun getItemCount(): Int {

@@ -8,11 +8,15 @@ import androidx.lifecycle.viewModelScope
 import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.repository.MediaRepository
+import com.penguinstudio.safecrypt.services.MediaEncryptionService
+import com.penguinstudio.safecrypt.utilities.EncryptionResource
 import com.penguinstudio.safecrypt.utilities.GalleryType
 import com.penguinstudio.safecrypt.utilities.MediaResponse
 import com.penguinstudio.safecrypt.utilities.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import java.lang.Exception
 import javax.inject.Inject
 
 interface IPicturesViewModel {
@@ -36,6 +40,12 @@ interface IPicturesViewModel {
 
     fun setSelectedMedia(selectedMedia: MediaModel)
 
+    fun encryptSelectedMedia()
+
+    @Deprecated("Used for testing only")
+    fun encryptSingleImage(position: Int, media: MediaModel)
+
+    val encryptionStatus: LiveData<EncryptionResource>
 }
 
 interface ISelectedMediaViewModel {
@@ -47,40 +57,66 @@ interface ISelectedMediaViewModel {
 }
 
 @HiltViewModel
-class GalleryViewModel @Inject constructor(private val mediaRepository: MediaRepository) :
+class GalleryViewModel @Inject constructor(
+    private val mediaRepository: MediaRepository,
+    private val mediaEncryptionService: MediaEncryptionService
+) :
     ViewModel(), IPicturesViewModel, ISelectedMediaViewModel {
 
+    /**
+     * Get media from Phone media folders
+     */
     private val _albums = MutableLiveData<Resource<MediaResponse>>()
     val albums: LiveData<Resource<MediaResponse>> = _albums
 
 
-    /**
-     * Gallery type handler TODO Will create a new fragment and viewmodel for encrypted
-     */
-    private var gType: GalleryType = GalleryType.NORMAL
-    val galleryType: GalleryType
-        get() {
-            return gType
-        }
-
-
-    fun setGalleryType(galleryType: GalleryType, context: Context) {
-        this.gType = galleryType
-        getMedia(context)
-    }
-
-
-    fun getMedia(context: Context) {
+    fun getMedia() {
         viewModelScope.launch {
 
             _albums.postValue(Resource.loading(null))
 
-            mediaRepository.getMedia(context).let {
+            mediaRepository.getMedia().let {
                 _albums.postValue(it)
             }
         }
     }
 
+    /**
+     * Encryption
+     */
+
+    private val _encryptionStatus = MutableLiveData<EncryptionResource>()
+    override val encryptionStatus: LiveData<EncryptionResource> = _encryptionStatus
+
+    // Each of these events trigger an enum class observer who then notifies view
+    override fun encryptSingleImage(position: Int, media: MediaModel) {
+        viewModelScope.launch {
+            _encryptionStatus.postValue(EncryptionResource.loading())
+
+            mediaRepository.encryptMedia(position, media).let {
+                _encryptionStatus.postValue(it)
+            }
+        }
+    }
+
+
+    // TODO implement multi-select encryption
+    override fun encryptSelectedMedia() {
+
+        // TODO Parallel? This is hugely un-optimized
+
+        viewModelScope.launch {
+            _encryptionStatus.postValue(EncryptionResource.loading())
+
+            selectedItems.value?.forEach { mediaItem ->
+
+                mediaRepository.encryptMedia(mediaItem.selectedPosition!!, mediaItem).let {
+                    _encryptionStatus.postValue(it)
+                }
+
+            }
+        }
+    }
 
     /**
      * Pictures fragment data
@@ -106,10 +142,11 @@ class GalleryViewModel @Inject constructor(private val mediaRepository: MediaRep
 
     override fun clearSelections() {
         selectedItems.value?.clear()
-        selectedItems.notifyObserver()
     }
 
     override fun addMediaToSelection(position: Int, media: MediaModel) {
+        media.selectedPosition = position
+
         if(selectedItems.value == null) {
             selectedItems.value = mutableListOf(media)
         }

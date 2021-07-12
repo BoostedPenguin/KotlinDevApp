@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -16,7 +15,6 @@ import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.AlbumGridAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentGalleryBinding
 import com.penguinstudio.safecrypt.models.AlbumModel
-import com.penguinstudio.safecrypt.utilities.GalleryType
 import com.penguinstudio.safecrypt.utilities.Status
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -55,10 +53,7 @@ class GalleryFragment : Fragment() {
 
         registerEvents()
 
-        // Runtime gallery type store
-        arguments?.takeIf { it.containsKey("GalleryType") }?.apply {
-            model.setGalleryType(getSerializable("GalleryType") as GalleryType, requireContext())
-        }
+        model.getMedia()
 
         return binding.root
     }
@@ -67,7 +62,7 @@ class GalleryFragment : Fragment() {
 
         // On user manual refresh
         binding.gallerySwipeToRefresh.setOnRefreshListener {
-            model.getMedia(requireContext())
+            model.getMedia()
         }
 
 

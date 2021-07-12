@@ -1,10 +1,16 @@
 package com.penguinstudio.safecrypt.ui.home
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import android.view.*
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -17,6 +23,7 @@ import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.PhotoGridAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentPicturesBinding
 import com.penguinstudio.safecrypt.models.MediaModel
+import com.penguinstudio.safecrypt.utilities.EncryptionStatus
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -98,6 +105,10 @@ class MediaFragment : Fragment(), LifecycleObserver {
                 photoAdapter.notifyItemRangeChanged(0, photoAdapter.itemCount)
                 true
             }
+            R.id.action_encrypt -> {
+                model.encryptSelectedMedia()
+                true
+            }
             android.R.id.home -> {
                 onBackPress()
                 true
@@ -134,16 +145,17 @@ class MediaFragment : Fragment(), LifecycleObserver {
             }
             override fun onLongClickListener(position: Int, media: MediaModel) {
                 if(model.itemSelectionMode) return
-                photoAdapter.toggleSelectionMode(true)
-
-                model.itemSelectionMode = true
-
-                model.addMediaToSelection(position, media)
-                (activity as AppCompatActivity?)?.supportActionBar?.title = "Select Media"
-                // Notify adapter that this item has changed
-                activity?.invalidateOptionsMenu()
-                media.isSelected = true
-                photoAdapter.notifyItemChanged(position)
+//                photoAdapter.toggleSelectionMode(true)
+//
+//                model.itemSelectionMode = true
+//
+//                model.addMediaToSelection(position, media)
+//                (activity as AppCompatActivity?)?.supportActionBar?.title = "Select Media"
+//                // Notify adapter that this item has changed
+//                activity?.invalidateOptionsMenu()
+//                media.isSelected = true
+//                photoAdapter.notifyItemChanged(position)
+                model.encryptSingleImage(position, media)
             }
         })
 
@@ -172,6 +184,77 @@ class MediaFragment : Fragment(), LifecycleObserver {
                 exitSelectMode()
             }
         })
+
+
+        model.encryptionStatus.observe(viewLifecycleOwner, {
+            when(it.status) {
+                EncryptionStatus.LOADING -> {
+                    binding.picturesProgressBar.visibility = View.VISIBLE
+                }
+                EncryptionStatus.REQUEST_STORAGE -> {
+                    chooseDefaultSaveLocation()
+                    binding.picturesProgressBar.visibility = View.GONE
+                }
+                EncryptionStatus.DELETE_RECOVERABLE -> {
+                    deleteOriginalFileLauncher.launch(it.intentSender)
+                    binding.picturesProgressBar.visibility = View.GONE
+
+                }
+                EncryptionStatus.OPERATION_COMPLETE -> {
+
+                    exitSelectMode()
+
+                    it.position?.let { pos ->
+                        photoAdapter.removeImage(pos)
+                    }
+                    binding.picturesProgressBar.visibility = View.GONE
+
+                }
+                EncryptionStatus.ERROR -> {
+                    binding.picturesProgressBar.visibility = View.GONE
+                }
+            }
+        })
+    }
+
+    private var deleteOriginalFileLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Call to function to continue encryption process
+            Log.d("callStack", "Currently, accepted delete request")
+        }
+    }
+
+    private fun chooseDefaultSaveLocation() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+        intent.addFlags(
+            Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                    or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
+        )
+        saveLocationCallback.launch(intent)
+    }
+
+    private val saveLocationCallback = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            Toast.makeText(context, "Completed", Toast.LENGTH_SHORT).show()
+            val contentResolver = requireContext().applicationContext.contentResolver
+
+            val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+
+            contentResolver.takePersistableUriPermission(it.data?.data!!, takeFlags)
+
+            val sp: SharedPreferences =
+                requireContext().getSharedPreferences("DirPermission", Context.MODE_PRIVATE)
+            val editor = sp.edit()
+
+            editor.putString("uriTree", it.data?.data!!.toString())
+            editor.apply()
+
+            // Restart the encryption once the default selection has been passed
+            model.encryptSelectedMedia()
+        }
     }
 
     private fun exitSelectMode() {
@@ -179,7 +262,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
 
         activity?.invalidateOptionsMenu()
         model.itemSelectionMode = false
-        model.selectedItems.value?.clear()
+        model.clearSelections()
         photoAdapter.toggleSelectionMode(false)
     }
 

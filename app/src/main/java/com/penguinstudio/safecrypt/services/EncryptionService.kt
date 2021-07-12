@@ -1,13 +1,23 @@
 package com.penguinstudio.safecrypt.services
 
+import android.content.Context
+import android.icu.util.Output
+import android.net.Uri
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import androidx.documentfile.provider.DocumentFile
+import com.penguinstudio.safecrypt.models.MediaModel
 import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 import java.security.InvalidKeyException
 import java.security.Key
 import java.security.KeyStore
 import java.security.SecureRandom
 import javax.crypto.Cipher
+import javax.crypto.CipherInputStream
+import javax.crypto.CipherOutputStream
 import javax.crypto.KeyGenerator
 import javax.crypto.spec.IvParameterSpec
 import javax.inject.Inject
@@ -43,7 +53,7 @@ class EncryptionService @Inject constructor() {
             }
         }
 
-        private fun getSecretKey(): Key {
+        fun getSecretKey(): Key {
             val keyStore = KeyStore.getInstance(AndroidKeyStore)
             keyStore.load(null)
 
@@ -94,6 +104,30 @@ class EncryptionService @Inject constructor() {
             decryptCipher.init(Cipher.DECRYPT_MODE, getSecretKey(), IvParameterSpec(iv))
 
             return decryptCipher.doFinal(encryptedBytes)
+        }
+
+
+        fun encryptData (
+            inputStream: InputStream,
+            outputStream: OutputStream) : Boolean {
+
+            // Read/Write buffer
+            val buffer = ByteArray(8192)
+
+            // Configure cipher crypt
+            val encryptCipher = Cipher.getInstance(AES_MODE)
+            encryptCipher.init(Cipher.ENCRYPT_MODE, getSecretKey(), SecureRandom())
+
+            var nread: Int
+
+            while (inputStream.read(buffer).also { nread = it } > 0) {
+                val enc: ByteArray = encryptCipher.update(buffer, 0, nread)
+                outputStream.write(enc)
+            }
+            val enc: ByteArray = encryptCipher.doFinal()
+            outputStream.write(enc)
+
+            return true
         }
     }
 }

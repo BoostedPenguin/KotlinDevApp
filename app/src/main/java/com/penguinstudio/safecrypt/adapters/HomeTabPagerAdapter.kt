@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.penguinstudio.safecrypt.ui.home.GalleryFragment
+import com.penguinstudio.safecrypt.ui.home.encrypted.EncryptedMediaFragment
 import com.penguinstudio.safecrypt.utilities.GalleryType
 
 
@@ -13,18 +14,10 @@ class HomeTabPagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
     }
 
     override fun createFragment(position: Int): Fragment {
-        val fragment = GalleryFragment()
-
-        // It recreates fragment but keeps the ViewModel
-        fragment.arguments = Bundle().apply {
-            if(position == 0) {
-                putSerializable("GalleryType", GalleryType.NORMAL)
-            }
-            else {
-                putSerializable("GalleryType", GalleryType.ENCRYPTED)
-            }
+        return if(position == 0) {
+            GalleryFragment()
+        } else {
+            EncryptedMediaFragment()
         }
-
-        return fragment
     }
 }
