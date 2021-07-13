@@ -6,15 +6,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.home.encrypted.EncryptedMediaFragment">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="5dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:background="@drawable/toolbar_dropshadow" />
-
-
     <ProgressBar
         android:id="@+id/enPicturesProgressBar"
         android:layout_width="wrap_content"

@@ -24,6 +24,7 @@ import com.penguinstudio.safecrypt.adapters.PhotoGridAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentPicturesBinding
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.utilities.EncryptionStatus
+import com.penguinstudio.safecrypt.utilities.Status
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -38,7 +39,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreated(){
-        (activity as AppCompatActivity?)?.supportActionBar?.title = model.selectedAlbum?.name
+        (activity as AppCompatActivity?)?.supportActionBar?.title = model.selectedAlbum.value?.name
         (activity as AppCompatActivity).supportActionBar?.show()
         activity?.lifecycle?.removeObserver(this)
     }
@@ -84,14 +85,14 @@ class MediaFragment : Fragment(), LifecycleObserver {
         binding = FragmentPicturesBinding.inflate(layoutInflater, container, false)
         setHasOptionsMenu(true)
 
-        (activity as AppCompatActivity?)?.supportActionBar?.title = model.selectedAlbum?.name
+        (activity as AppCompatActivity?)?.supportActionBar?.title = model.selectedAlbum.value?.name
         (activity as AppCompatActivity).supportActionBar?.show()
 
         initGrid()
 
         registerEvents()
 
-        photoAdapter.setImages(model.selectedAlbum?.albumMedia)
+        photoAdapter.setImages(model.selectedAlbum.value?.albumMedia)
 
         return binding.root
     }
@@ -177,6 +178,28 @@ class MediaFragment : Fragment(), LifecycleObserver {
          * If the selected items become 0,
          * Disable selection mode
          */
+        binding.picturesSwipeToRefresh.setOnRefreshListener {
+            model.getMedia()
+        }
+
+        model.albums.observe(viewLifecycleOwner, {
+            when(it.status) {
+                Status.LOADING -> {
+                    // Do nothing
+                }
+                else -> {
+                    binding.picturesSwipeToRefresh.isRefreshing = false
+                    binding.picturesSwipeToRefresh.isEnabled = true
+                }
+            }
+        })
+
+        model.selectedAlbum.observe(viewLifecycleOwner, {
+            if(it == null) return@observe
+            photoAdapter.setImages(it.albumMedia)
+        })
+
+
         model.selectedItems.observe(viewLifecycleOwner, {
             if(it != null && it.size == 0) {
                 photoAdapter.toggleSelectionMode(false)
@@ -187,6 +210,8 @@ class MediaFragment : Fragment(), LifecycleObserver {
 
 
         model.encryptionStatus.observe(viewLifecycleOwner, {
+            if(it == null) return@observe
+
             when(it.status) {
                 EncryptionStatus.LOADING -> {
                     binding.picturesProgressBar.visibility = View.VISIBLE
@@ -214,6 +239,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
                     binding.picturesProgressBar.visibility = View.GONE
                 }
             }
+            model.clearEncryptionStatus()
         })
     }
 
@@ -258,7 +284,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
     }
 
     private fun exitSelectMode() {
-        (activity as AppCompatActivity?)?.supportActionBar?.title = model.selectedAlbum?.name
+        (activity as AppCompatActivity?)?.supportActionBar?.title = model.selectedAlbum.value?.name
 
         activity?.invalidateOptionsMenu()
         model.itemSelectionMode = false

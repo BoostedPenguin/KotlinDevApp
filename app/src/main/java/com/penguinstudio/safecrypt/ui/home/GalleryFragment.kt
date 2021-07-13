@@ -81,6 +81,9 @@ class GalleryFragment : Fragment() {
                     binding.galleryProgressBar.visibility = View.GONE
                     binding.galleryRecyclerView.visibility = View.VISIBLE
 
+                    binding.gallerySwipeToRefresh.isRefreshing = false
+                    binding.gallerySwipeToRefresh.isEnabled = true
+
                     Snackbar.make(binding.root, "Something went wrong", Snackbar.LENGTH_SHORT)
                         .show()
                 }

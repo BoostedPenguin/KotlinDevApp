@@ -1,28 +1,25 @@
 package com.penguinstudio.safecrypt.ui.home
 
-import android.content.Context
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.repository.MediaRepository
 import com.penguinstudio.safecrypt.services.MediaEncryptionService
 import com.penguinstudio.safecrypt.utilities.EncryptionResource
-import com.penguinstudio.safecrypt.utilities.GalleryType
 import com.penguinstudio.safecrypt.utilities.MediaResponse
 import com.penguinstudio.safecrypt.utilities.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import java.lang.Exception
 import javax.inject.Inject
 
 interface IPicturesViewModel {
-    val selectedAlbum: AlbumModel?
+    fun getMedia()
 
-    fun setSelectedAlbum(selectedAlbum: AlbumModel)
+    val albums: LiveData<Resource<MediaResponse>>
+
+    val selectedAlbum: LiveData<AlbumModel>
+
+    fun setSelectedAlbum(selectedItem: AlbumModel)
 
     fun clearSelectedAlbum()
 
@@ -45,7 +42,9 @@ interface IPicturesViewModel {
     @Deprecated("Used for testing only")
     fun encryptSingleImage(position: Int, media: MediaModel)
 
-    val encryptionStatus: LiveData<EncryptionResource>
+    val encryptionStatus: LiveData<EncryptionResource?>
+
+    fun clearEncryptionStatus()
 }
 
 interface ISelectedMediaViewModel {
@@ -67,10 +66,10 @@ class GalleryViewModel @Inject constructor(
      * Get media from Phone media folders
      */
     private val _albums = MutableLiveData<Resource<MediaResponse>>()
-    val albums: LiveData<Resource<MediaResponse>> = _albums
+    override val albums: LiveData<Resource<MediaResponse>> = _albums
 
 
-    fun getMedia() {
+    override fun getMedia() {
         viewModelScope.launch {
 
             _albums.postValue(Resource.loading(null))
@@ -84,9 +83,14 @@ class GalleryViewModel @Inject constructor(
     /**
      * Encryption
      */
-
-    private val _encryptionStatus = MutableLiveData<EncryptionResource>()
-    override val encryptionStatus: LiveData<EncryptionResource> = _encryptionStatus
+    private val _encryptionStatus = MutableLiveData<EncryptionResource?>()
+    override val encryptionStatus: LiveData<EncryptionResource?>
+        get() {
+            return _encryptionStatus
+        }
+    override fun clearEncryptionStatus() {
+        _encryptionStatus.postValue(null)
+    }
 
     // Each of these events trigger an enum class observer who then notifies view
     override fun encryptSingleImage(position: Int, media: MediaModel) {
@@ -99,41 +103,31 @@ class GalleryViewModel @Inject constructor(
         }
     }
 
-
     // TODO implement multi-select encryption
     override fun encryptSelectedMedia() {
 
-        // TODO Parallel? This is hugely un-optimized
 
-        viewModelScope.launch {
-            _encryptionStatus.postValue(EncryptionResource.loading())
-
-            selectedItems.value?.forEach { mediaItem ->
-
-                mediaRepository.encryptMedia(mediaItem.selectedPosition!!, mediaItem).let {
-                    _encryptionStatus.postValue(it)
-                }
-
-            }
-        }
     }
 
     /**
      * Pictures fragment data
      */
+    override val selectedAlbum: LiveData<AlbumModel> = Transformations.map(_albums) {
+        _selectedAlbumName ?: return@map null
 
-    private var _selectedAlbum: AlbumModel? = null
-    override val selectedAlbum: AlbumModel?
-        get() {
-            return _selectedAlbum
+        return@map it.data?.media?.find { album ->
+            album.name == _selectedAlbumName
         }
+    }
 
-    override fun setSelectedAlbum(selectedAlbum: AlbumModel) {
-        _selectedAlbum = selectedAlbum
+    private var _selectedAlbumName: String? = null
+
+    override fun setSelectedAlbum(selectedItem: AlbumModel) {
+        _selectedAlbumName = selectedItem.name
     }
 
     override fun clearSelectedAlbum() {
-        _selectedAlbum = null
+        _selectedAlbumName = null
     }
 
     override var itemSelectionMode = false

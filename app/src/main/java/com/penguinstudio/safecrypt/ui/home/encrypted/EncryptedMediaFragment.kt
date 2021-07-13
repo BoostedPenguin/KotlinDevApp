@@ -147,6 +147,10 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
 
             editor.putString(getString(R.string.ENC_DIR_ROOT_TREE), it.data?.data!!.toString())
             editor.apply()
+
+            binding.enPicturesSaveLocation.visibility = View.VISIBLE
+            binding.enPicturesHint.visibility = View.VISIBLE
+            binding.enPicturesRecyclerView.visibility = View.INVISIBLE
         }
     }
 }
