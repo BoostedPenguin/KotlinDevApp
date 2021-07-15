@@ -10,23 +10,22 @@
     android:orientation="horizontal">
 
     <androidx.cardview.widget.CardView
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         android:id="@+id/albumCardView"
         android:layout_width="120dp"
         android:layout_height="120dp"
-        app:cardCornerRadius="12dp"
         android:layout_margin="5dp"
-        android:elevation="10dp">
+        android:elevation="10dp"
+        app:cardCornerRadius="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/albumInnerImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            android:scaleType="centerCrop" />
     </androidx.cardview.widget.CardView>
 
     <TextView

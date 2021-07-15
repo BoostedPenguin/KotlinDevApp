@@ -85,14 +85,11 @@ class MediaFragment : Fragment(), LifecycleObserver {
         binding = FragmentPicturesBinding.inflate(layoutInflater, container, false)
         setHasOptionsMenu(true)
 
-        (activity as AppCompatActivity?)?.supportActionBar?.title = model.selectedAlbum.value?.name
         (activity as AppCompatActivity).supportActionBar?.show()
 
         initGrid()
 
         registerEvents()
-
-        photoAdapter.setImages(model.selectedAlbum.value?.albumMedia)
 
         return binding.root
     }
@@ -197,6 +194,10 @@ class MediaFragment : Fragment(), LifecycleObserver {
         model.selectedAlbum.observe(viewLifecycleOwner, {
             if(it == null) return@observe
             photoAdapter.setImages(it.albumMedia)
+
+            (activity as AppCompatActivity?)?.supportActionBar?.title =
+                it.name
+
         })
 
 

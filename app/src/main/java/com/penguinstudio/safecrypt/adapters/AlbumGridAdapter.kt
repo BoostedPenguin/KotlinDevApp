@@ -35,7 +35,13 @@ class AlbumGridAdapter(private var listener: AdapterListeners?) : RecyclerView.A
     override fun onBindViewHolder(holder: AlbumHolder, position: Int) {
         val currentAlbum = albums[position]
         holder.image = currentAlbum
-        holder.mainText.text = albums[position].name.toString()
+
+        var currentAlbumName = albums[position].name ?: "Unknown"
+
+        if(currentAlbumName.length > 10) {
+            currentAlbumName = currentAlbumName.substring(0, 10).plus("...")
+        }
+        holder.mainText.text = currentAlbumName
         holder.secondaryText.text = albums[position].albumMedia.size.toString()
 
         Glide.with(holder.itemView)

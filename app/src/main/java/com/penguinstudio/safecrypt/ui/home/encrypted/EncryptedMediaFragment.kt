@@ -61,7 +61,6 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreated(){
-        (activity as AppCompatActivity?)?.supportActionBar?.title = "Encrypted Media"
         (activity as AppCompatActivity).supportActionBar?.show()
         activity?.lifecycle?.removeObserver(this)
     }
@@ -82,7 +81,6 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
     ): View {
         // Inflate the layout for this fragment
         binding = FragmentEncryptedMediaBinding.inflate(layoutInflater, container, false)
-        (activity as AppCompatActivity?)?.supportActionBar?.title = "Encrypted Media"
         (activity as AppCompatActivity).supportActionBar?.show()
 
         //chooseDefaultSaveLocation()
