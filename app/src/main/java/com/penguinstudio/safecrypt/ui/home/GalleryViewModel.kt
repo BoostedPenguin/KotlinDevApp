@@ -8,6 +8,7 @@ import com.penguinstudio.safecrypt.services.MediaEncryptionService
 import com.penguinstudio.safecrypt.utilities.EncryptionResource
 import com.penguinstudio.safecrypt.utilities.MediaResponse
 import com.penguinstudio.safecrypt.utilities.Resource
+import com.penguinstudio.safecrypt.utilities.Status
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -17,7 +18,7 @@ interface IPicturesViewModel {
 
     val albums: LiveData<Resource<MediaResponse>>
 
-    val selectedAlbum: LiveData<AlbumModel>
+    val selectedAlbum: LiveData<Resource<AlbumModel>>
 
     fun setSelectedAlbum(selectedItem: AlbumModel)
 
@@ -38,9 +39,6 @@ interface IPicturesViewModel {
     fun setSelectedMedia(selectedMedia: MediaModel)
 
     fun encryptSelectedMedia()
-
-    @Deprecated("Used for testing only")
-    fun encryptSingleImage(position: Int, media: MediaModel)
 
     val encryptionStatus: LiveData<EncryptionResource?>
 
@@ -72,7 +70,8 @@ class GalleryViewModel @Inject constructor(
     override fun getMedia() {
         viewModelScope.launch {
 
-            _albums.postValue(Resource.loading(null))
+            // Use same value or null while loading to prevent observers from catching nulls
+            _albums.postValue(Resource.loading(_albums.value?.data))
 
             mediaRepository.getMedia().let {
                 _albums.postValue(it)
@@ -92,31 +91,39 @@ class GalleryViewModel @Inject constructor(
         _encryptionStatus.postValue(null)
     }
 
-    // Each of these events trigger an enum class observer who then notifies view
-    override fun encryptSingleImage(position: Int, media: MediaModel) {
+
+    // TODO implement multi-select encryption
+    override fun encryptSelectedMedia() {
         viewModelScope.launch {
+
+            val content = selectedItems.value ?: return@launch
             _encryptionStatus.postValue(EncryptionResource.loading())
 
-            mediaRepository.encryptMedia(position, media).let {
+            mediaRepository.encryptSelectedMedia(content.toList()).let {
                 _encryptionStatus.postValue(it)
             }
         }
     }
 
-    // TODO implement multi-select encryption
-    override fun encryptSelectedMedia() {
-
-
-    }
-
     /**
      * Pictures fragment data
      */
-    override val selectedAlbum: LiveData<AlbumModel> = Transformations.map(_albums) {
+    override val selectedAlbum: LiveData<Resource<AlbumModel>> = Transformations.map(_albums) {
         _selectedAlbumName ?: return@map null
 
-        return@map it.data?.media?.find { album ->
-            album.name == _selectedAlbumName
+        return@map when(_albums.value?.status) {
+            Status.SUCCESS -> {
+                val result = it.data?.media?.find { album ->
+                    album.name == _selectedAlbumName
+                }
+                Resource.success(result)
+            }
+            Status.LOADING -> {
+                Resource.loading(null)
+            }
+            null, Status.ERROR -> {
+                Resource.error("An unknown error occurred", null)
+            }
         }
     }
 

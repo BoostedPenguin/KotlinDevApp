@@ -23,15 +23,20 @@ import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.PhotoGridAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentPicturesBinding
 import com.penguinstudio.safecrypt.models.MediaModel
+import com.penguinstudio.safecrypt.services.DefaultStorageService
 import com.penguinstudio.safecrypt.utilities.EncryptionStatus
 import com.penguinstudio.safecrypt.utilities.Status
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MediaFragment : Fragment(), LifecycleObserver {
     private lateinit var binding: FragmentPicturesBinding
     private lateinit var photoAdapter: PhotoGridAdapter
     private val _model: GalleryViewModel by activityViewModels()
+
+    @Inject
+    lateinit var defaultStorageService: DefaultStorageService
     private val model: IPicturesViewModel
         get() {
             return _model
@@ -39,7 +44,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun onCreated(){
-        (activity as AppCompatActivity?)?.supportActionBar?.title = model.selectedAlbum.value?.name
+        (activity as AppCompatActivity?)?.supportActionBar?.title = model.selectedAlbum.value?.data?.name
         (activity as AppCompatActivity).supportActionBar?.show()
         activity?.lifecycle?.removeObserver(this)
     }
@@ -143,17 +148,16 @@ class MediaFragment : Fragment(), LifecycleObserver {
             }
             override fun onLongClickListener(position: Int, media: MediaModel) {
                 if(model.itemSelectionMode) return
-//                photoAdapter.toggleSelectionMode(true)
-//
-//                model.itemSelectionMode = true
-//
-//                model.addMediaToSelection(position, media)
-//                (activity as AppCompatActivity?)?.supportActionBar?.title = "Select Media"
-//                // Notify adapter that this item has changed
-//                activity?.invalidateOptionsMenu()
-//                media.isSelected = true
-//                photoAdapter.notifyItemChanged(position)
-                model.encryptSingleImage(position, media)
+                photoAdapter.toggleSelectionMode(true)
+
+                model.itemSelectionMode = true
+
+                model.addMediaToSelection(position, media)
+                (activity as AppCompatActivity?)?.supportActionBar?.title = "Select Media"
+                // Notify adapter that this item has changed
+                activity?.invalidateOptionsMenu()
+                media.isSelected = true
+                photoAdapter.notifyItemChanged(position)
             }
         })
 
@@ -193,11 +197,30 @@ class MediaFragment : Fragment(), LifecycleObserver {
 
         model.selectedAlbum.observe(viewLifecycleOwner, {
             if(it == null) return@observe
-            photoAdapter.setImages(it.albumMedia)
 
-            (activity as AppCompatActivity?)?.supportActionBar?.title =
-                it.name
+            when(it.status) {
+                Status.SUCCESS -> {
+                    binding.picturesProgressBar.visibility = View.GONE
 
+                    // If this album doesn't exist anymore // No media inside it
+                    if(it.data == null || it.data.albumMedia.size == 0) {
+                        findNavController().popBackStack()
+                        return@observe
+                    }
+
+                    photoAdapter.setImages(it.data.albumMedia)
+                    (activity as AppCompatActivity?)?.supportActionBar?.title =
+                        it.data.name
+                }
+                Status.ERROR -> {
+                    binding.picturesProgressBar.visibility = View.GONE
+                    Toast.makeText(context, "${it.message}", Toast.LENGTH_SHORT).show()
+                    findNavController().popBackStack()
+                }
+                Status.LOADING -> {
+                    binding.picturesProgressBar.visibility = View.VISIBLE
+                }
+            }
         })
 
 
@@ -218,8 +241,18 @@ class MediaFragment : Fragment(), LifecycleObserver {
                     binding.picturesProgressBar.visibility = View.VISIBLE
                 }
                 EncryptionStatus.REQUEST_STORAGE -> {
-                    chooseDefaultSaveLocation()
-                    binding.picturesProgressBar.visibility = View.GONE
+                    defaultStorageService.chooseDefaultSaveLocation().observe(viewLifecycleOwner, { result ->
+                        //TODO On chosen location result
+                        when(result) {
+                            Activity.RESULT_OK -> {
+
+                            }
+                            Activity.RESULT_CANCELED -> {
+
+                            }
+                        }
+                        binding.picturesProgressBar.visibility = View.GONE
+                    })
                 }
                 EncryptionStatus.DELETE_RECOVERABLE -> {
                     deleteOriginalFileLauncher.launch(it.intentSender)
@@ -230,9 +263,9 @@ class MediaFragment : Fragment(), LifecycleObserver {
 
                     exitSelectMode()
 
-                    it.position?.let { pos ->
-                        photoAdapter.removeImage(pos)
-                    }
+                    // Fetch media, it will update adapter automatically
+                    model.getMedia()
+
                     binding.picturesProgressBar.visibility = View.GONE
 
                 }
@@ -251,41 +284,8 @@ class MediaFragment : Fragment(), LifecycleObserver {
         }
     }
 
-    private fun chooseDefaultSaveLocation() {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-        intent.addFlags(
-            Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                    or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                    or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
-        )
-        saveLocationCallback.launch(intent)
-    }
-
-    private val saveLocationCallback = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == Activity.RESULT_OK) {
-            Toast.makeText(context, "Completed", Toast.LENGTH_SHORT).show()
-            val contentResolver = requireContext().applicationContext.contentResolver
-
-            val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-
-            contentResolver.takePersistableUriPermission(it.data?.data!!, takeFlags)
-
-            val sp: SharedPreferences =
-                requireContext().getSharedPreferences("DirPermission", Context.MODE_PRIVATE)
-            val editor = sp.edit()
-
-            editor.putString("uriTree", it.data?.data!!.toString())
-            editor.apply()
-
-            // Restart the encryption once the default selection has been passed
-            model.encryptSelectedMedia()
-        }
-    }
-
     private fun exitSelectMode() {
-        (activity as AppCompatActivity?)?.supportActionBar?.title = model.selectedAlbum.value?.name
+        (activity as AppCompatActivity?)?.supportActionBar?.title = model.selectedAlbum.value?.data?.name
 
         activity?.invalidateOptionsMenu()
         model.itemSelectionMode = false

@@ -9,6 +9,7 @@ import com.penguinstudio.safecrypt.services.MediaEncryptionService
 import com.penguinstudio.safecrypt.services.MediaService
 import com.penguinstudio.safecrypt.services.NoDefaultDirFound
 import com.penguinstudio.safecrypt.utilities.EncryptionResource
+import com.penguinstudio.safecrypt.utilities.EncryptionStatus
 import com.penguinstudio.safecrypt.utilities.MediaResponse
 import com.penguinstudio.safecrypt.utilities.Resource
 import javax.inject.Inject
@@ -30,48 +31,16 @@ class MediaRepository @Inject constructor(
         }
     }
 
-    suspend fun encryptMedia(position: Int, media: MediaModel) :
+    suspend fun encryptSelectedMedia(media: List<MediaModel>) :
             EncryptionResource {
 
-        return try {
-            encryptionService.encryptImage(media)
-
-            EncryptionResource.complete(position)
-        }
-        // Recoverable delete
-        catch (e: SecurityException) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val recoverableSecurityException = e as?
-                        RecoverableSecurityException ?: throw RuntimeException(e.message, e)
-
-                val intentSender =
-                    recoverableSecurityException.userAction.actionIntent.intentSender
-
-
-                val intentSenderRequest =
-                    IntentSenderRequest.Builder(intentSender).build()
-
-                EncryptionResource.deleteRecoverable(intentSenderRequest)
-            } else {
-                throw RuntimeException(e.message, e)
-            }
-        }
-        // No default directory / Permissions
-        catch (e: NoDefaultDirFound) {
-            EncryptionResource.requestStorage()
-        }
-        // All other
-        catch (e: Exception) {
-            throw e
-        }
-    }
-
-    //TODO
-    suspend fun encryptAllMedia(mediaList: List<MediaModel>) : EncryptionResource {
-
-        mediaList.forEach {
-            try {
+        val successResponse = EncryptionResource.complete(null)
+        media.forEach {
+            val result = try {
                 encryptionService.encryptImage(it)
+
+                it.selectedPosition?.let { it1 -> successResponse.positions?.add(it1) }
+                EncryptionResource.complete(null)
             }
             // Recoverable delete
             catch (e: SecurityException) {
@@ -86,21 +55,22 @@ class MediaRepository @Inject constructor(
                     val intentSenderRequest =
                         IntentSenderRequest.Builder(intentSender).build()
 
-                    return EncryptionResource.deleteRecoverable(intentSenderRequest)
+                    EncryptionResource.deleteRecoverable(intentSenderRequest)
                 } else {
                     throw RuntimeException(e.message, e)
                 }
             }
             // No default directory / Permissions
             catch (e: NoDefaultDirFound) {
-                return EncryptionResource.requestStorage()
+                EncryptionResource.requestStorage()
             }
             // All other
             catch (e: Exception) {
                 throw e
             }
-        }
 
-        return EncryptionResource.complete(0)
+            if(result.status != EncryptionStatus.OPERATION_COMPLETE) return result
+        }
+        return successResponse
     }
 }

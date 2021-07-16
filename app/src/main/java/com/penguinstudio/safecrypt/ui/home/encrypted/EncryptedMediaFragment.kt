@@ -26,15 +26,22 @@ import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.PhotoGridAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentEncryptedMediaBinding
 import com.penguinstudio.safecrypt.models.MediaModel
+import com.penguinstudio.safecrypt.services.DefaultStorageService
 import com.penguinstudio.safecrypt.ui.home.EncryptedMediaViewModel
 import com.penguinstudio.safecrypt.ui.home.GalleryViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class EncryptedMediaFragment : Fragment(), LifecycleObserver {
     private val model: EncryptedMediaViewModel by activityViewModels()
     private lateinit var binding: FragmentEncryptedMediaBinding
     private lateinit var encryptedMediaAdapter: PhotoGridAdapter
+
+    @Inject
+    lateinit var defaultStorageService: DefaultStorageService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,7 +92,18 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
 
         //chooseDefaultSaveLocation()
         binding.enPicturesSaveLocation.setOnClickListener {
-            chooseDefaultSaveLocation()
+            defaultStorageService.chooseDefaultSaveLocation().observe(viewLifecycleOwner, {
+                when(it) {
+                    Activity.RESULT_OK -> {
+                        binding.enPicturesSaveLocation.visibility = View.VISIBLE
+                        binding.enPicturesHint.visibility = View.VISIBLE
+                        binding.enPicturesRecyclerView.visibility = View.INVISIBLE
+                    }
+                    Activity.RESULT_CANCELED -> {
+                        Toast.makeText(context, "User canceled request", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            })
         }
 
         val sp: SharedPreferences =
@@ -116,39 +134,5 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
         })
         binding.enPicturesRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.enPicturesRecyclerView.adapter = encryptedMediaAdapter
-    }
-
-    private fun chooseDefaultSaveLocation() {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-        intent.addFlags(
-            Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                    or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                    or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION
-        )
-        saveLocationCallback.launch(intent)
-    }
-
-    private val saveLocationCallback = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == Activity.RESULT_OK) {
-            Toast.makeText(context, "Completed", Toast.LENGTH_SHORT).show()
-            val contentResolver = requireContext().applicationContext.contentResolver
-
-            val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-
-            contentResolver.takePersistableUriPermission(it.data?.data!!, takeFlags)
-
-            val sp: SharedPreferences =
-                requireContext().getSharedPreferences(getString(R.string.ENC_STORAGE_DIR_PERMISSIONS), Context.MODE_PRIVATE)
-            val editor = sp.edit()
-
-            editor.putString(getString(R.string.ENC_DIR_ROOT_TREE), it.data?.data!!.toString())
-            editor.apply()
-
-            binding.enPicturesSaveLocation.visibility = View.VISIBLE
-            binding.enPicturesHint.visibility = View.VISIBLE
-            binding.enPicturesRecyclerView.visibility = View.INVISIBLE
-        }
     }
 }

@@ -5,12 +5,12 @@ import androidx.activity.result.IntentSenderRequest
 data class EncryptionResource(
     val status: EncryptionStatus,
     val intentSender: IntentSenderRequest? = null,
-    val position: Int? = null
+    val positions: MutableList<Int>? = null
 ){
     companion object{
 
-        fun complete(position: Int?): EncryptionResource{
-            return EncryptionResource(EncryptionStatus.OPERATION_COMPLETE, null, position)
+        fun complete(positions: MutableList<Int>?): EncryptionResource{
+            return EncryptionResource(EncryptionStatus.OPERATION_COMPLETE, null, positions)
         }
 
         fun deleteRecoverable(intent: IntentSenderRequest?): EncryptionResource{
