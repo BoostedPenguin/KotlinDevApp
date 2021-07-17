@@ -93,6 +93,7 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
             .thumbnail(0.1f)
             .into(binding.selectedPicture)
 
+        handleToolbarOnImageClick()
         binding.selectedPicture.setOnClickListener {
             handleToolbarOnImageClick()
         }

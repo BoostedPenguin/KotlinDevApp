@@ -92,7 +92,6 @@ class GalleryViewModel @Inject constructor(
     }
 
 
-    // TODO implement multi-select encryption
     override fun encryptSelectedMedia() {
         viewModelScope.launch {
 

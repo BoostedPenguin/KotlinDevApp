@@ -4,22 +4,35 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.util.Log
 import android.widget.Toast
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.penguinstudio.safecrypt.utilities.Event
 import dagger.hilt.android.qualifiers.ActivityContext
+import dagger.hilt.android.scopes.FragmentScoped
 import javax.inject.Inject
 
-class DefaultStorageService @Inject constructor (
+@FragmentScoped
+class EncryptionProcessIntentHandler @Inject constructor (
     @ActivityContext context: Context,
     registry: ActivityResultRegistry) {
 
-    private val result: MutableLiveData<Int> = MutableLiveData()
+    private val _saveLocationResult = MutableLiveData<Event<Int>>()
 
-    fun chooseDefaultSaveLocation() : LiveData<Int> {
+    private val deleteFileResult: MutableLiveData<Int> = MutableLiveData()
+
+    /**
+     * @param lifecycleOwner if supplied, will remove all observers attached to it
+     */
+    fun chooseDefaultSaveLocation(lifecycleOwner: LifecycleOwner? = null) : LiveData<Event<Int>> {
+        if(lifecycleOwner != null)
+            _saveLocationResult.removeObservers(lifecycleOwner)
+
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
         intent.addFlags(
             Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -29,7 +42,21 @@ class DefaultStorageService @Inject constructor (
         )
         saveLocationCallback.launch(intent)
 
-        return result
+        return _saveLocationResult
+    }
+
+    fun deleteOriginalFile(intentSenderRequest: IntentSenderRequest) : LiveData<Int> {
+        deleteOriginalFileLauncher.launch(intentSenderRequest)
+
+        return deleteFileResult
+    }
+
+    private var deleteOriginalFileLauncher = registry.register("Test", ActivityResultContracts.StartIntentSenderForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Call to function to continue encryption process
+            Log.d("callStack", "Currently, accepted delete request")
+        }
+        deleteFileResult.value = result.resultCode
     }
 
     private val saveLocationCallback = registry.register("TESTING",ActivityResultContracts.StartActivityForResult()) {
@@ -49,6 +76,6 @@ class DefaultStorageService @Inject constructor (
             editor.putString("uriTree", it.data?.data!!.toString())
             editor.apply()
         }
-        result.value = it.resultCode
+        _saveLocationResult.value = Event(it.resultCode)
     }
 }

@@ -2,8 +2,6 @@ package com.penguinstudio.safecrypt.ui.home
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
@@ -19,11 +17,12 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.PhotoGridAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentPicturesBinding
 import com.penguinstudio.safecrypt.models.MediaModel
-import com.penguinstudio.safecrypt.services.DefaultStorageService
+import com.penguinstudio.safecrypt.services.EncryptionProcessIntentHandler
 import com.penguinstudio.safecrypt.utilities.EncryptionStatus
 import com.penguinstudio.safecrypt.utilities.Status
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,8 +34,10 @@ class MediaFragment : Fragment(), LifecycleObserver {
     private lateinit var photoAdapter: PhotoGridAdapter
     private val _model: GalleryViewModel by activityViewModels()
 
+    private lateinit var defaultStorageLocationSnackbar: Snackbar
+
     @Inject
-    lateinit var defaultStorageService: DefaultStorageService
+    lateinit var encryptionProcessIntentHandler: EncryptionProcessIntentHandler
     private val model: IPicturesViewModel
         get() {
             return _model
@@ -97,6 +98,17 @@ class MediaFragment : Fragment(), LifecycleObserver {
         registerEvents()
 
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Instantiate snack-bars
+        defaultStorageLocationSnackbar = Snackbar
+            .make(binding.root, "Choose default storage location before encryption proceeds.", Snackbar.LENGTH_INDEFINITE)
+            .setAction("Choose") {
+                encryptionProcessIntentHandler.chooseDefaultSaveLocation()
+            }
     }
 
 
@@ -179,6 +191,9 @@ class MediaFragment : Fragment(), LifecycleObserver {
          * If the selected items become 0,
          * Disable selection mode
          */
+
+
+
         binding.picturesSwipeToRefresh.setOnRefreshListener {
             model.getMedia()
         }
@@ -233,7 +248,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
         })
 
 
-        model.encryptionStatus.observe(viewLifecycleOwner, {
+        model.encryptionStatus.observe(viewLifecycleOwner, { it ->
             if(it == null) return@observe
 
             when(it.status) {
@@ -241,23 +256,38 @@ class MediaFragment : Fragment(), LifecycleObserver {
                     binding.picturesProgressBar.visibility = View.VISIBLE
                 }
                 EncryptionStatus.REQUEST_STORAGE -> {
-                    defaultStorageService.chooseDefaultSaveLocation().observe(viewLifecycleOwner, { result ->
-                        //TODO On chosen location result
-                        when(result) {
-                            Activity.RESULT_OK -> {
+                    binding.picturesProgressBar.visibility = View.GONE
 
-                            }
-                            Activity.RESULT_CANCELED -> {
-
+                    encryptionProcessIntentHandler.chooseDefaultSaveLocation(viewLifecycleOwner).observe(viewLifecycleOwner, { event ->
+                        event.getContentIfNotHandled().let { eventContent ->
+                            when(eventContent) {
+                                Activity.RESULT_OK -> {
+                                    model.encryptSelectedMedia()
+                                }
+                                Activity.RESULT_CANCELED -> {
+                                    defaultStorageLocationSnackbar.show()
+                                }
                             }
                         }
-                        binding.picturesProgressBar.visibility = View.GONE
                     })
                 }
                 EncryptionStatus.DELETE_RECOVERABLE -> {
-                    deleteOriginalFileLauncher.launch(it.intentSender)
                     binding.picturesProgressBar.visibility = View.GONE
+                    if(it.intentSender == null) return@observe
 
+                    encryptionProcessIntentHandler.deleteOriginalFile(it.intentSender)
+                        .observe(viewLifecycleOwner, { result ->
+                            when(result) {
+                                Activity.RESULT_OK -> {
+                                    //Successfully deleted
+                                }
+                                Activity.RESULT_CANCELED -> {
+                                    Snackbar.make(binding.root,
+                                        "Original media item wasn't deleted. Please delete it manually.",
+                                        Snackbar.LENGTH_INDEFINITE).show()
+                                }
+                            }
+                        })
                 }
                 EncryptionStatus.OPERATION_COMPLETE -> {
 
@@ -277,16 +307,11 @@ class MediaFragment : Fragment(), LifecycleObserver {
         })
     }
 
-    private var deleteOriginalFileLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            // Call to function to continue encryption process
-            Log.d("callStack", "Currently, accepted delete request")
-        }
-    }
 
     private fun exitSelectMode() {
         (activity as AppCompatActivity?)?.supportActionBar?.title = model.selectedAlbum.value?.data?.name
 
+        if(defaultStorageLocationSnackbar.isShown) defaultStorageLocationSnackbar.dismiss()
         activity?.invalidateOptionsMenu()
         model.itemSelectionMode = false
         model.clearSelections()
