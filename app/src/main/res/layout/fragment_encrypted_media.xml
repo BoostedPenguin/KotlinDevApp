@@ -7,7 +7,7 @@
     tools:context=".ui.home.encrypted.EncryptedMediaFragment">
 
     <ProgressBar
-        android:id="@+id/enPicturesProgressBar"
+        android:id="@+id/enMediaProgressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -18,7 +18,7 @@
 
     <TextView
         android:visibility="gone"
-        android:id="@+id/enPicturesHint"
+        android:id="@+id/enMediaHint"
         android:textAlignment="center"
         android:layout_marginHorizontal="20dp"
         android:text="You haven't specified a save directory for your encrypted media. Configure it now."
@@ -31,17 +31,17 @@
         android:layout_height="wrap_content" />
     <Button
         android:visibility="gone"
-        android:id="@+id/enPicturesSaveLocation"
+        android:id="@+id/enMediaSaveLocation"
         android:text="Save directory"
         android:textSize="15sp"
-        app:layout_constraintTop_toBottomOf="@id/enPicturesHint"
+        app:layout_constraintTop_toBottomOf="@id/enMediaHint"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/enPicturesSwipeToRefresh"
+        android:id="@+id/enMediaSwipeToRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 

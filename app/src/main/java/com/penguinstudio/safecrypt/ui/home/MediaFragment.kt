@@ -258,9 +258,9 @@ class MediaFragment : Fragment(), LifecycleObserver {
                 EncryptionStatus.REQUEST_STORAGE -> {
                     binding.picturesProgressBar.visibility = View.GONE
 
-                    encryptionProcessIntentHandler.chooseDefaultSaveLocation(viewLifecycleOwner).observe(viewLifecycleOwner, { event ->
-                        event.getContentIfNotHandled().let { eventContent ->
-                            when(eventContent) {
+                    encryptionProcessIntentHandler.chooseDefaultSaveLocation(viewLifecycleOwner)
+                        .observe(viewLifecycleOwner, { result ->
+                            when(result) {
                                 Activity.RESULT_OK -> {
                                     model.encryptSelectedMedia()
                                 }
@@ -268,7 +268,6 @@ class MediaFragment : Fragment(), LifecycleObserver {
                                     defaultStorageLocationSnackbar.show()
                                 }
                             }
-                        }
                     })
                 }
                 EncryptionStatus.DELETE_RECOVERABLE -> {

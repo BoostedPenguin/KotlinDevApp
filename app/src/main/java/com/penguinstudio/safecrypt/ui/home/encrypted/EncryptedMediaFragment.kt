@@ -18,10 +18,13 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.penguinstudio.safecrypt.adapters.EncryptedGridAdapter
 import com.penguinstudio.safecrypt.adapters.PhotoGridAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentEncryptedMediaBinding
+import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.services.EncryptionProcessIntentHandler
+import com.penguinstudio.safecrypt.services.EncryptionService
 import com.penguinstudio.safecrypt.ui.home.EncryptedMediaViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -30,7 +33,7 @@ import javax.inject.Inject
 class EncryptedMediaFragment : Fragment(), LifecycleObserver {
     private val model: EncryptedMediaViewModel by activityViewModels()
     private lateinit var binding: FragmentEncryptedMediaBinding
-    private lateinit var encryptedMediaAdapter: PhotoGridAdapter
+    private lateinit var encryptedMediaAdapter: EncryptedGridAdapter
 
     @Inject
     lateinit var encryptionProcessIntentHandler: EncryptionProcessIntentHandler
@@ -83,19 +86,19 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
         (activity as AppCompatActivity).supportActionBar?.show()
 
         //chooseDefaultSaveLocation()
-        binding.enPicturesSaveLocation.setOnClickListener {
-//            encryptionProcessIntentHandler.chooseDefaultSaveLocation().observe(viewLifecycleOwner, {
-//                when(it) {
-//                    Activity.RESULT_OK -> {
-//                        binding.enPicturesSaveLocation.visibility = View.VISIBLE
-//                        binding.enPicturesHint.visibility = View.VISIBLE
-//                        binding.enPicturesRecyclerView.visibility = View.INVISIBLE
-//                    }
-//                    Activity.RESULT_CANCELED -> {
-//                        Toast.makeText(context, "User canceled request", Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//            })
+        binding.enMediaSaveLocation.setOnClickListener {
+            encryptionProcessIntentHandler.chooseDefaultSaveLocation().observe(viewLifecycleOwner, {
+                when(it) {
+                    Activity.RESULT_OK -> {
+                        binding.enMediaSaveLocation.visibility = View.VISIBLE
+                        binding.enMediaHint.visibility = View.VISIBLE
+                        binding.enPicturesRecyclerView.visibility = View.INVISIBLE
+                    }
+                    Activity.RESULT_CANCELED -> {
+                        Toast.makeText(context, "User canceled request", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            })
         }
 
         val sp: SharedPreferences =
@@ -103,28 +106,27 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
 
         val uriTree = sp.getString("uriTree", "")
         if(TextUtils.isEmpty(uriTree)) {
-            binding.enPicturesSaveLocation.visibility = View.VISIBLE
-            binding.enPicturesHint.visibility = View.VISIBLE
+            binding.enMediaSaveLocation.visibility = View.VISIBLE
+            binding.enMediaHint.visibility = View.VISIBLE
             binding.enPicturesRecyclerView.visibility = View.INVISIBLE
         }
 
         initGrid()
 
+
+        val bitmaps = EncryptionService.massDecrypt(requireContext())
+        encryptedMediaAdapter.setImages(bitmaps)
+
         return binding.root
     }
 
     private fun initGrid() {
-        // Non encrypted file stored images (MediaStore controlled)
-        encryptedMediaAdapter = PhotoGridAdapter(object : PhotoGridAdapter.AdapterListeners {
-            override fun onClickListener(position: Int, media: MediaModel) {
-                TODO("Not yet implemented")
-            }
-
-            override fun onLongClickListener(position: Int, media: MediaModel) {
+        encryptedMediaAdapter = EncryptedGridAdapter(object : EncryptedGridAdapter.AdapterListeners {
+            override fun onImageClickListener(position: Int, album: AlbumModel) {
                 TODO("Not yet implemented")
             }
         })
-        binding.enPicturesRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
+        binding.enPicturesRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
         binding.enPicturesRecyclerView.adapter = encryptedMediaAdapter
     }
 }

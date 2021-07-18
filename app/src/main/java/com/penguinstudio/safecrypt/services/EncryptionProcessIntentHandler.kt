@@ -22,14 +22,14 @@ class EncryptionProcessIntentHandler @Inject constructor (
     @ActivityContext context: Context,
     registry: ActivityResultRegistry) {
 
-    private val _saveLocationResult = MutableLiveData<Event<Int>>()
+    private val _saveLocationResult = MutableLiveData<Int>()
 
     private val deleteFileResult: MutableLiveData<Int> = MutableLiveData()
 
     /**
      * @param lifecycleOwner if supplied, will remove all observers attached to it
      */
-    fun chooseDefaultSaveLocation(lifecycleOwner: LifecycleOwner? = null) : LiveData<Event<Int>> {
+    fun chooseDefaultSaveLocation(lifecycleOwner: LifecycleOwner? = null) : LiveData<Int> {
         if(lifecycleOwner != null)
             _saveLocationResult.removeObservers(lifecycleOwner)
 
@@ -76,6 +76,6 @@ class EncryptionProcessIntentHandler @Inject constructor (
             editor.putString("uriTree", it.data?.data!!.toString())
             editor.apply()
         }
-        _saveLocationResult.value = Event(it.resultCode)
+        _saveLocationResult.value = it.resultCode
     }
 }
