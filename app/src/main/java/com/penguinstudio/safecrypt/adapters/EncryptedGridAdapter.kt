@@ -1,17 +1,17 @@
 package com.penguinstudio.safecrypt.adapters
 
-import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.ImageView
+import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.GlideBuilder
-import com.bumptech.glide.annotation.GlideModule
-import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayAdapter
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.AlbumModel
+import com.penguinstudio.safecrypt.models.EncryptedModel
 import com.penguinstudio.safecrypt.models.MediaModel
 
 
@@ -20,14 +20,9 @@ class EncryptedGridAdapter(private var listener: EncryptedGridAdapter.AdapterLis
         fun onImageClickListener(position: Int, album: AlbumModel)
     }
 
-    private var _images: ArrayList<MediaModel> = ArrayList()
+    private var images: MutableList<EncryptedModel> = ArrayList()
 
-    // TODO
-    // This is meant for testing only, it contains only bitmap extracted from decrypted file
-    // Require more info
-    private var images: MutableList<ByteArray> = ArrayList()
-
-    fun setImages(images:  MutableList<ByteArray>?) {
+    fun setImages(images:  MutableList<EncryptedModel>?) {
         if (images != null) {
             this.images = images
             notifyDataSetChanged()
@@ -47,6 +42,10 @@ class EncryptedGridAdapter(private var listener: EncryptedGridAdapter.AdapterLis
     override fun onBindViewHolder(holder: EncryptedGridAdapter.MediaHolder, position: Int) {
         val currentImage = images[position]
 
+        holder.videoLayoutCard.visibility = View.GONE
+        holder.checkBox.visibility = View.INVISIBLE
+        holder.checkBox.isChecked = false
+
         Glide.with(holder.itemView)
             .load(currentImage)
             .fitCenter()
@@ -60,6 +59,11 @@ class EncryptedGridAdapter(private var listener: EncryptedGridAdapter.AdapterLis
 
     inner class MediaHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         internal var imageView: ImageView = itemView.findViewById(R.id.picturesInnerImage)
+
+        internal var checkBox: CheckBox = itemView.findViewById(R.id.picturesCheckbox)
+        internal var videoLayoutCard: CardView = itemView.findViewById(R.id.videoLayoutParentCard)
+        internal var videoTextViewDuration: TextView = itemView.findViewById(R.id.videoDuration)
+
         init {
 
         }

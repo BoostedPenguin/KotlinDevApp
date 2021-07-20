@@ -18,7 +18,7 @@ import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.andrognito.patternlockview.utils.PatternLockUtils
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.databinding.FragmentPatternUnlockBinding
-import com.penguinstudio.safecrypt.services.EncryptionService
+import com.penguinstudio.safecrypt.services.CBCEncryptionService
 
 
 /**
@@ -88,7 +88,7 @@ class PatternUnlockFragment : Fragment() {
 
             // Generate key for encrypting media
             // Stores securely in KeyStore
-            EncryptionService.generateKey()
+            CBCEncryptionService.generateKey()
 
             findNavController().navigate(R.id.action_patternUnlockFragment_to_homeFragment)
 

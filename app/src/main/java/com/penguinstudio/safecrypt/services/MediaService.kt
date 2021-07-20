@@ -2,9 +2,14 @@ package com.penguinstudio.safecrypt.services
 
 import android.content.ContentUris
 import android.content.Context
+import android.content.SharedPreferences
 import android.net.Uri
 import android.provider.MediaStore
+import android.text.TextUtils
+import android.util.Log
+import androidx.documentfile.provider.DocumentFile
 import com.penguinstudio.safecrypt.models.AlbumModel
+import com.penguinstudio.safecrypt.models.EncryptedModel
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.models.MediaType
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -125,5 +130,32 @@ class MediaService @Inject constructor(
             }
             return@withContext allAlbums
         }
+    }
+
+    suspend fun getAllEncryptedMedia() : ArrayList<EncryptedModel> = withContext(Dispatchers.IO) {
+        val sp: SharedPreferences = context.getSharedPreferences("DirPermission", Context.MODE_PRIVATE)
+        val uriTree = sp.getString("uriTree", "")
+
+        if (TextUtils.isEmpty(uriTree)) {
+            //chooseDefaultSaveLocation()
+        } else {
+            val startTime = System.currentTimeMillis()
+
+
+            val uri: Uri = Uri.parse(uriTree)
+
+            // Root directory > where to look for encrypted files
+            val root = DocumentFile.fromTreeUri(context, uri)
+
+            val uris = arrayListOf<EncryptedModel>()
+
+            root?.listFiles()?.forEach {
+                uris.add(EncryptedModel(it.uri))
+            }
+            Log.e("thefuck", "Time to decrypt images ${System.currentTimeMillis() - startTime} ms")
+
+            return@withContext uris
+        }
+        throw IllegalArgumentException("Shouldn't be here")
     }
 }

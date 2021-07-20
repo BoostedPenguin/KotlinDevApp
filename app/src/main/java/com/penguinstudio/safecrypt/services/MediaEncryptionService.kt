@@ -19,7 +19,8 @@ class NoDefaultDirFound(message: String) : Exception(message)
 
 @Singleton
 class MediaEncryptionService @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val cbcEncryptionService: CBCEncryptionService
     ) {
 
     suspend fun encryptImage(
@@ -58,7 +59,7 @@ class MediaEncryptionService @Inject constructor(
                 val outputStream = context.contentResolver.openOutputStream(encryptedEmptyFile.uri)
                     ?: throw FileNotFoundException()
 
-                val encryptedStatus = EncryptionService.encryptData(inputStream, outputStream)
+                val encryptedStatus = cbcEncryptionService.encryptBytes(inputStream, outputStream)
                 inputStream.close()
                 outputStream.flush()
                 outputStream.close()
@@ -86,8 +87,8 @@ class MediaEncryptionService @Inject constructor(
         val encryptedFile = async(Dispatchers.IO) {
 
             return@async root.createFile(
-                EncryptionService.ENC_FILE_EXTENSION,
-                imageName.plus(".${EncryptionService.ENC_FILE_EXTENSION}")
+                CBCEncryptionService.ENC_FILE_EXTENSION,
+                imageName.plus(".${CBCEncryptionService.ENC_FILE_EXTENSION}")
             )
                 ?: throw NoDefaultDirFound("Couldn't create a file in the specified location")
         }

@@ -5,8 +5,8 @@ import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.repository.MediaRepository
 import com.penguinstudio.safecrypt.services.MediaEncryptionService
+import com.penguinstudio.safecrypt.utilities.CollectionResponse
 import com.penguinstudio.safecrypt.utilities.EncryptionResource
-import com.penguinstudio.safecrypt.utilities.MediaResponse
 import com.penguinstudio.safecrypt.utilities.Resource
 import com.penguinstudio.safecrypt.utilities.Status
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,7 +16,7 @@ import javax.inject.Inject
 interface IPicturesViewModel {
     fun getMedia()
 
-    val albums: LiveData<Resource<MediaResponse>>
+    val albums: LiveData<Resource<CollectionResponse<AlbumModel>>>
 
     val selectedAlbum: LiveData<Resource<AlbumModel>>
 
@@ -63,8 +63,8 @@ class GalleryViewModel @Inject constructor(
     /**
      * Get media from Phone media folders
      */
-    private val _albums = MutableLiveData<Resource<MediaResponse>>()
-    override val albums: LiveData<Resource<MediaResponse>> = _albums
+    private val _albums = MutableLiveData<Resource<CollectionResponse<AlbumModel>>>()
+    override val albums: LiveData<Resource<CollectionResponse<AlbumModel>>> = _albums
 
 
     override fun getMedia() {
@@ -112,7 +112,7 @@ class GalleryViewModel @Inject constructor(
 
         return@map when(_albums.value?.status) {
             Status.SUCCESS -> {
-                val result = it.data?.media?.find { album ->
+                val result = it.data?.collection?.find { album ->
                     album.name == _selectedAlbumName
                 }
                 Resource.success(result)

@@ -4,14 +4,13 @@ import android.app.RecoverableSecurityException
 import android.content.Context
 import android.os.Build
 import androidx.activity.result.IntentSenderRequest
+import com.penguinstudio.safecrypt.models.AlbumModel
+import com.penguinstudio.safecrypt.models.EncryptedModel
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.services.MediaEncryptionService
 import com.penguinstudio.safecrypt.services.MediaService
 import com.penguinstudio.safecrypt.services.NoDefaultDirFound
-import com.penguinstudio.safecrypt.utilities.EncryptionResource
-import com.penguinstudio.safecrypt.utilities.EncryptionStatus
-import com.penguinstudio.safecrypt.utilities.MediaResponse
-import com.penguinstudio.safecrypt.utilities.Resource
+import com.penguinstudio.safecrypt.utilities.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,12 +20,22 @@ class MediaRepository @Inject constructor(
     private val encryptionService: MediaEncryptionService,
     ) {
 
-    suspend fun getMedia(): Resource<MediaResponse> {
+    suspend fun getMedia(): Resource<CollectionResponse<AlbumModel>> {
         return try {
             val result = mediaService.getAllVideosWithAlbums()
-            Resource.success(MediaResponse(result))
+            Resource.success(CollectionResponse(result))
 
         } catch (ex: Exception) {
+            Resource.error(ex.message.toString(), null)
+        }
+    }
+
+    suspend fun getEncryptedMediaUris() : Resource<CollectionResponse<EncryptedModel>> {
+        return try {
+            val result = mediaService.getAllEncryptedMedia()
+            Resource.success(CollectionResponse(result))
+        }
+        catch (ex: Exception) {
             Resource.error(ex.message.toString(), null)
         }
     }

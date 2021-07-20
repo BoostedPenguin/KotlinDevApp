@@ -75,7 +75,7 @@ class GalleryFragment : Fragment() {
                     binding.galleryProgressBar.visibility = View.GONE
                     binding.galleryRecyclerView.visibility = View.VISIBLE
 
-                    it.data?.let { it1 -> galleryAdapter.setAlbums(it1.media) }
+                    it.data?.let { it1 -> galleryAdapter.setAlbums(it1.collection) }
                 }
                 Status.ERROR -> {
                     binding.galleryProgressBar.visibility = View.GONE
