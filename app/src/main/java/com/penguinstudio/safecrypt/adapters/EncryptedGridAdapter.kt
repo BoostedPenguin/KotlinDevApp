@@ -49,6 +49,7 @@ class EncryptedGridAdapter(private var listener: EncryptedGridAdapter.AdapterLis
         Glide.with(holder.itemView)
             .load(currentImage)
             .fitCenter()
+            .placeholder(R.drawable.ic_baseline_image_24)
             .thumbnail(0.1f)
             .into(holder.imageView)
     }

@@ -137,11 +137,8 @@ class MediaService @Inject constructor(
         val uriTree = sp.getString("uriTree", "")
 
         if (TextUtils.isEmpty(uriTree)) {
-            //chooseDefaultSaveLocation()
+            return@withContext ArrayList()
         } else {
-            val startTime = System.currentTimeMillis()
-
-
             val uri: Uri = Uri.parse(uriTree)
 
             // Root directory > where to look for encrypted files
@@ -152,10 +149,7 @@ class MediaService @Inject constructor(
             root?.listFiles()?.forEach {
                 uris.add(EncryptedModel(it.uri))
             }
-            Log.e("thefuck", "Time to decrypt images ${System.currentTimeMillis() - startTime} ms")
-
             return@withContext uris
         }
-        throw IllegalArgumentException("Shouldn't be here")
     }
 }

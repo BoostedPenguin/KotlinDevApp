@@ -24,6 +24,7 @@ import com.penguinstudio.safecrypt.adapters.PhotoGridAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentEncryptedMediaBinding
 import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.models.MediaModel
+import com.penguinstudio.safecrypt.services.CBCEncryptionService
 import com.penguinstudio.safecrypt.services.EncryptionProcessIntentHandler
 import com.penguinstudio.safecrypt.utilities.Status
 import dagger.hilt.android.AndroidEntryPoint
@@ -85,22 +86,34 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
         binding = FragmentEncryptedMediaBinding.inflate(layoutInflater, container, false)
         (activity as AppCompatActivity).supportActionBar?.show()
 
-        //chooseDefaultSaveLocation()
         binding.enMediaSaveLocation.setOnClickListener {
             encryptionProcessIntentHandler.chooseDefaultSaveLocation().observe(viewLifecycleOwner, {
                 when(it) {
                     Activity.RESULT_OK -> {
-                        binding.enMediaSaveLocation.visibility = View.VISIBLE
-                        binding.enMediaHint.visibility = View.VISIBLE
-                        binding.enPicturesRecyclerView.visibility = View.INVISIBLE
+                        binding.enMediaSaveLocation.visibility = View.GONE
+                        binding.enMediaHint.visibility = View.GONE
+                        binding.enPicturesRecyclerView.visibility = View.VISIBLE
                     }
                     Activity.RESULT_CANCELED -> {
-                        Toast.makeText(context, "User canceled request", Toast.LENGTH_SHORT).show()
+                        Snackbar.make(binding.root, "You must choose a default save location before you can encrypt media", Snackbar.LENGTH_SHORT)
+                            .show()
                     }
                 }
             })
         }
 
+        checkForSaveLocation()
+
+        initGrid()
+
+        registerEvents()
+
+        model.getEncryptedFiles()
+
+        return binding.root
+    }
+
+    private fun checkForSaveLocation() {
         val sp: SharedPreferences =
             requireContext().getSharedPreferences("DirPermission", Context.MODE_PRIVATE)
 
@@ -110,14 +123,6 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
             binding.enMediaHint.visibility = View.VISIBLE
             binding.enPicturesRecyclerView.visibility = View.INVISIBLE
         }
-
-        initGrid()
-
-        registerEvents()
-
-        model.getEncryptedFiles()
-
-        return binding.root
     }
 
     private fun initGrid() {

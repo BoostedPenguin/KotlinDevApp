@@ -47,8 +47,9 @@ class AlbumGridAdapter(private var listener: AdapterListeners?) : RecyclerView.A
         Glide.with(holder.itemView)
             .load(currentAlbum.coverUri)
             .thumbnail(0.1f)
+            .placeholder(R.drawable.ic_baseline_image_24)
             .fitCenter()
-            .into(holder.imageView);
+            .into(holder.imageView)
     }
 
     override fun getItemCount(): Int {

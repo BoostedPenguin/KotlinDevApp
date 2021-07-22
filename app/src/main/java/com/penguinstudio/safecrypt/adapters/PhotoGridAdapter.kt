@@ -100,6 +100,7 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?) : Re
 
         Glide.with(holder.itemView)
             .load(currentImage.mediaUri)
+            .placeholder(R.drawable.ic_baseline_image_24)
             .fitCenter()
             .thumbnail(0.1f)
             .into(holder.imageView)
