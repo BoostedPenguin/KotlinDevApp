@@ -19,6 +19,7 @@ import com.andrognito.patternlockview.utils.PatternLockUtils
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.databinding.FragmentPatternUnlockBinding
 import com.penguinstudio.safecrypt.services.CBCEncryptionService
+import com.penguinstudio.safecrypt.services.GCMEncryptionService
 
 
 /**
@@ -72,8 +73,6 @@ class PatternUnlockFragment : Fragment() {
         // The callback can be enabled or disabled here or in handleOnBackPressed()
     }
 
-
-
     /**
      * Triggered on app first time pattern creation
      * Triggered on app change pattern request
@@ -88,7 +87,7 @@ class PatternUnlockFragment : Fragment() {
 
             // Generate key for encrypting media
             // Stores securely in KeyStore
-            CBCEncryptionService.generateKey()
+            GCMEncryptionService.generateKey()
 
             findNavController().navigate(R.id.action_patternUnlockFragment_to_homeFragment)
 

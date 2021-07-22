@@ -1,6 +1,7 @@
 package com.penguinstudio.safecrypt.services.glide_service
 
 import android.content.Context
+import android.util.Log
 import androidx.annotation.Nullable
 import com.bumptech.glide.Priority
 import com.bumptech.glide.load.DataSource
@@ -12,6 +13,7 @@ import com.bumptech.glide.load.model.ModelLoaderFactory
 import com.bumptech.glide.load.model.MultiModelLoaderFactory
 import com.bumptech.glide.signature.ObjectKey
 import com.penguinstudio.safecrypt.services.CBCEncryptionService
+import com.penguinstudio.safecrypt.services.GCMEncryptionService
 import dagger.hilt.EntryPoint
 import dagger.hilt.EntryPoints
 import dagger.hilt.InstallIn
@@ -36,14 +38,14 @@ class SafeCryptModelLoader constructor(private val context: Context) : ModelLoad
         return true
     }
 
-    class MyDataFetcher (private val file: IPicture, private var context: Context
+    class MyDataFetcher (private val file: IPicture, private var context: Context,  private var time: Long = 0
     ) : DataFetcher<InputStream> {
 
 
         @EntryPoint
         @InstallIn(SingletonComponent::class)
-        interface CBCEncryptionServiceEntryPoint {
-            fun get(): CBCEncryptionService
+        interface GCMEncryptionServicePoint {
+            fun get(): GCMEncryptionService
         }
 
         private var isCanceled = false
@@ -54,7 +56,10 @@ class SafeCryptModelLoader constructor(private val context: Context) : ModelLoad
         ) {
 
             if (!isCanceled) {
-                val cbcEncryptionService = EntryPoints.get(context, CBCEncryptionServiceEntryPoint::class.java).get()
+                //Log.e("loadTime", "Start loading data resource of ${file.uri} - ${System.currentTimeMillis() - time}ms")
+                time = System.currentTimeMillis()
+
+                val cbcEncryptionService = EntryPoints.get(context, GCMEncryptionServicePoint::class.java).get()
 
                 mInputStream = cbcEncryptionService.getCipherInputStream(file.uri)
             }
@@ -62,6 +67,8 @@ class SafeCryptModelLoader constructor(private val context: Context) : ModelLoad
         }
 
         override fun cleanup() {
+            Log.e("loadTime", "- ${System.currentTimeMillis() - time}ms")
+
             if (mInputStream != null) {
                 try {
                     mInputStream!!.close()

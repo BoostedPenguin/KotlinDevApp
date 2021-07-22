@@ -20,7 +20,7 @@ class NoDefaultDirFound(message: String) : Exception(message)
 @Singleton
 class MediaEncryptionService @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val cbcEncryptionService: CBCEncryptionService
+    private val gcmEncryptionService: GCMEncryptionService
     ) {
 
     suspend fun encryptImage(
@@ -59,7 +59,7 @@ class MediaEncryptionService @Inject constructor(
                 val outputStream = context.contentResolver.openOutputStream(encryptedEmptyFile.uri)
                     ?: throw FileNotFoundException()
 
-                val encryptedStatus = cbcEncryptionService.encryptBytes(inputStream, outputStream)
+                val encryptedStatus = gcmEncryptionService.encryptData(inputStream, outputStream)
                 inputStream.close()
                 outputStream.flush()
                 outputStream.close()
