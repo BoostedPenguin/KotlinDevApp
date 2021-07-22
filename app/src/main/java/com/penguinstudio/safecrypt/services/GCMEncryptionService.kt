@@ -85,21 +85,21 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
 
         decryptCipher.init(Cipher.DECRYPT_MODE, getSecretKey(), gcmIv)
 
-        val endArray = decryptCipher.doFinal(inputStream.readBytes())
+//        val endArray = decryptCipher.doFinal(inputStream.readBytes())
 
-//        val buffer = ByteArray(8192)
-//        val outputStream = ByteArrayOutputStream()
-//
-//        var read: Int
-//
-//        val cis = CipherInputStream(inputStream, decryptCipher)
-//
-//        while (cis.read(buffer).also { read = it } != -1) {
-//            outputStream.write(buffer, 0, read)
-//        }
-//        cis.close()
-//
-//        val endArray = outputStream.toByteArray()
+        val buffer = ByteArray(8192)
+        val outputStream = ByteArrayOutputStream()
+
+        var read: Int
+
+        val cis = CipherInputStream(inputStream, decryptCipher)
+
+        while (cis.read(buffer).also { read = it } != -1) {
+            outputStream.write(buffer, 0, read)
+        }
+        cis.close()
+
+        val endArray = outputStream.toByteArray()
 
         return endArray
     }

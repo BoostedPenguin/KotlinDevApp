@@ -26,13 +26,13 @@ class SafeCryptGlideModule : AppGlideModule() {
     }
 
     override fun registerComponents(context: Context, glide: Glide, registry: Registry) {
-//        registry.prepend(IPicture::class.java, InputStream::class.java,
-//            SafeCryptModelLoader.LoaderFactory(context)
-//        )
-
-        registry.prepend(IPicture::class.java, ByteBuffer::class.java,
-            GlideModuleByteBuffer.LoaderFactory(context)
+        registry.prepend(IPicture::class.java, InputStream::class.java,
+            SafeCryptModelLoader.LoaderFactory(context)
         )
+
+//        registry.prepend(IPicture::class.java, ByteBuffer::class.java,
+//            GlideModuleByteBuffer.LoaderFactory(context)
+//        )
 
         super.registerComponents(context, glide, registry)
 

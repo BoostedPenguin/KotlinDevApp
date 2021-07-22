@@ -2,6 +2,7 @@ package com.penguinstudio.safecrypt.adapters
 
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,10 +15,16 @@ import com.bumptech.glide.Glide
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.models.MediaType
+import me.zhanghai.android.fastscroll.PopupTextProvider
+import java.text.SimpleDateFormat
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
-
-class PhotoGridAdapter constructor(private var listener: AdapterListeners?) : RecyclerView.Adapter<PhotoGridAdapter.ImageHolder>() {
+class PhotoGridAdapter constructor(private var listener: AdapterListeners?) :
+    RecyclerView.Adapter<PhotoGridAdapter.ImageHolder>(), PopupTextProvider {
     interface AdapterListeners {
         fun onClickListener(position: Int, media: MediaModel)
         fun onLongClickListener(position: Int, media: MediaModel)
@@ -49,7 +56,7 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?) : Re
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageHolder {
         val itemView: View = LayoutInflater.from(parent.context)
-            .inflate(R.layout.pictures_grid_fragment, parent, false)
+            .inflate(R.layout.pictures_grid_item, parent, false)
 
         return ImageHolder(itemView)
     }
@@ -147,5 +154,11 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?) : Re
                 }
             }
         }
+    }
+
+    override fun getPopupText(position: Int): String {
+        Log.d("tag", images[position].dateAdded.toString())
+        return SimpleDateFormat("MMM y", Locale.US)
+            .format(images[position].dateAdded?.times(1000))
     }
 }

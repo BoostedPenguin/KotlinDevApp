@@ -7,6 +7,8 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.text.TextUtils
 import android.util.Log
+import androidx.core.database.getIntOrNull
+import androidx.core.database.getLongOrNull
 import androidx.documentfile.provider.DocumentFile
 import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.models.EncryptedModel
@@ -60,6 +62,7 @@ class MediaService @Inject constructor(
                 val bucketNameColumn: Int = it.getColumnIndex(
                     MediaStore.Files.FileColumns.BUCKET_DISPLAY_NAME
                 )
+                val dateAddedColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_ADDED)
                 val mediaNameColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME)
                 val idColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
                 val mediaType = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)
@@ -72,6 +75,7 @@ class MediaService @Inject constructor(
                     val bucketName = it.getString(bucketNameColumn)
                     val imageId = it.getLong(idColumn)
                     val mediaName = it.getString(mediaNameColumn)
+                    val dateAdded = it.getLongOrNull(dateAddedColumn)
 
                     val contentUri: Uri = ContentUris.withAppendedId(
                         MediaStore.Files.getContentUri("external"),
@@ -89,6 +93,7 @@ class MediaService @Inject constructor(
                                 MediaType.IMAGE,
                                 null,
                                 mediaName,
+                                dateAdded
                                 )
                         }
                         MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO -> {
@@ -99,6 +104,7 @@ class MediaService @Inject constructor(
                                 MediaType.VIDEO,
                                 it.getLong(durationColumn),
                                 mediaName,
+                                dateAdded
                             )
                         }
                         else -> {

@@ -12,7 +12,6 @@ import com.bumptech.glide.Glide
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.models.EncryptedModel
-import com.penguinstudio.safecrypt.models.MediaModel
 
 
 class EncryptedGridAdapter(private var listener: EncryptedGridAdapter.AdapterListeners?) : RecyclerView.Adapter<EncryptedGridAdapter.MediaHolder>() {
@@ -34,7 +33,7 @@ class EncryptedGridAdapter(private var listener: EncryptedGridAdapter.AdapterLis
         viewType: Int
     ): EncryptedGridAdapter.MediaHolder {
         val itemView: View = LayoutInflater.from(parent.context)
-            .inflate(R.layout.pictures_grid_fragment, parent, false)
+            .inflate(R.layout.pictures_grid_item, parent, false)
 
         return MediaHolder(itemView)
     }

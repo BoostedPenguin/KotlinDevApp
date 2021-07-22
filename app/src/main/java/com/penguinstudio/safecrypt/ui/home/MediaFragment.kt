@@ -4,11 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -26,7 +24,10 @@ import com.penguinstudio.safecrypt.services.EncryptionProcessIntentHandler
 import com.penguinstudio.safecrypt.utilities.EncryptionStatus
 import com.penguinstudio.safecrypt.utilities.Status
 import dagger.hilt.android.AndroidEntryPoint
+import me.zhanghai.android.fastscroll.FastScroller
+import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class MediaFragment : Fragment(), LifecycleObserver {
@@ -183,6 +184,9 @@ class MediaFragment : Fragment(), LifecycleObserver {
 
             }
         }
+
+        FastScrollerBuilder(binding.picturesRecyclerView).build()
+
         binding.picturesRecyclerView.adapter = photoAdapter
     }
 
@@ -195,6 +199,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
 
 
         binding.picturesSwipeToRefresh.setOnRefreshListener {
+            exitSelectMode()
             model.getMedia()
         }
 
