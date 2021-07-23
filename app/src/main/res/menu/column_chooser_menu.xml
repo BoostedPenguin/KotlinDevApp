@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/option_by_3"
+        android:title="By 3" />
+    <item android:id="@+id/option_by_4"
+        android:title="By 4" />
+    <item android:id="@+id/option_by_5"
+        android:title="By 5" />
+</menu>

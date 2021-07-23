@@ -157,7 +157,6 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?) :
     }
 
     override fun getPopupText(position: Int): String {
-        Log.d("tag", images[position].dateAdded.toString())
         return SimpleDateFormat("MMM y", Locale.US)
             .format(images[position].dateAdded?.times(1000))
     }

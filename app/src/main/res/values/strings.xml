@@ -31,6 +31,7 @@
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
 
     <!-- Settings   -->
+    <string name="grid_columns">Grid Columns</string>
     <string name="ui">UI</string>
     <string name="dark_mode">Application Theme</string>
     <string name="dark_mode_def_value">MODE_NIGHT_FOLLOW_SYSTEM</string>

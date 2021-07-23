@@ -1,12 +1,20 @@
 package com.penguinstudio.safecrypt.ui.home
 
+import android.R.attr.data
 import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.*
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+import android.view.animation.DecelerateInterpolator
+import android.widget.ArrayAdapter
+import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.annotation.MenuRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -24,7 +32,6 @@ import com.penguinstudio.safecrypt.services.EncryptionProcessIntentHandler
 import com.penguinstudio.safecrypt.utilities.EncryptionStatus
 import com.penguinstudio.safecrypt.utilities.Status
 import dagger.hilt.android.AndroidEntryPoint
-import me.zhanghai.android.fastscroll.FastScroller
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import javax.inject.Inject
 
@@ -181,15 +188,83 @@ class MediaFragment : Fragment(), LifecycleObserver {
             }
             else -> {
                 binding.picturesRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
-
             }
         }
 
-        FastScrollerBuilder(binding.picturesRecyclerView).build()
+        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
+
+        // Prevent redrawing recyclerview if current column is same size as requested
+        val columns = sharedPref.getInt(getString(R.string.grid_columns), 3)
+
+        binding.picturesRecyclerView.layoutManager = GridLayoutManager(requireContext(), columns)
+
+
+        FastScrollerBuilder(binding.picturesRecyclerView).useMd2Style().build()
 
         binding.picturesRecyclerView.adapter = photoAdapter
     }
 
+    private fun animateRecyclerLayoutChange(layoutSpanCount: Int) {
+        val fadeOut: Animation = AlphaAnimation(1f, 0f)
+        fadeOut.interpolator = DecelerateInterpolator()
+        fadeOut.duration = 400
+        fadeOut.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation) {
+
+            }
+            override fun onAnimationRepeat(animation: Animation) {
+
+            }
+            override fun onAnimationEnd(animation: Animation) {
+                (binding.picturesRecyclerView.layoutManager as GridLayoutManager)
+                    .spanCount = layoutSpanCount
+
+                (binding.picturesRecyclerView.layoutManager as GridLayoutManager)
+                    .requestLayout()
+
+                val fadeIn: Animation = AlphaAnimation(0f, 1f)
+                fadeIn.interpolator = AccelerateInterpolator()
+                fadeIn.duration = 400
+                binding.picturesRecyclerView.startAnimation(fadeIn)
+            }
+        })
+        binding.picturesRecyclerView.startAnimation(fadeOut)
+    }
+
+    private fun setGridColumnPreferences(columns: Int) {
+        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
+
+        // Prevent redrawing recyclerview if current column is same size as requested
+        if (sharedPref.getInt(getString(R.string.grid_columns), 3) == columns) return
+
+        with (sharedPref.edit()) {
+            putInt(getString(R.string.grid_columns), columns)
+            apply()
+        }
+
+        animateRecyclerLayoutChange(columns)
+    }
+
+    private fun showMenu(v: View, @MenuRes menuRes: Int) {
+        val popup = PopupMenu(requireContext(), v)
+        popup.menuInflater.inflate(menuRes, popup.menu)
+
+        popup.setOnMenuItemClickListener { menuItem: MenuItem ->
+            when(menuItem.itemId) {
+                R.id.option_by_3 -> setGridColumnPreferences(3)
+                R.id.option_by_4 -> setGridColumnPreferences(4)
+                R.id.option_by_5 -> setGridColumnPreferences(5)
+            }
+            true
+        }
+        popup.setOnDismissListener {
+            // Respond to popup being dismissed.
+        }
+        // Show the popup menu.
+        popup.show()
+    }
+
+    private var isBig = false
     private fun registerEvents() {
         /**
          * If the selected items become 0,
@@ -197,6 +272,10 @@ class MediaFragment : Fragment(), LifecycleObserver {
          */
 
 
+
+        binding.picturesSpanCountChange.setOnClickListener {
+            showMenu(it, R.menu.column_chooser_menu)
+        }
 
         binding.picturesSwipeToRefresh.setOnRefreshListener {
             exitSelectMode()

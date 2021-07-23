@@ -7,32 +7,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.home.SelectedMediaFragment">
 
-    <androidx.appcompat.widget.Toolbar
-        android:visibility="gone"
-        android:id="@+id/selected_fragment_toolbar"
-        app:layout_constraintTop_toTopOf="parent"
-        android:theme="@style/Toolbar.SelectedPicture"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize" />
 
-    <com.github.chrisbanes.photoview.PhotoView
-        android:visibility="gone"
-        android:id="@+id/selected_picture"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
-    <com.google.android.exoplayer2.ui.StyledPlayerView
-        android:visibility="gone"
-        android:layout_width="match_parent"
-        android:id="@+id/selected_video"
-        app:surface_type="surface_view"
-        app:show_next_button="false"
-        app:show_previous_button="false"
-        app:show_fastforward_button="true"
-        app:show_rewind_button="true"
-        app:controller_layout_id="@layout/custom_video_overlay"
-        app:show_shuffle_button="false"
-        app:show_subtitle_button="false"
-        app:show_vr_button="false"
         android:layout_height="match_parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
