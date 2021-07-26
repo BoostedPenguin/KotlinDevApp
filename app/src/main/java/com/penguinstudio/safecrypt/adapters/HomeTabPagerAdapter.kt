@@ -5,7 +5,6 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.penguinstudio.safecrypt.ui.home.GalleryFragment
 import com.penguinstudio.safecrypt.ui.home.encrypted.EncryptedMediaFragment
-import com.penguinstudio.safecrypt.utilities.GalleryType
 
 
 class HomeTabPagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {

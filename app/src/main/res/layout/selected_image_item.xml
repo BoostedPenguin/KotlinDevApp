@@ -1,16 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-    <androidx.appcompat.widget.Toolbar
-        android:visibility="gone"
-        android:id="@+id/selected_fragment_toolbar"
-        app:layout_constraintTop_toTopOf="parent"
-        android:theme="@style/Toolbar.SelectedPicture"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize" />
-
+    android:layout_height="match_parent">
     <com.github.chrisbanes.photoview.PhotoView
         android:id="@+id/selected_picture"
         android:layout_width="match_parent"

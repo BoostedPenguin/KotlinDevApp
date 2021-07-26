@@ -10,6 +10,7 @@
         android:background="@color/exo_black_opacity_60"/>
 
     <ImageButton android:id="@+id/video_back"
+        android:visibility="invisible"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_margin="10dp"

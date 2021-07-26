@@ -14,17 +14,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LifecycleObserver
+import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.SimpleExoPlayer
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.ImagePagerAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentSelectedPictureBinding
+import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.models.MediaType
 
 
@@ -55,11 +55,32 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
         viewPager.offscreenPageLimit = 1
         viewPager.getChildAt(0).overScrollMode = RecyclerView.OVER_SCROLL_NEVER;
         val compositePageTransformer = CompositePageTransformer()
-        compositePageTransformer.addTransformer(MarginPageTransformer(40));
-        viewPager.setPageTransformer(compositePageTransformer);
+        compositePageTransformer.addTransformer(MarginPageTransformer(40))
+        viewPager.setPageTransformer(compositePageTransformer)
 
 
-        imagePagerAdapter = ImagePagerAdapter()
+        // Toolbar control (should be images only)
+        binding.selectedFragmentToolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
+        binding.selectedFragmentToolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+        binding.selectedFragmentToolbar.visibility = View.VISIBLE
+
+
+        imagePagerAdapter = ImagePagerAdapter(object: ImagePagerAdapter.ImagePagerListeners {
+            override fun onImageClickListener(position: Int, album: MediaModel) {
+                handleToolbarOnImageClick()
+            }
+        }, requireContext())
+
+        viewPager.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                viewPager.post {
+                    (viewPager.adapter as ImagePagerAdapter).onPageSwitch(position)
+                }
+            }
+        })
         viewPager.adapter = imagePagerAdapter
 
         val content = model.selectedAlbum.value?.data?.albumMedia
@@ -78,8 +99,28 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
 //            return _model
 //        }
 
-    private var player: SimpleExoPlayer? = null
+    private fun handleToolbarOnImageClick() {
+        binding.selectedFragmentToolbar.apply {
+            if (visibility == View.VISIBLE) {
+                animate()
+                    .translationY(-height.toFloat())
+                    .alpha(0f)
+                    .setListener(object: AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            super.onAnimationEnd(animation)
+                            visibility = View.INVISIBLE
+                        }
+                    })
+            } else {
+                visibility = View.VISIBLE
+                alpha = 0f
 
+                animate().translationY(0f)
+                    .alpha(1f)
+                    .setListener(null)
+            }
+        }
+    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -97,15 +138,6 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
 
         return binding.root
     }
-
-    override fun onPause() {
-        super.onPause()
-
-        if(player != null) {
-            player?.pause()
-        }
-    }
-
 
     override fun onDestroy() {
         super.onDestroy()
