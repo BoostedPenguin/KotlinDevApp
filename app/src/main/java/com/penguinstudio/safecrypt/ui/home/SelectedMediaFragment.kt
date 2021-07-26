@@ -73,14 +73,6 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
             }
         }, requireContext())
 
-        viewPager.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                super.onPageSelected(position)
-                viewPager.post {
-                    (viewPager.adapter as ImagePagerAdapter).onPageSwitch(position)
-                }
-            }
-        })
         viewPager.adapter = imagePagerAdapter
 
         val content = model.selectedAlbum.value?.data?.albumMedia

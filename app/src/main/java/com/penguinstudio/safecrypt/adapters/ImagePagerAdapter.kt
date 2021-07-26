@@ -169,8 +169,10 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners, context: Cont
 
         override fun setMediaItem(media: MediaModel) {
             this.media = media
+
             imageThumbnail.visibility = View.VISIBLE
-            selectedVideo.visibility = View.GONE
+            progressBar.visibility = View.VISIBLE
+            selectedVideo.visibility = View.INVISIBLE
 
             Glide.with(itemView)
                 .load(media.mediaUri)
@@ -179,9 +181,7 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners, context: Cont
                 .thumbnail(0.1f)
                 .into(imageThumbnail)
 
-            if(media.isSelected) {
-                createVideoPlayback()
-            }
+            createVideoPlayback()
         }
 
         fun releasePlayer() {
@@ -199,7 +199,6 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners, context: Cont
                 .build()
 
             selectedVideo.player = player
-            progressBar.visibility = View.VISIBLE
 
             selectedVideo.setOnClickListener {
 
@@ -212,11 +211,9 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners, context: Cont
 
             player.setMediaItem(mediaItem)
             player.prepare()
-            player.playWhenReady
 
             player.addListener(object: Player.Listener {
                 override fun onIsLoadingChanged(isLoading: Boolean) {
-                    super.onIsLoadingChanged(isLoading)
                     if(!isLoading) {
                         imageThumbnail.visibility = View.GONE
                         selectedVideo.visibility = View.VISIBLE
@@ -224,6 +221,7 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners, context: Cont
                     }
                 }
             })
+
 
             selectedVideo.findViewById<ImageButton>(R.id.video_back).setOnClickListener {
                 player.stop()
