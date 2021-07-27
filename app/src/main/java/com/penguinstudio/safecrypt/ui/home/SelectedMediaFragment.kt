@@ -3,29 +3,24 @@ package com.penguinstudio.safecrypt.ui.home
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.ImageButton
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LifecycleObserver
-import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
-import com.bumptech.glide.Glide
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.ImagePagerAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentSelectedPictureBinding
 import com.penguinstudio.safecrypt.models.MediaModel
-import com.penguinstudio.safecrypt.models.MediaType
 
 
 class SelectedMediaFragment : Fragment(), LifecycleObserver {
@@ -58,7 +53,6 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
         compositePageTransformer.addTransformer(MarginPageTransformer(40))
         viewPager.setPageTransformer(compositePageTransformer)
 
-
         // Toolbar control (should be images only)
         binding.selectedFragmentToolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
         binding.selectedFragmentToolbar.setNavigationOnClickListener {
@@ -74,6 +68,14 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
         }, requireContext())
 
         viewPager.adapter = imagePagerAdapter
+
+        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                viewPager.post {
+                    (viewPager.adapter as ImagePagerAdapter).setCurrentPosition(position)
+                }
+            }
+        })
 
         val content = model.selectedAlbum.value?.data?.albumMedia
             ?: return

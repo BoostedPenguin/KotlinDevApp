@@ -34,7 +34,6 @@
         app:show_previous_button="false"
         app:show_fastforward_button="true"
         app:show_rewind_button="true"
-        app:controller_layout_id="@layout/custom_video_overlay"
         app:show_shuffle_button="false"
         app:show_subtitle_button="false"
         app:show_vr_button="false"

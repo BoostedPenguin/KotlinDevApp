@@ -36,43 +36,19 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners, context: Cont
         fun onImageClickListener(position: Int, album: MediaModel)
     }
     private var media: ArrayList<MediaModel> = ArrayList()
-    private var player: SimpleExoPlayer = SimpleExoPlayer.Builder(context).build()
-    private var currentVideoPlayingPosition: Int = -1
+    private var player: SimpleExoPlayer? = null
+    private var currentPosition: Int = -1
 
     fun setMedia(media: ArrayList<MediaModel>) {
         this.media = media
         notifyDataSetChanged()
     }
 
-    /**
-     * On viewpager2 page switch
-     * Internal video playing state
-     * Switches dynamically the selected video
-     */
-    fun onPageSwitch(position: Int) {
-        if(player.mediaItemCount > 0) {
-            player.clearMediaItems()
-            player.release()
-        }
-
-        if(media[position].mediaType == MediaType.VIDEO) {
-            media[position].isSelected = true
-
-            // Don't change any data, just tell it to re-render itself
-            if(currentVideoPlayingPosition == position) {
-                notifyItemChanged(position)
-                return
-            }
-
-            if(currentVideoPlayingPosition != -1) {
-                media[currentVideoPlayingPosition].isSelected = false
-                notifyItemChanged(currentVideoPlayingPosition)
-            }
-
-            notifyItemChanged(position)
-            currentVideoPlayingPosition = position
-        }
+    fun setCurrentPosition(position: Int) {
+        media[position].isSelected = true
+        notifyItemChanged(position)
     }
+
 
     override fun getItemViewType(position: Int): Int {
         return when (media[position].mediaType) {
@@ -82,13 +58,6 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners, context: Cont
         }
     }
 
-    override fun onViewDetachedFromWindow(holder: RecyclerView.ViewHolder) {
-        super.onViewDetachedFromWindow(holder)
-
-        if(holder is InnerGalleryVideoViewHolder) {
-            holder.releasePlayer()
-        }
-    }
 
     fun getItemPosition(item: MediaModel) : Int {
         return media.indexOf(item)
@@ -115,10 +84,23 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners, context: Cont
     }
 
 
-
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val vh = holder as CommonViewHolderItems
-        vh.setMediaItem(media[position])
+
+        when(media[position].mediaType) {
+            MediaType.IMAGE -> {
+                val vh = holder as InnerGalleryImageViewHolder
+                vh.setMediaItem(media[position])
+            }
+            MediaType.VIDEO -> {
+                val vh = holder as InnerGalleryVideoViewHolder
+                vh.setMediaItem(media[position])
+
+                if(media[position].isSelected) {
+                    vh.createVideoPlayback()
+                }
+            }
+            null -> throw IllegalArgumentException("No such type")
+        }
     }
 
     override fun getItemCount(): Int {
@@ -159,6 +141,16 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners, context: Cont
         }
     }
 
+    override fun onViewDetachedFromWindow(holder: RecyclerView.ViewHolder) {
+        super.onViewDetachedFromWindow(holder)
+//
+//        player?.stop()
+//        player?.clearMediaItems()
+//        player?.release()
+//
+//        player = null
+    }
+
     inner class InnerGalleryVideoViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView), CommonViewHolderItems {
 
@@ -170,9 +162,9 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners, context: Cont
         override fun setMediaItem(media: MediaModel) {
             this.media = media
 
-            imageThumbnail.visibility = View.VISIBLE
-            progressBar.visibility = View.VISIBLE
-            selectedVideo.visibility = View.INVISIBLE
+            imageThumbnail.visibility = View.INVISIBLE
+            progressBar.visibility = View.INVISIBLE
+            selectedVideo.visibility = View.VISIBLE
 
             Glide.with(itemView)
                 .load(media.mediaUri)
@@ -180,20 +172,14 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners, context: Cont
                 .fitCenter()
                 .thumbnail(0.1f)
                 .into(imageThumbnail)
-
-            createVideoPlayback()
         }
 
-        fun releasePlayer() {
-            if(player.mediaItemCount > 0) {
-                player.stop()
-                player.clearMediaItems()
-                player.release()
-            }
-        }
+        fun createVideoPlayback() {
 
-
-        private fun createVideoPlayback() {
+            player?.stop()
+            player?.clearMediaItems()
+            player?.release()
+            player = null
 
             player = SimpleExoPlayer.Builder(itemView.context)
                 .build()
@@ -209,27 +195,25 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners, context: Cont
 
             val mediaItem: MediaItem = MediaItem.fromUri(media.mediaUri)
 
-            player.setMediaItem(mediaItem)
-            player.prepare()
+            player?.setMediaItem(mediaItem)
+            player?.prepare()
 
-            player.addListener(object: Player.Listener {
+            player?.addListener(object: Player.Listener {
                 override fun onIsLoadingChanged(isLoading: Boolean) {
                     if(!isLoading) {
-                        imageThumbnail.visibility = View.GONE
-                        selectedVideo.visibility = View.VISIBLE
-                        progressBar.visibility = View.GONE
+
                     }
                 }
             })
 
 
-            selectedVideo.findViewById<ImageButton>(R.id.video_back).setOnClickListener {
-                player.stop()
-                player.clearMediaItems()
-                player.release()
-
-                findNavController(itemView).popBackStack()
-            }
+//            selectedVideo.findViewById<ImageButton>(R.id.video_back).setOnClickListener {
+//                player?.stop()
+//                player?.clearMediaItems()
+//                player?.release()
+//
+//                findNavController(itemView).popBackStack()
+//            }
         }
     }
 }
