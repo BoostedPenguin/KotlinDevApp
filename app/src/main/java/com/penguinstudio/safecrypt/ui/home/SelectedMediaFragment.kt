@@ -2,6 +2,7 @@ package com.penguinstudio.safecrypt.ui.home
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +18,13 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
+import com.bumptech.glide.Glide
+import com.bumptech.glide.ListPreloader
+import com.bumptech.glide.ListPreloader.PreloadModelProvider
+import com.bumptech.glide.ListPreloader.PreloadSizeProvider
+import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader
+import com.bumptech.glide.util.ViewPreloadSizeProvider
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.ImagePagerAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentSelectedPictureBinding
@@ -26,17 +34,17 @@ import com.penguinstudio.safecrypt.models.MediaModel
 class SelectedMediaFragment : Fragment(), LifecycleObserver {
     private lateinit var binding: FragmentSelectedPictureBinding
     private lateinit var viewPager: ViewPager2
-    private lateinit var imagePagerAdapter: ImagePagerAdapter
+    private var content: ArrayList<MediaModel> = ArrayList()
+    private lateinit var fullRequest: RequestBuilder<Drawable>
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val callback: OnBackPressedCallback =
-            object : OnBackPressedCallback(true /* enabled by default */) {
+            object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    // Handle the back button event
-                    viewPager.adapter = null
+                    model.clearSelectedMedia()
                     findNavController().popBackStack()
                 }
             }
@@ -61,11 +69,18 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
         binding.selectedFragmentToolbar.visibility = View.VISIBLE
 
 
-        imagePagerAdapter = ImagePagerAdapter(object: ImagePagerAdapter.ImagePagerListeners {
+//        val sizeProvider: PreloadSizeProvider<MediaModel>  = ViewPreloadSizeProvider()
+//        val modelProvider: PreloadModelProvider<MediaModel> = MyPreloadModelProvider()
+//        val preloader: RecyclerViewPreloader<MediaModel> = RecyclerViewPreloader(
+//            Glide.with(this), modelProvider, sizeProvider, 10
+//        )
+
+
+        val imagePagerAdapter = ImagePagerAdapter(object: ImagePagerAdapter.ImagePagerListeners {
             override fun onImageClickListener(position: Int, album: MediaModel) {
                 handleToolbarOnImageClick()
             }
-        }, requireContext())
+        }, fullRequest)
 
         viewPager.adapter = imagePagerAdapter
 
@@ -77,13 +92,29 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
             }
         })
 
-        val content = model.selectedAlbum.value?.data?.albumMedia
+        content = model.selectedAlbum.value?.data?.albumMedia
             ?: return
 
         imagePagerAdapter.setMedia(content)
 
         val g = imagePagerAdapter.getItemPosition(model.selectedMedia!!)
         viewPager.setCurrentItem(g, false)
+    }
+
+    inner class MyPreloadModelProvider : ListPreloader.PreloadModelProvider<MediaModel> {
+        override fun getPreloadItems(position: Int): MutableList<MediaModel> {
+            return content
+        }
+
+        override fun getPreloadRequestBuilder(item: MediaModel): RequestBuilder<*> {
+            return Glide.with(binding.root)
+                .load(item.mediaUri)
+        }
+    }
+
+    override fun onDestroyView() {
+        viewPager.adapter = null
+        super.onDestroyView()
     }
 
 
@@ -129,6 +160,10 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
     ): View {
         binding = FragmentSelectedPictureBinding.inflate(layoutInflater, container, false)
         activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        fullRequest = Glide.with(this)
+            .asDrawable()
+            .placeholder(R.drawable.ic_baseline_image_24)
+            .fitCenter()
 
         return binding.root
     }

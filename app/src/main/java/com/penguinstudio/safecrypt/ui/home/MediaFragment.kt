@@ -1,16 +1,15 @@
 package com.penguinstudio.safecrypt.ui.home
 
-import android.R.attr.data
 import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.*
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.view.animation.DecelerateInterpolator
-import android.widget.ArrayAdapter
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -23,12 +22,16 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.PhotoGridAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentPicturesBinding
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.services.EncryptionProcessIntentHandler
+import com.penguinstudio.safecrypt.services.glide_service.GlideApp
+import com.penguinstudio.safecrypt.services.glide_service.GlideRequest
 import com.penguinstudio.safecrypt.utilities.EncryptionStatus
 import com.penguinstudio.safecrypt.utilities.Status
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,6 +44,8 @@ class MediaFragment : Fragment(), LifecycleObserver {
     private lateinit var binding: FragmentPicturesBinding
     private lateinit var photoAdapter: PhotoGridAdapter
     private val _model: GalleryViewModel by activityViewModels()
+
+    private lateinit var fullRequest: RequestBuilder<Drawable>
 
     private lateinit var defaultStorageLocationSnackbar: Snackbar
 
@@ -98,6 +103,11 @@ class MediaFragment : Fragment(), LifecycleObserver {
         // Inflate the layout for this fragment
         binding = FragmentPicturesBinding.inflate(layoutInflater, container, false)
         setHasOptionsMenu(true)
+
+        fullRequest = Glide.with(this)
+            .asDrawable()
+            .placeholder(R.drawable.ic_baseline_image_24)
+            .fitCenter()
 
         (activity as AppCompatActivity).supportActionBar?.show()
 
@@ -179,7 +189,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
                 media.isSelected = true
                 photoAdapter.notifyItemChanged(position)
             }
-        })
+        },fullRequest)
 
         when(resources.configuration.orientation) {
 
