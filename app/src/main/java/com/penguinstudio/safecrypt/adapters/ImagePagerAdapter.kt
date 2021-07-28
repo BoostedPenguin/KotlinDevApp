@@ -44,7 +44,11 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
     }
 
     fun setCurrentPosition(position: Int) {
-        media[position].isSelected = true
+
+        //Notify current selected item to fuck off
+        notifyItemChanged(currentSelectedItem)
+
+        // Notify the new current selected item to come in place
         currentSelectedItem = position
         notifyItemChanged(currentSelectedItem)
     }
@@ -90,12 +94,25 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
             MediaType.IMAGE -> {
                 val vh = holder as InnerGalleryImageViewHolder
                 vh.setMediaItem(media[position])
+
+                if(currentSelectedItem != -1
+                    && currentSelectedItem < media.size
+                    && currentSelectedItem == position) {
+
+                    player?.stop()
+                    player?.clearMediaItems()
+                    player?.release()
+                    player = null
+                }
             }
             MediaType.VIDEO -> {
                 val vh = holder as InnerGalleryVideoViewHolder
                 vh.setMediaItem(media[position])
 
-                if(currentSelectedItem != -1 && currentSelectedItem < media.size) {
+                if(currentSelectedItem != -1
+                    && currentSelectedItem < media.size
+                    && currentSelectedItem == position) {
+
                     vh.createVideoPlayback()
                 }
             }
@@ -113,6 +130,16 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
 
     override fun getItemCount(): Int {
         return media.size
+    }
+
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        player?.stop()
+        player?.clearMediaItems()
+        player?.release()
+        player = null
+
+        super.onDetachedFromRecyclerView(recyclerView)
     }
 
     private interface CommonViewHolderItems {
@@ -149,16 +176,6 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
 
         }
     }
-
-    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-        player?.stop()
-        player?.clearMediaItems()
-        player?.release()
-        player = null
-
-        super.onDetachedFromRecyclerView(recyclerView)
-    }
-
 
     inner class InnerGalleryVideoViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView), CommonViewHolderItems {
@@ -209,6 +226,8 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
             player?.addListener(object: Player.Listener {
                 override fun onIsLoadingChanged(isLoading: Boolean) {
                     if(!isLoading) {
+                        Glide.with(itemView.context).clear(imageView)
+
                         imageView.visibility = View.GONE
                         selectedVideo.visibility = View.VISIBLE
                         progressBar.visibility = View.GONE
