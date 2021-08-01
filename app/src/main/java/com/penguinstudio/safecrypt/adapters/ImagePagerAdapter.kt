@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.ListPreloader
 import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.RequestManager
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
@@ -18,11 +19,13 @@ import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.models.MediaType
+import kotlinx.coroutines.selects.select
 import kotlin.collections.ArrayList
 
 
 class ImagePagerAdapter(private var listener: ImagePagerListeners,
-                        var fullRequest: RequestBuilder<Drawable>)
+                        var fullRequest: RequestBuilder<Drawable>,
+                        val glide: RequestManager)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>(),
     ListPreloader.PreloadModelProvider<MediaModel> {
 
@@ -32,11 +35,12 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
     }
 
     interface ImagePagerListeners {
-        fun onImageClickListener(position: Int, album: MediaModel)
+        fun onViewClickListener(position: Int, album: MediaModel)
     }
     private var media: ArrayList<MediaModel> = ArrayList()
     private var player: SimpleExoPlayer? = null
     private var currentSelectedItem = -1
+    var isHandleVisible = true
 
     fun setMedia(media: ArrayList<MediaModel>) {
         this.media = media
@@ -124,7 +128,7 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
         super.onViewRecycled(holder)
 
         if(holder is CommonViewHolderItems) {
-            Glide.with(holder.itemView.context).clear(holder.imageView);
+            glide.clear(holder.imageView)
         }
     }
 
@@ -160,7 +164,7 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
                 val position = bindingAdapterPosition
 
                 if (position != RecyclerView.NO_POSITION) {
-                    listener.onImageClickListener(position, media)
+                    listener.onViewClickListener(position, media)
                 }
             }
         }
@@ -187,6 +191,8 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
 
         override fun setMediaItem(media: MediaModel) {
             this.media = media
+            selectedVideo.controllerAutoShow = false
+            selectedVideo.controllerShowTimeoutMs = -1
 
 
             fullRequest
@@ -197,10 +203,6 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
         }
 
         fun createVideoPlayback() {
-            imageView.visibility = View.INVISIBLE
-            progressBar.visibility = View.INVISIBLE
-            selectedVideo.visibility = View.VISIBLE
-
             player?.stop()
             player?.clearMediaItems()
             player?.release()
@@ -214,7 +216,7 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
             selectedVideo.setOnClickListener {
 
                 if (bindingAdapterPosition != RecyclerView.NO_POSITION) {
-                    listener.onImageClickListener(bindingAdapterPosition, media)
+                    listener.onViewClickListener(bindingAdapterPosition, media)
                 }
             }
 
@@ -226,23 +228,22 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
             player?.addListener(object: Player.Listener {
                 override fun onIsLoadingChanged(isLoading: Boolean) {
                     if(!isLoading) {
-                        Glide.with(itemView.context).clear(imageView)
+                        if(isHandleVisible) {
+                            selectedVideo.showController()
+                        }
+                        else {
+                            selectedVideo.hideController()
+                        }
 
                         imageView.visibility = View.GONE
                         selectedVideo.visibility = View.VISIBLE
                         progressBar.visibility = View.GONE
+
+                        //Glide.with(itemView.context).clear(imageView)
+
                     }
                 }
             })
-
-
-//            selectedVideo.findViewById<ImageButton>(R.id.video_back).setOnClickListener {
-//                player?.stop()
-//                player?.clearMediaItems()
-//                player?.release()
-//
-//                findNavController(itemView).popBackStack()
-//            }
         }
     }
 

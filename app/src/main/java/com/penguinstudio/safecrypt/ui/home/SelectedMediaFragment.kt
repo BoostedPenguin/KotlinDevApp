@@ -10,9 +10,12 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.CompositePageTransformer
@@ -77,10 +80,12 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
 
 
         val imagePagerAdapter = ImagePagerAdapter(object: ImagePagerAdapter.ImagePagerListeners {
-            override fun onImageClickListener(position: Int, album: MediaModel) {
-                handleToolbarOnImageClick()
+            override fun onViewClickListener(position: Int, album: MediaModel) {
+                handleToolbarOnImageClick().observe(viewLifecycleOwner, {
+                    (viewPager.adapter as ImagePagerAdapter).isHandleVisible = it
+                })
             }
-        }, fullRequest)
+        }, fullRequest, Glide.with(this))
 
         viewPager.adapter = imagePagerAdapter
 
@@ -101,17 +106,6 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
         viewPager.setCurrentItem(g, false)
     }
 
-    inner class MyPreloadModelProvider : ListPreloader.PreloadModelProvider<MediaModel> {
-        override fun getPreloadItems(position: Int): MutableList<MediaModel> {
-            return content
-        }
-
-        override fun getPreloadRequestBuilder(item: MediaModel): RequestBuilder<*> {
-            return Glide.with(binding.root)
-                .load(item.mediaUri)
-        }
-    }
-
     override fun onDestroyView() {
         viewPager.adapter = null
         super.onDestroyView()
@@ -124,7 +118,8 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
 //            return _model
 //        }
 
-    private fun handleToolbarOnImageClick() {
+    private var _handle = MutableLiveData<Boolean>()
+    private fun handleToolbarOnImageClick() : LiveData<Boolean> {
         binding.selectedFragmentToolbar.apply {
             if (visibility == View.VISIBLE) {
                 animate()
@@ -134,8 +129,10 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
                         override fun onAnimationEnd(animation: Animator?) {
                             super.onAnimationEnd(animation)
                             visibility = View.INVISIBLE
+                            _handle.value = binding.selectedFragmentToolbar.isVisible
                         }
                     })
+                return _handle
             } else {
                 visibility = View.VISIBLE
                 alpha = 0f
@@ -143,6 +140,9 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
                 animate().translationY(0f)
                     .alpha(1f)
                     .setListener(null)
+
+                _handle.value = binding.selectedFragmentToolbar.isVisible
+                return _handle
             }
         }
     }
