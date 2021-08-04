@@ -33,7 +33,7 @@ class MediaService @Inject constructor(
 
             val projection = arrayOf(
                 MediaStore.Files.FileColumns._ID,
-                MediaStore.Files.FileColumns.DATE_ADDED,
+                MediaStore.Files.FileColumns.DATE_TAKEN,
                 MediaStore.Files.FileColumns.MEDIA_TYPE,
                 MediaStore.Files.FileColumns.MIME_TYPE,
                 MediaStore.Files.FileColumns.TITLE,
@@ -55,14 +55,14 @@ class MediaService @Inject constructor(
                 projection,  // Which columns to return
                 selection,  // Which rows to return (all rows)
                 null,  // Selection arguments (none)
-                MediaStore.Files.FileColumns.DATE_ADDED + " DESC" // Sort order.
+                MediaStore.Files.FileColumns.DATE_TAKEN + " DESC" // Sort order.
             )
 
             query?.use {
                 val bucketNameColumn: Int = it.getColumnIndex(
                     MediaStore.Files.FileColumns.BUCKET_DISPLAY_NAME
                 )
-                val dateAddedColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_ADDED)
+                val dateAddedColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_TAKEN)
                 val mediaNameColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME)
                 val idColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
                 val mediaType = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)

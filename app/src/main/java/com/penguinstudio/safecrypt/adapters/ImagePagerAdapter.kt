@@ -161,7 +161,7 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
         init {
             // On this click and on video click change boolean
             imageView.setOnClickListener {
-                val position = bindingAdapterPosition
+                val position = layoutPosition
 
                 if (position != RecyclerView.NO_POSITION) {
                     listener.onViewClickListener(position, media)
@@ -215,8 +215,8 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
 
             selectedVideo.setOnClickListener {
 
-                if (bindingAdapterPosition != RecyclerView.NO_POSITION) {
-                    listener.onViewClickListener(bindingAdapterPosition, media)
+                if (layoutPosition != RecyclerView.NO_POSITION) {
+                    listener.onViewClickListener(layoutPosition, media)
                 }
             }
 

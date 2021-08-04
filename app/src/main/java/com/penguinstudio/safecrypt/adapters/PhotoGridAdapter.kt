@@ -1,6 +1,5 @@
 package com.penguinstudio.safecrypt.adapters
 
-import android.R.attr.thumbnail
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
@@ -12,15 +11,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.bumptech.glide.ListPreloader
 import com.bumptech.glide.RequestBuilder
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.target.Target
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.models.MediaType
-import me.zhanghai.android.fastscroll.PopupTextProvider
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -31,7 +26,7 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?,
                                    var fullRequest: RequestBuilder<Drawable>,
                                     ) :
     RecyclerView.Adapter<PhotoGridAdapter.ImageHolder>(),
-    ListPreloader.PreloadModelProvider<MediaModel>, PopupTextProvider {
+    ListPreloader.PreloadModelProvider<MediaModel> {
 
     interface AdapterListeners {
         fun onClickListener(position: Int, media: MediaModel)
@@ -170,9 +165,12 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?,
         }
     }
 
-    override fun getPopupText(position: Int): String {
-        return SimpleDateFormat("MMM y", Locale.US)
-            .format(images[position].dateAdded?.times(1000))
+    fun getPopupText(position: Int): String {
+        if(images[position].dateAdded != null) {
+            return SimpleDateFormat("MMM y", Locale.US)
+                .format(images[position].dateAdded)
+        }
+        return ""
     }
 
     override fun getPreloadItems(position: Int): MutableList<MediaModel> {

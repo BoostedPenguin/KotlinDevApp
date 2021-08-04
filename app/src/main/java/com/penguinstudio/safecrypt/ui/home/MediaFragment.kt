@@ -1,19 +1,13 @@
 package com.penguinstudio.safecrypt.ui.home
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.*
-import android.view.animation.AccelerateInterpolator
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
-import android.view.animation.DecelerateInterpolator
-import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.annotation.MenuRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -30,12 +24,9 @@ import com.penguinstudio.safecrypt.adapters.PhotoGridAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentPicturesBinding
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.services.EncryptionProcessIntentHandler
-import com.penguinstudio.safecrypt.services.glide_service.GlideApp
-import com.penguinstudio.safecrypt.services.glide_service.GlideRequest
 import com.penguinstudio.safecrypt.utilities.EncryptionStatus
 import com.penguinstudio.safecrypt.utilities.Status
 import dagger.hilt.android.AndroidEntryPoint
-import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import javax.inject.Inject
 
 
@@ -118,6 +109,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
         return binding.root
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -127,9 +119,12 @@ class MediaFragment : Fragment(), LifecycleObserver {
             .setAction("Choose") {
                 encryptionProcessIntentHandler.chooseDefaultSaveLocation()
             }
+
+        binding.picturesRecyclerView.setOnTouchListener { v, event ->
+            binding.picturesSwipeToRefresh.isEnabled = event.pointerCount <= 1
+            return@setOnTouchListener v.onTouchEvent(event)
+        }
     }
-
-
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
@@ -183,126 +178,36 @@ class MediaFragment : Fragment(), LifecycleObserver {
                 model.itemSelectionMode = true
 
                 model.addMediaToSelection(position, media)
-                (activity as AppCompatActivity?)?.supportActionBar?.title = "Select Media"
+                (activity as AppCompatActivity).supportActionBar?.title = "Select Media"
                 // Notify adapter that this item has changed
                 activity?.invalidateOptionsMenu()
                 media.isSelected = true
                 photoAdapter.notifyItemChanged(position)
             }
-        },fullRequest)
+        }, fullRequest)
 
-        when(resources.configuration.orientation) {
+        val sharedPref = context?.getSharedPreferences(getString(R.string.main_shared_pref), Context.MODE_PRIVATE)
+        val columns =
+            sharedPref?.getInt(context?.getString(R.string.grid_columns), 3) ?: 3
 
-            Configuration.ORIENTATION_LANDSCAPE -> {
-                binding.picturesRecyclerView.layoutManager = GridLayoutManager(requireContext(), 5)
-            }
-            else -> {
-                binding.picturesRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
-            }
-        }
 
-        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
 
         // Prevent redrawing recyclerview if current column is same size as requested
-        val columns = sharedPref.getInt(getString(R.string.grid_columns), 3)
-
         binding.picturesRecyclerView.layoutManager = GridLayoutManager(requireContext(), columns)
-
-
-        FastScrollerBuilder(binding.picturesRecyclerView).useMd2Style().build()
 
         binding.picturesRecyclerView.adapter = photoAdapter
     }
 
-    private fun animateRecyclerLayoutChange(layoutSpanCount: Int) {
-        val fadeOut: Animation = AlphaAnimation(1f, 0f)
-        fadeOut.interpolator = DecelerateInterpolator()
-        fadeOut.duration = 400
-        fadeOut.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(animation: Animation) {
-
-            }
-            override fun onAnimationRepeat(animation: Animation) {
-
-            }
-            override fun onAnimationEnd(animation: Animation) {
-                (binding.picturesRecyclerView.layoutManager as GridLayoutManager)
-                    .spanCount = layoutSpanCount
-
-                (binding.picturesRecyclerView.layoutManager as GridLayoutManager)
-                    .requestLayout()
-
-                val fadeIn: Animation = AlphaAnimation(0f, 1f)
-                fadeIn.interpolator = AccelerateInterpolator()
-                fadeIn.duration = 400
-                binding.picturesRecyclerView.startAnimation(fadeIn)
-            }
-        })
-        binding.picturesRecyclerView.startAnimation(fadeOut)
-    }
-
-    private fun setGridColumnPreferences(columns: Int) {
-        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
-
-        // Prevent redrawing recyclerview if current column is same size as requested
-        if (sharedPref.getInt(getString(R.string.grid_columns), 3) == columns) return
-
-        with (sharedPref.edit()) {
-            putInt(getString(R.string.grid_columns), columns)
-            apply()
-        }
-
-        animateRecyclerLayoutChange(columns)
-    }
-
-    private fun showMenu(v: View, @MenuRes menuRes: Int) {
-        val popup = PopupMenu(requireContext(), v)
-        popup.menuInflater.inflate(menuRes, popup.menu)
-
-        popup.setOnMenuItemClickListener { menuItem: MenuItem ->
-            when(menuItem.itemId) {
-                R.id.option_by_3 -> setGridColumnPreferences(3)
-                R.id.option_by_4 -> setGridColumnPreferences(4)
-                R.id.option_by_5 -> setGridColumnPreferences(5)
-            }
-            true
-        }
-        popup.setOnDismissListener {
-            // Respond to popup being dismissed.
-        }
-        // Show the popup menu.
-        popup.show()
-    }
-
-    private var isBig = false
     private fun registerEvents() {
         /**
          * If the selected items become 0,
          * Disable selection mode
          */
 
-
-
-        binding.picturesSpanCountChange.setOnClickListener {
-            showMenu(it, R.menu.column_chooser_menu)
-        }
-
         binding.picturesSwipeToRefresh.setOnRefreshListener {
             exitSelectMode()
             model.getMedia()
         }
-
-        model.albums.observe(viewLifecycleOwner, {
-            when(it.status) {
-                Status.LOADING -> {
-                    // Do nothing
-                }
-                else -> {
-                    binding.picturesSwipeToRefresh.isRefreshing = false
-                    binding.picturesSwipeToRefresh.isEnabled = true
-                }
-            }
-        })
 
         model.selectedAlbum.observe(viewLifecycleOwner, {
             if(it == null) return@observe
@@ -310,6 +215,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
             when(it.status) {
                 Status.SUCCESS -> {
                     binding.picturesProgressBar.visibility = View.GONE
+                    binding.picturesSwipeToRefresh.isRefreshing = false
 
                     // If this album doesn't exist anymore // No media inside it
                     if(it.data == null || it.data.albumMedia.size == 0) {
@@ -327,7 +233,12 @@ class MediaFragment : Fragment(), LifecycleObserver {
                     findNavController().popBackStack()
                 }
                 Status.LOADING -> {
-                    binding.picturesProgressBar.visibility = View.VISIBLE
+                    if(binding.picturesSwipeToRefresh.isRefreshing) {
+                        // Do nothing wait it out
+                    }
+                    else {
+                        binding.picturesProgressBar.visibility = View.VISIBLE
+                    }
                 }
             }
         })
@@ -402,6 +313,9 @@ class MediaFragment : Fragment(), LifecycleObserver {
 
 
     private fun exitSelectMode() {
+        // Prevent invalidating if not in selection mode already
+        if(!model.itemSelectionMode) return
+
         (activity as AppCompatActivity?)?.supportActionBar?.title = model.selectedAlbum.value?.data?.name
 
         if(defaultStorageLocationSnackbar.isShown) defaultStorageLocationSnackbar.dismiss()
