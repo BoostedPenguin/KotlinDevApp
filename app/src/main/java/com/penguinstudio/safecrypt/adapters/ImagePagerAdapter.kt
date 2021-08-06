@@ -2,6 +2,7 @@ package com.penguinstudio.safecrypt.adapters
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.media.AudioFocusRequest
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,8 +20,11 @@ import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.models.MediaType
-import kotlinx.coroutines.selects.select
 import kotlin.collections.ArrayList
+import androidx.core.content.ContextCompat.getSystemService
+import android.media.AudioManager
+import com.google.android.exoplayer2.C
+import com.google.android.exoplayer2.audio.AudioAttributes
 
 
 class ImagePagerAdapter(private var listener: ImagePagerListeners,
@@ -42,9 +46,18 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
     private var currentSelectedItem = -1
     var isHandleVisible = true
 
+    val audioAttributes: AudioAttributes = AudioAttributes.Builder()
+        .setUsage(C.USAGE_MEDIA)
+        .setContentType(C.CONTENT_TYPE_MOVIE)
+        .build()
+
     fun setMedia(media: ArrayList<MediaModel>) {
         this.media = media
         notifyDataSetChanged()
+    }
+
+    fun pausePlayer() {
+        player?.pause()
     }
 
     fun setCurrentPosition(position: Int) {
@@ -211,6 +224,8 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
             player = SimpleExoPlayer.Builder(itemView.context)
                 .build()
 
+            player?.setAudioAttributes(audioAttributes, true)
+
             selectedVideo.player = player
 
             selectedVideo.setOnClickListener {
@@ -238,7 +253,6 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
                         imageView.visibility = View.GONE
                         selectedVideo.visibility = View.VISIBLE
                         progressBar.visibility = View.GONE
-
                         //Glide.with(itemView.context).clear(imageView)
 
                     }

@@ -106,6 +106,12 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
         viewPager.setCurrentItem(g, false)
     }
 
+    override fun onPause() {
+        super.onPause()
+
+        (viewPager.adapter as ImagePagerAdapter).pausePlayer()
+    }
+
     override fun onDestroyView() {
         viewPager.adapter = null
         super.onDestroyView()
