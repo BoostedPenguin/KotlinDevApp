@@ -11,7 +11,9 @@ import android.view.animation.Animation
 import android.view.animation.DecelerateInterpolator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.TransitionManager
 import com.penguinstudio.safecrypt.R
+import com.penguinstudio.safecrypt.adapters.PhotoGridAdapter
 import kotlin.math.abs
 enum class ScaleFactor {
     SCALE_EXPANDING, SCALE_SHRINKING
@@ -74,31 +76,14 @@ class CustomRecyclerView(context: Context, attrs: AttributeSet ) : RecyclerView(
     }
 
     private fun animateRecyclerLayoutChange(layoutSpanCount: Int) {
-        val fadeOut: Animation = AlphaAnimation(1f, 0f)
-        fadeOut.interpolator = DecelerateInterpolator()
-        fadeOut.duration = 150
-        fadeOut.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(animation: Animation) {
-
-            }
-            override fun onAnimationRepeat(animation: Animation) {
-
-            }
-            override fun onAnimationEnd(animation: Animation) {
-                if(this@CustomRecyclerView.layoutManager is GridLayoutManager) {
-                    (this@CustomRecyclerView.layoutManager as GridLayoutManager).spanCount = layoutSpanCount
-                    (this@CustomRecyclerView.layoutManager as GridLayoutManager).requestLayout()
-
-                    val fadeIn: Animation = AlphaAnimation(0f, 1f)
-                    fadeIn.interpolator = AccelerateInterpolator()
-                    fadeIn.duration = 150
-
-                    this@CustomRecyclerView.startAnimation(fadeIn)
-                }
-            }
-        })
-
-        this@CustomRecyclerView.startAnimation(fadeOut)
+        val lm = layoutManager as GridLayoutManager
+        (adapter as PhotoGridAdapter).apply {
+            notifyDataSetChanged()
+        }
+        post {
+            TransitionManager.beginDelayedTransition(this)
+            lm.spanCount = layoutSpanCount
+        }
     }
 
 

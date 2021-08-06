@@ -5,7 +5,7 @@ enum class MediaType {
     IMAGE, VIDEO
 }
 data class MediaModel(
-    var id: Int,
+    var id: Long,
     val mediaUri: Uri,
     var albumName: String?,
     var mediaType: MediaType?,

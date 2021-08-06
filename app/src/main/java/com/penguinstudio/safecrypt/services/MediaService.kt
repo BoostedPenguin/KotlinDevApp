@@ -87,7 +87,7 @@ class MediaService @Inject constructor(
                     when(it.getInt(mediaType)) {
                         MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE -> {
                             media = MediaModel(
-                                Integer.valueOf(imageId.toInt()),
+                                imageId,
                                 contentUri,
                                 bucketName,
                                 MediaType.IMAGE,
@@ -98,7 +98,7 @@ class MediaService @Inject constructor(
                         }
                         MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO -> {
                             media = MediaModel(
-                                Integer.valueOf(imageId.toInt()),
+                                imageId,
                                 contentUri,
                                 bucketName,
                                 MediaType.VIDEO,

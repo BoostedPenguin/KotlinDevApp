@@ -163,6 +163,10 @@ class MediaFragment : Fragment(), LifecycleObserver {
                         media.isSelected = true
                     }
 
+                    if (model.itemSelectionMode) {
+                        (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.value?.size ?: 0} selected"
+                    }
+
                     // Notify adapter that this item has changed
                     photoAdapter.notifyItemChanged(position)
                 }
@@ -178,7 +182,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
                 model.itemSelectionMode = true
 
                 model.addMediaToSelection(position, media)
-                (activity as AppCompatActivity).supportActionBar?.title = "Select Media"
+                (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.value?.size ?: 0} selected"
                 // Notify adapter that this item has changed
                 activity?.invalidateOptionsMenu()
                 media.isSelected = true
@@ -196,6 +200,8 @@ class MediaFragment : Fragment(), LifecycleObserver {
         binding.picturesRecyclerView.layoutManager = GridLayoutManager(requireContext(), columns)
 
         binding.picturesRecyclerView.adapter = photoAdapter
+        
+        binding.picturesRecyclerView.setHasFixedSize(true)
     }
 
     private fun registerEvents() {
@@ -208,6 +214,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
             exitSelectMode()
             model.getMedia()
         }
+        (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.value?.size ?: 0} selected"
 
         model.selectedAlbum.observe(viewLifecycleOwner, {
             if(it == null) return@observe

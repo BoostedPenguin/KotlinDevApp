@@ -28,6 +28,10 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?,
     RecyclerView.Adapter<PhotoGridAdapter.ImageHolder>(),
     ListPreloader.PreloadModelProvider<MediaModel> {
 
+    init {
+        setHasStableIds(true)
+    }
+
     interface AdapterListeners {
         fun onClickListener(position: Int, media: MediaModel)
         fun onLongClickListener(position: Int, media: MediaModel)
@@ -124,6 +128,10 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?,
 
     override fun getItemCount(): Int {
         return images.size
+    }
+
+    override fun getItemId(position: Int): Long {
+        return images[position].id
     }
 
     fun getImages() : ArrayList<MediaModel> {
