@@ -172,9 +172,9 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners?,
     }
 
     fun getPopupText(position: Int): String {
-        if(images[position].dateAdded != null) {
+        if(images[position].details.dateAdded != null) {
             return SimpleDateFormat("MMM y", Locale.US)
-                .format(images[position].dateAdded)
+                .format(images[position].details.dateAdded)
         }
         return ""
     }

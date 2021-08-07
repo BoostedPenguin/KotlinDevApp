@@ -11,8 +11,17 @@ data class MediaModel(
     var mediaType: MediaType?,
     var videoDuration: Long?,
     var mediaName: String,
-    val dateAdded: Long? = null,
-    var isSelected: Boolean = false,
 
+    val details: MediaModelDetails,
+
+    var isSelected: Boolean = false,
     var selectedPosition: Int? = null,
+)
+
+data class MediaModelDetails(
+    val dateAdded: Long? = null,
+    val relativePath: String? = null,
+    val size: String? = null,
+    val width: String? = null,
+    val height: String? = null,
 )

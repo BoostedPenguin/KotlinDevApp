@@ -6,14 +6,10 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.provider.MediaStore
 import android.text.TextUtils
-import android.util.Log
-import androidx.core.database.getIntOrNull
 import androidx.core.database.getLongOrNull
+import androidx.core.database.getStringOrNull
 import androidx.documentfile.provider.DocumentFile
-import com.penguinstudio.safecrypt.models.AlbumModel
-import com.penguinstudio.safecrypt.models.EncryptedModel
-import com.penguinstudio.safecrypt.models.MediaModel
-import com.penguinstudio.safecrypt.models.MediaType
+import com.penguinstudio.safecrypt.models.*
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -31,6 +27,7 @@ class MediaService @Inject constructor(
             val allAlbums: ArrayList<AlbumModel> = ArrayList()
             val albumsNames: ArrayList<String> = ArrayList()
 
+
             val projection = arrayOf(
                 MediaStore.Files.FileColumns._ID,
                 MediaStore.Files.FileColumns.DATE_TAKEN,
@@ -39,7 +36,11 @@ class MediaService @Inject constructor(
                 MediaStore.Files.FileColumns.TITLE,
                 MediaStore.Files.FileColumns.DISPLAY_NAME,
                 MediaStore.Files.FileColumns.DURATION,
-                MediaStore.Files.FileColumns.BUCKET_DISPLAY_NAME
+                MediaStore.Files.FileColumns.BUCKET_DISPLAY_NAME,
+                MediaStore.Files.FileColumns.SIZE,
+                MediaStore.Files.FileColumns.WIDTH,
+                MediaStore.Files.FileColumns.HEIGHT,
+                MediaStore.Files.FileColumns.RELATIVE_PATH
             )
             val selection = (MediaStore.Files.FileColumns.MEDIA_TYPE + "="
                     + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
@@ -65,9 +66,14 @@ class MediaService @Inject constructor(
                 val dateAddedColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_TAKEN)
                 val mediaNameColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME)
                 val idColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
-                val mediaType = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)
+                val mediaTypeColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)
                 val durationColumn: Int =
                     it.getColumnIndex(MediaStore.Video.VideoColumns.DURATION)
+
+                val itemSizeColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE)
+                val itemWidthColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.WIDTH)
+                val itemHeightColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.HEIGHT)
+                val relativePathColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.RELATIVE_PATH)
 
 
                 while (it.moveToNext()) {
@@ -76,6 +82,10 @@ class MediaService @Inject constructor(
                     val imageId = it.getLong(idColumn)
                     val mediaName = it.getString(mediaNameColumn)
                     val dateAdded = it.getLongOrNull(dateAddedColumn)
+                    val size = it.getStringOrNull(itemSizeColumn)
+                    val width = it.getStringOrNull(itemWidthColumn)
+                    val height = it.getStringOrNull(itemHeightColumn)
+                    val relativePath = it.getStringOrNull(relativePathColumn)
 
                     val contentUri: Uri = ContentUris.withAppendedId(
                         MediaStore.Files.getContentUri("external"),
@@ -84,8 +94,9 @@ class MediaService @Inject constructor(
 
                     var media: MediaModel
 
-                    when(it.getInt(mediaType)) {
+                    when(it.getInt(mediaTypeColumn)) {
                         MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE -> {
+
                             media = MediaModel(
                                 imageId,
                                 contentUri,
@@ -93,7 +104,7 @@ class MediaService @Inject constructor(
                                 MediaType.IMAGE,
                                 null,
                                 mediaName,
-                                dateAdded
+                                MediaModelDetails(dateAdded, relativePath, size, width, height)
                                 )
                         }
                         MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO -> {
@@ -104,15 +115,13 @@ class MediaService @Inject constructor(
                                 MediaType.VIDEO,
                                 it.getLong(durationColumn),
                                 mediaName,
-                                dateAdded
+                                MediaModelDetails(dateAdded, relativePath, size)
                             )
                         }
                         else -> {
                             throw IllegalArgumentException("Something wrong happened.")
                         }
                     }
-
-                    //TODO If this causes performance issues defer it to on album click
 
                     if (albumsNames.contains(bucketName)) {
                         for (album in allAlbums) {
