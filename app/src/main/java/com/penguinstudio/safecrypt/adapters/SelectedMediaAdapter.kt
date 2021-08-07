@@ -1,15 +1,13 @@
 package com.penguinstudio.safecrypt.adapters
 
-import android.content.Context
+import android.annotation.SuppressLint
 import android.graphics.drawable.Drawable
-import android.media.AudioFocusRequest
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.bumptech.glide.ListPreloader
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
@@ -21,15 +19,13 @@ import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.models.MediaType
 import kotlin.collections.ArrayList
-import androidx.core.content.ContextCompat.getSystemService
-import android.media.AudioManager
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.audio.AudioAttributes
 
 
-class ImagePagerAdapter(private var listener: ImagePagerListeners,
-                        var fullRequest: RequestBuilder<Drawable>,
-                        val glide: RequestManager)
+class SelectedMediaAdapter(private var listener: ImagePagerListeners,
+                           var fullRequest: RequestBuilder<Drawable>,
+                           val glide: RequestManager)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>(),
     ListPreloader.PreloadModelProvider<MediaModel> {
 
@@ -51,6 +47,7 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
         .setContentType(C.CONTENT_TYPE_MOVIE)
         .build()
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setMedia(media: ArrayList<MediaModel>) {
         this.media = media
         notifyDataSetChanged()
@@ -62,7 +59,7 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
 
     fun setCurrentPosition(position: Int) {
 
-        //Notify current selected item to fuck off
+        //Notify current selected item that it ain't selected anymore
         notifyItemChanged(currentSelectedItem)
 
         // Notify the new current selected item to come in place
@@ -101,7 +98,7 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
                 viewHolder = InnerGalleryVideoViewHolder(v1)
             }
         }
-        return viewHolder;
+        return viewHolder
     }
 
 
@@ -262,10 +259,10 @@ class ImagePagerAdapter(private var listener: ImagePagerListeners,
     }
 
     override fun getPreloadItems(position: Int): MutableList<MediaModel> {
-        return media.subList(position, position + 1);
+        return media.subList(position, position + 1)
     }
 
-    override fun getPreloadRequestBuilder(item: MediaModel): RequestBuilder<*>? {
+    override fun getPreloadRequestBuilder(item: MediaModel): RequestBuilder<*> {
         return fullRequest.clone()
     }
 }

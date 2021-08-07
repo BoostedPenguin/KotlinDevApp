@@ -1,6 +1,7 @@
 package com.penguinstudio.safecrypt.ui.home
 
 import android.content.res.Configuration
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,9 +11,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.penguinstudio.safecrypt.R
-import com.penguinstudio.safecrypt.adapters.AlbumGridAdapter
+import com.penguinstudio.safecrypt.adapters.AlbumsAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentGalleryBinding
 import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.utilities.Status
@@ -24,7 +27,8 @@ import dagger.hilt.android.AndroidEntryPoint
 class GalleryFragment : Fragment() {
     private val model: GalleryViewModel by activityViewModels()
     private lateinit var binding: FragmentGalleryBinding
-    private lateinit var galleryAdapter: AlbumGridAdapter
+    private lateinit var galleryAdapter: AlbumsAdapter
+    private lateinit var fullRequest: RequestBuilder<Drawable>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,8 +42,6 @@ class GalleryFragment : Fragment() {
             }
 
         requireActivity().onBackPressedDispatcher.addCallback(this, callback)
-
-        // The callback can be enabled or disabled here or in handleOnBackPressed()
     }
 
     override fun onCreateView(
@@ -48,6 +50,11 @@ class GalleryFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         binding = FragmentGalleryBinding.inflate(layoutInflater)
+
+        fullRequest = Glide.with(this)
+            .asDrawable()
+            .placeholder(R.drawable.ic_baseline_image_24)
+            .fitCenter()
 
         initGrid()
 
@@ -69,20 +76,12 @@ class GalleryFragment : Fragment() {
         model.albums.observe(viewLifecycleOwner, {
             when (it.status) {
                 Status.SUCCESS -> {
-                    binding.gallerySwipeToRefresh.isRefreshing = false
-                    binding.gallerySwipeToRefresh.isEnabled = true
-
-                    binding.galleryProgressBar.visibility = View.GONE
-                    binding.galleryRecyclerView.visibility = View.VISIBLE
+                    updateUIOnResponse()
 
                     it.data?.let { it1 -> galleryAdapter.setAlbums(it1.collection) }
                 }
                 Status.ERROR -> {
-                    binding.galleryProgressBar.visibility = View.GONE
-                    binding.galleryRecyclerView.visibility = View.VISIBLE
-
-                    binding.gallerySwipeToRefresh.isRefreshing = false
-                    binding.gallerySwipeToRefresh.isEnabled = true
+                    updateUIOnResponse()
 
                     Snackbar.make(binding.root, "Something went wrong", Snackbar.LENGTH_SHORT)
                         .show()
@@ -104,14 +103,22 @@ class GalleryFragment : Fragment() {
         })
     }
 
+    private fun updateUIOnResponse() {
+        binding.gallerySwipeToRefresh.isRefreshing = false
+        binding.gallerySwipeToRefresh.isEnabled = true
+
+        binding.galleryProgressBar.visibility = View.GONE
+        binding.galleryRecyclerView.visibility = View.VISIBLE
+    }
+
 
     private fun initGrid() {
-        galleryAdapter = AlbumGridAdapter(object : AlbumGridAdapter.AdapterListeners {
+        galleryAdapter = AlbumsAdapter(object : AlbumsAdapter.AdapterListeners {
             override fun onImageClickListener(position: Int, album: AlbumModel) {
                 model.setSelectedAlbum(album)
                 findNavController().navigate(R.id.action_homeFragment_to_picturesFragment)
             }
-        })
+        }, fullRequest)
 
         when(resources.configuration.orientation) {
 

@@ -1,5 +1,6 @@
 package com.penguinstudio.safecrypt.adapters
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
@@ -22,10 +23,10 @@ import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
 
-class PhotoGridAdapter constructor(private var listener: AdapterListeners?,
-                                   var fullRequest: RequestBuilder<Drawable>,
+class AlbumMediaAdapter constructor(private var listener: AdapterListeners?,
+                                    private var fullRequest: RequestBuilder<Drawable>,
                                     ) :
-    RecyclerView.Adapter<PhotoGridAdapter.ImageHolder>(),
+    RecyclerView.Adapter<AlbumMediaAdapter.ImageHolder>(),
     ListPreloader.PreloadModelProvider<MediaModel> {
 
     init {
@@ -40,6 +41,7 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?,
     private var isSelectionMode: Boolean = false
 
 
+    @SuppressLint("NotifyDataSetChanged")
     fun toggleSelectionMode(isSelectionMode: Boolean) {
         this.isSelectionMode = isSelectionMode
         images.forEach {
@@ -48,12 +50,8 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?,
         notifyDataSetChanged()
     }
 
-    fun removeImage(position: Int) {
-        this.images.removeAt(position)
-        notifyItemRemoved(position)
-    }
 
-
+    @SuppressLint("NotifyDataSetChanged")
     fun setImages(images: ArrayList<MediaModel>?) {
         if (images != null) {
             this.images = images
@@ -182,7 +180,7 @@ class PhotoGridAdapter constructor(private var listener: AdapterListeners?,
     }
 
     override fun getPreloadItems(position: Int): MutableList<MediaModel> {
-        return images.subList(position, position + 1);
+        return images.subList(position, position + 1)
     }
 
     override fun getPreloadRequestBuilder(item: MediaModel): RequestBuilder<*> {

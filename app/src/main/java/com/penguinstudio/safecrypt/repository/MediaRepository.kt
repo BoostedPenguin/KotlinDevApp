@@ -1,7 +1,6 @@
 package com.penguinstudio.safecrypt.repository
 
 import android.app.RecoverableSecurityException
-import android.content.Context
 import android.os.Build
 import androidx.activity.result.IntentSenderRequest
 import com.penguinstudio.safecrypt.models.AlbumModel

@@ -22,14 +22,9 @@ import androidx.viewpager2.widget.CompositePageTransformer
 import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
-import com.bumptech.glide.ListPreloader
-import com.bumptech.glide.ListPreloader.PreloadModelProvider
-import com.bumptech.glide.ListPreloader.PreloadSizeProvider
 import com.bumptech.glide.RequestBuilder
-import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader
-import com.bumptech.glide.util.ViewPreloadSizeProvider
 import com.penguinstudio.safecrypt.R
-import com.penguinstudio.safecrypt.adapters.ImagePagerAdapter
+import com.penguinstudio.safecrypt.adapters.SelectedMediaAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentSelectedPictureBinding
 import com.penguinstudio.safecrypt.models.MediaModel
 
@@ -79,10 +74,10 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
 //        )
 
 
-        val imagePagerAdapter = ImagePagerAdapter(object: ImagePagerAdapter.ImagePagerListeners {
+        val imagePagerAdapter = SelectedMediaAdapter(object: SelectedMediaAdapter.ImagePagerListeners {
             override fun onViewClickListener(position: Int, album: MediaModel) {
                 handleToolbarOnImageClick().observe(viewLifecycleOwner, {
-                    (viewPager.adapter as ImagePagerAdapter).isHandleVisible = it
+                    (viewPager.adapter as SelectedMediaAdapter).isHandleVisible = it
                 })
             }
         }, fullRequest, Glide.with(this))
@@ -92,7 +87,7 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 viewPager.post {
-                    (viewPager.adapter as ImagePagerAdapter).setCurrentPosition(position)
+                    (viewPager.adapter as SelectedMediaAdapter).setCurrentPosition(position)
                 }
             }
         })
@@ -109,7 +104,7 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
     override fun onPause() {
         super.onPause()
 
-        (viewPager.adapter as ImagePagerAdapter).pausePlayer()
+        (viewPager.adapter as SelectedMediaAdapter).pausePlayer()
     }
 
     override fun onDestroyView() {

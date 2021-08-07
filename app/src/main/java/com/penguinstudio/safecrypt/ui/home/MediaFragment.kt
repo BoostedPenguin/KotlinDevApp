@@ -20,7 +20,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.penguinstudio.safecrypt.R
-import com.penguinstudio.safecrypt.adapters.PhotoGridAdapter
+import com.penguinstudio.safecrypt.adapters.AlbumMediaAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentPicturesBinding
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.services.EncryptionProcessIntentHandler
@@ -33,7 +33,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MediaFragment : Fragment(), LifecycleObserver {
     private lateinit var binding: FragmentPicturesBinding
-    private lateinit var photoAdapter: PhotoGridAdapter
+    private lateinit var photoAdapter: AlbumMediaAdapter
     private val _model: GalleryViewModel by activityViewModels()
 
     private lateinit var fullRequest: RequestBuilder<Drawable>
@@ -148,7 +148,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
     }
 
     private fun initGrid() {
-        photoAdapter = PhotoGridAdapter(object: PhotoGridAdapter.AdapterListeners {
+        photoAdapter = AlbumMediaAdapter(object: AlbumMediaAdapter.AdapterListeners {
             override fun onClickListener(position: Int, media: MediaModel) {
 
                 // If in selection mode add / remove, else trigger normal action

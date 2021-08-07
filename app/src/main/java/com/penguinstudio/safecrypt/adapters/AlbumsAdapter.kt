@@ -1,5 +1,7 @@
 package com.penguinstudio.safecrypt.adapters
 
+import android.annotation.SuppressLint
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,12 +9,16 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.ListPreloader
+import com.bumptech.glide.RequestBuilder
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.AlbumModel
-import com.penguinstudio.safecrypt.models.MediaModel
 
-class AlbumGridAdapter(private var listener: AdapterListeners?) : RecyclerView.Adapter<AlbumGridAdapter.AlbumHolder>() {
+class AlbumsAdapter(private var listener: AdapterListeners?,
+                    private var fullRequest: RequestBuilder<Drawable>) :
+    RecyclerView.Adapter<AlbumsAdapter.AlbumHolder>(),
+    ListPreloader.PreloadModelProvider<AlbumModel> {
+
     interface AdapterListeners {
         fun onImageClickListener(position: Int, album: AlbumModel)
     }
@@ -20,6 +26,7 @@ class AlbumGridAdapter(private var listener: AdapterListeners?) : RecyclerView.A
     // Replace with data model
     private var albums: ArrayList<AlbumModel> = ArrayList()
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setAlbums(albums: ArrayList<AlbumModel>) {
         this.albums = albums
         notifyDataSetChanged()
@@ -71,5 +78,13 @@ class AlbumGridAdapter(private var listener: AdapterListeners?) : RecyclerView.A
                 }
             }
         }
+    }
+
+    override fun getPreloadItems(position: Int): MutableList<AlbumModel> {
+        return albums.subList(position, position + 1)
+    }
+
+    override fun getPreloadRequestBuilder(item: AlbumModel): RequestBuilder<*> {
+        return fullRequest.clone()
     }
 }

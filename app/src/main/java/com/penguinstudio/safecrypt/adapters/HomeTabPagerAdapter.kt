@@ -1,6 +1,5 @@
 package com.penguinstudio.safecrypt.adapters
 
-import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.penguinstudio.safecrypt.ui.home.GalleryFragment

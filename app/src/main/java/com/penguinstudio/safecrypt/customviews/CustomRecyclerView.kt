@@ -1,19 +1,16 @@
 package com.penguinstudio.safecrypt.customviews
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
-import android.view.animation.AccelerateInterpolator
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
-import android.view.animation.DecelerateInterpolator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
 import com.penguinstudio.safecrypt.R
-import com.penguinstudio.safecrypt.adapters.PhotoGridAdapter
+import com.penguinstudio.safecrypt.adapters.AlbumMediaAdapter
 import kotlin.math.abs
 enum class ScaleFactor {
     SCALE_EXPANDING, SCALE_SHRINKING
@@ -75,9 +72,10 @@ class CustomRecyclerView(context: Context, attrs: AttributeSet ) : RecyclerView(
         animateRecyclerLayoutChange(currentColumns)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun animateRecyclerLayoutChange(layoutSpanCount: Int) {
         val lm = layoutManager as GridLayoutManager
-        (adapter as PhotoGridAdapter).apply {
+        (adapter as AlbumMediaAdapter).apply {
             notifyDataSetChanged()
         }
         post {
@@ -88,7 +86,7 @@ class CustomRecyclerView(context: Context, attrs: AttributeSet ) : RecyclerView(
 
 
 
-    internal class PinchListener(val listener: PinchListenerResult) : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+    internal class PinchListener(private val listener: PinchListenerResult) : ScaleGestureDetector.SimpleOnScaleGestureListener() {
         interface PinchListenerResult {
             fun onResult(scale: ScaleFactor)
             fun onScaleBegin()
@@ -118,8 +116,7 @@ class CustomRecyclerView(context: Context, attrs: AttributeSet ) : RecyclerView(
         }
 
         private fun gestureTolerance(detector: ScaleGestureDetector): Boolean {
-            val slop = 7;
-
+            val slop = 7
             val spanDelta = abs(detector.currentSpan - detector.previousSpan)
             return spanDelta > slop
         }
