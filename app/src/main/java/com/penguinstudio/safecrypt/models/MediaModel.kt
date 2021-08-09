@@ -15,7 +15,6 @@ data class MediaModel(
     val details: MediaModelDetails,
 
     var isSelected: Boolean = false,
-    var selectedPosition: Int? = null,
 )
 
 data class MediaModelDetails(

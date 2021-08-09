@@ -28,7 +28,7 @@ interface IPicturesViewModel {
 
     fun clearSelections()
 
-    val selectedItems: MutableLiveData<MutableList<MediaModel>>
+    val selectedItems: MutableList<MediaModel>
 
     fun addMediaToSelection(position: Int, media: MediaModel)
 
@@ -95,10 +95,9 @@ class GalleryViewModel @Inject constructor(
     override fun encryptSelectedMedia() {
         viewModelScope.launch {
 
-            val content = selectedItems.value ?: return@launch
             _encryptionStatus.postValue(EncryptionResource.loading())
 
-            mediaRepository.encryptSelectedMedia(content.toList()).let {
+            mediaRepository.encryptSelectedMedia(selectedItems.toList()).let {
                 _encryptionStatus.postValue(it)
             }
         }
@@ -137,48 +136,35 @@ class GalleryViewModel @Inject constructor(
     }
 
     override var itemSelectionMode = false
-    override val selectedItems: MutableLiveData<MutableList<MediaModel>> = MutableLiveData()
+    override val selectedItems: MutableList<MediaModel> = mutableListOf()
 
 
     override fun clearSelections() {
-        selectedItems.value?.clear()
+        selectedItems.clear()
     }
 
     override fun addMediaToSelection(position: Int, media: MediaModel) {
-        media.selectedPosition = position
+        media.isSelected = true
 
-        if(selectedItems.value == null) {
-            selectedItems.value = mutableListOf(media)
-        }
-        else {
-            selectedItems.value?.add(media)
-            selectedItems.notifyObserver()
-        }
+        selectedItems.add(media)
     }
 
     override fun addAllMediaToSelection(media: ArrayList<MediaModel>) {
-        if(selectedItems.value == null) {
-            selectedItems.value = media
-        }
-        else {
-            selectedItems.value!!.let {
-                for(obj in media) {
-                    if(!it.contains(obj)) {
-                        it.add(obj)
-                        obj.isSelected = true
-                    }
+        selectedItems.let {
+            for(obj in media) {
+                if(!it.contains(obj)) {
+                    it.add(obj)
+                    obj.isSelected = true
                 }
             }
-
-            selectedItems.notifyObserver()
         }
     }
 
     override fun removeMediaFromSelection(position: Int, media: MediaModel) {
-        selectedItems.value?.removeAll {
+        selectedItems.removeAll {
             it.id == media.id
         }
-        selectedItems.notifyObserver()
+        media.isSelected = false
     }
 
     /**

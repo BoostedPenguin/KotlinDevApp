@@ -47,7 +47,6 @@ class MediaRepository @Inject constructor(
             val result = try {
                 encryptionService.encryptImage(it)
 
-                it.selectedPosition?.let { it1 -> successResponse.positions?.add(it1) }
                 EncryptionResource.complete(null)
             }
             // Recoverable delete

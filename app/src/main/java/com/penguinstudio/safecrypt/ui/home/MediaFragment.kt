@@ -154,17 +154,22 @@ class MediaFragment : Fragment(), LifecycleObserver {
                 // If in selection mode add / remove, else trigger normal action
                 if(model.itemSelectionMode) {
 
-                    if(model.selectedItems.value?.contains(media) == true) {
+                    if(model.selectedItems.contains(media)) {
                         model.removeMediaFromSelection(position, media)
-                        media.isSelected = false
+
+                        if(model.selectedItems.size == 0) {
+
+                            photoAdapter.toggleSelectionMode(false)
+
+                            exitSelectMode()
+                        }
                     }
                     else {
                         model.addMediaToSelection(position, media)
-                        media.isSelected = true
                     }
 
                     if (model.itemSelectionMode) {
-                        (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.value?.size ?: 0} selected"
+                        (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.size} selected"
                     }
 
                     // Notify adapter that this item has changed
@@ -182,10 +187,10 @@ class MediaFragment : Fragment(), LifecycleObserver {
                 model.itemSelectionMode = true
 
                 model.addMediaToSelection(position, media)
-                (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.value?.size ?: 0} selected"
+                (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.size} selected"
+
                 // Notify adapter that this item has changed
                 activity?.invalidateOptionsMenu()
-                media.isSelected = true
                 photoAdapter.notifyItemChanged(position)
             }
         }, fullRequest)
@@ -214,8 +219,6 @@ class MediaFragment : Fragment(), LifecycleObserver {
             exitSelectMode()
             model.getMedia()
         }
-        (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.value?.size ?: 0} selected"
-
         model.selectedAlbum.observe(viewLifecycleOwner, {
             if(it == null) return@observe
 
@@ -231,8 +234,14 @@ class MediaFragment : Fragment(), LifecycleObserver {
                     }
 
                     photoAdapter.setImages(it.data.albumMedia, model.itemSelectionMode)
-                    (activity as AppCompatActivity?)?.supportActionBar?.title =
-                        it.data.name
+
+                    if(model.itemSelectionMode) {
+                        (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.size} selected"
+                    }
+                    else {
+                        (activity as AppCompatActivity?)?.supportActionBar?.title =
+                            it.data.name
+                    }
                 }
                 Status.ERROR -> {
                     binding.picturesProgressBar.visibility = View.GONE
@@ -240,25 +249,12 @@ class MediaFragment : Fragment(), LifecycleObserver {
                     findNavController().popBackStack()
                 }
                 Status.LOADING -> {
-                    if(binding.picturesSwipeToRefresh.isRefreshing) {
-                        // Do nothing wait it out
-                    }
-                    else {
+                    if(!binding.picturesSwipeToRefresh.isRefreshing) {
                         binding.picturesProgressBar.visibility = View.VISIBLE
                     }
                 }
             }
         })
-
-
-        model.selectedItems.observe(viewLifecycleOwner, {
-            if(it != null && it.size == 0) {
-                photoAdapter.toggleSelectionMode(false)
-
-                exitSelectMode()
-            }
-        })
-
 
         model.encryptionStatus.observe(viewLifecycleOwner, { it ->
             if(it == null) return@observe
