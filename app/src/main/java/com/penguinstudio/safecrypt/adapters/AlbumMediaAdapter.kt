@@ -52,11 +52,10 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners?,
 
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setImages(images: ArrayList<MediaModel>?) {
-        if (images != null) {
-            this.images = images
-            notifyDataSetChanged()
-        }
+    fun setImages(images: ArrayList<MediaModel>, isSelectionMode: Boolean = false) {
+        this.images = images
+        this.isSelectionMode = isSelectionMode
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageHolder {
@@ -109,13 +108,6 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners?,
             }
             else -> holder.videoLayoutCard.visibility = View.GONE
         }
-
-
-//        Glide.with(holder.itemView)
-//            .load(currentImage.mediaUri)
-//            .placeholder(R.drawable.ic_baseline_image_24)
-//            .fitCenter()
-//            .into(holder.imageView)
 
         fullRequest
             .load(currentImage.mediaUri)

@@ -175,7 +175,7 @@ class GalleryViewModel @Inject constructor(
     }
 
     override fun removeMediaFromSelection(position: Int, media: MediaModel) {
-        selectedItems.value!!.removeAll {
+        selectedItems.value?.removeAll {
             it.id == media.id
         }
         selectedItems.notifyObserver()

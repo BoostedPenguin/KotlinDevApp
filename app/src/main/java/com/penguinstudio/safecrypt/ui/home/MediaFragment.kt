@@ -230,7 +230,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
                         return@observe
                     }
 
-                    photoAdapter.setImages(it.data.albumMedia)
+                    photoAdapter.setImages(it.data.albumMedia, model.itemSelectionMode)
                     (activity as AppCompatActivity?)?.supportActionBar?.title =
                         it.data.name
                 }
