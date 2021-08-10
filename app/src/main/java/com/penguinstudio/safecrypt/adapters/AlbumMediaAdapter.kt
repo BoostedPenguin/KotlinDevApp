@@ -41,20 +41,27 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners?,
     private var isSelectionMode: Boolean = false
 
 
-    @SuppressLint("NotifyDataSetChanged")
     fun toggleSelectionMode(isSelectionMode: Boolean) {
         this.isSelectionMode = isSelectionMode
         images.forEach {
             it.isSelected = false
         }
-        notifyDataSetChanged()
+        adapterDataSetChanged()
     }
 
 
-    @SuppressLint("NotifyDataSetChanged")
     fun setImages(images: ArrayList<MediaModel>, isSelectionMode: Boolean = false) {
         this.images = images
         this.isSelectionMode = isSelectionMode
+        adapterDataSetChanged()
+    }
+
+    /**
+     * Use this instead of notifyDataSetChanged to ignore lint warnings
+     * @see notifyDataSetChanged
+     */
+    @SuppressLint("NotifyDataSetChanged")
+    fun adapterDataSetChanged() {
         notifyDataSetChanged()
     }
 

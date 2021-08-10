@@ -35,7 +35,7 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
     }
 
     interface ImagePagerListeners {
-        fun onViewClickListener(position: Int, album: MediaModel)
+        fun onViewClickListener(position: Int, media: MediaModel)
     }
     private var media: ArrayList<MediaModel> = ArrayList()
     private var player: SimpleExoPlayer? = null
@@ -55,6 +55,10 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
 
     fun pausePlayer() {
         player?.pause()
+    }
+
+    fun getItem(position: Int) : MediaModel {
+        return media[position]
     }
 
     fun setCurrentPosition(position: Int) {
@@ -232,6 +236,14 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
                 }
             }
 
+            if(isHandleVisible) {
+                selectedVideo.showController()
+            }
+            else {
+                selectedVideo.hideController()
+            }
+
+
             val mediaItem: MediaItem = MediaItem.fromUri(media.mediaUri)
 
             player?.setMediaItem(mediaItem)
@@ -240,12 +252,7 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
             player?.addListener(object: Player.Listener {
                 override fun onIsLoadingChanged(isLoading: Boolean) {
                     if(!isLoading) {
-                        if(isHandleVisible) {
-                            selectedVideo.showController()
-                        }
-                        else {
-                            selectedVideo.hideController()
-                        }
+
 
                         imageView.visibility = View.GONE
                         selectedVideo.visibility = View.VISIBLE

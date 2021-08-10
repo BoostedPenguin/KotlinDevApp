@@ -2,6 +2,7 @@ package com.penguinstudio.safecrypt.ui.home
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -27,11 +28,13 @@ import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.SelectedMediaAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentSelectedPictureBinding
 import com.penguinstudio.safecrypt.models.MediaModel
+import com.penguinstudio.safecrypt.models.MediaType
 
 
 class SelectedMediaFragment : Fragment(), LifecycleObserver {
     private lateinit var binding: FragmentSelectedPictureBinding
     private lateinit var viewPager: ViewPager2
+    private lateinit var imagePagerAdapter: SelectedMediaAdapter
     private var content: ArrayList<MediaModel> = ArrayList()
     private lateinit var fullRequest: RequestBuilder<Drawable>
 
@@ -66,16 +69,8 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
         }
         binding.selectedFragmentToolbar.visibility = View.VISIBLE
 
-
-//        val sizeProvider: PreloadSizeProvider<MediaModel>  = ViewPreloadSizeProvider()
-//        val modelProvider: PreloadModelProvider<MediaModel> = MyPreloadModelProvider()
-//        val preloader: RecyclerViewPreloader<MediaModel> = RecyclerViewPreloader(
-//            Glide.with(this), modelProvider, sizeProvider, 10
-//        )
-
-
-        val imagePagerAdapter = SelectedMediaAdapter(object: SelectedMediaAdapter.ImagePagerListeners {
-            override fun onViewClickListener(position: Int, album: MediaModel) {
+        imagePagerAdapter = SelectedMediaAdapter(object: SelectedMediaAdapter.ImagePagerListeners {
+            override fun onViewClickListener(position: Int, media: MediaModel) {
                 handleToolbarOnImageClick().observe(viewLifecycleOwner, {
                     (viewPager.adapter as SelectedMediaAdapter).isHandleVisible = it
                 })
@@ -87,7 +82,18 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 viewPager.post {
-                    (viewPager.adapter as SelectedMediaAdapter).setCurrentPosition(position)
+                    imagePagerAdapter.setCurrentPosition(position)
+
+                    when(imagePagerAdapter.getItem(position).mediaType) {
+                        MediaType.IMAGE -> {
+                            binding.selectedFragmentToolbar.
+                            setBackgroundColor(resources.getColor(R.color.black_overlay))
+                        }
+                        MediaType.VIDEO -> {
+                            binding.selectedFragmentToolbar.
+                            setBackgroundColor(Color.TRANSPARENT)
+                        }
+                    }
                 }
             }
         })
@@ -97,14 +103,13 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
 
         imagePagerAdapter.setMedia(content)
 
-        val g = imagePagerAdapter.getItemPosition(model.selectedMedia!!)
-        viewPager.setCurrentItem(g, false)
+        viewPager.setCurrentItem(imagePagerAdapter.getItemPosition(model.selectedMedia!!), false)
     }
 
     override fun onPause() {
         super.onPause()
 
-        (viewPager.adapter as SelectedMediaAdapter).pausePlayer()
+        imagePagerAdapter.pausePlayer()
     }
 
     override fun onDestroyView() {

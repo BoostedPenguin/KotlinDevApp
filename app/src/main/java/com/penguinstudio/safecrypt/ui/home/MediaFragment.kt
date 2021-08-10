@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -130,7 +131,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
         return when(item.itemId) {
             R.id.action_select_all -> {
                 model.addAllMediaToSelection(photoAdapter.getImages())
-                photoAdapter.notifyItemRangeChanged(0, photoAdapter.itemCount)
+                photoAdapter.adapterDataSetChanged()
                 true
             }
             R.id.action_encrypt -> {
