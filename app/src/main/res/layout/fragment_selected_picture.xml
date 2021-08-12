@@ -9,15 +9,24 @@
 
     <androidx.appcompat.widget.Toolbar
         android:visibility="gone"
+        app:menu="@menu/selected_picture_menu"
         android:id="@+id/selected_fragment_toolbar"
         app:layout_constraintTop_toTopOf="parent"
         android:theme="@style/Toolbar.SelectedPicture"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize" />
+        android:layout_height="?attr/actionBarSize">
+    </androidx.appcompat.widget.Toolbar>
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <View
+        android:visibility="gone"
+        android:elevation="100dp"
+        android:id="@+id/selected_picture_overlay"
+        android:background="@color/black_50_transparent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,10 +5,6 @@ import android.animation.AnimatorListenerAdapter
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -24,11 +20,18 @@ import androidx.viewpager2.widget.MarginPageTransformer
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
-import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.SelectedMediaAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentSelectedPictureBinding
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.models.MediaType
+import android.content.Context.LAYOUT_INFLATER_SERVICE
+import android.view.*
+import android.widget.*
+import com.penguinstudio.safecrypt.R
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 
 class SelectedMediaFragment : Fragment(), LifecycleObserver {
@@ -66,6 +69,15 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
         binding.selectedFragmentToolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24)
         binding.selectedFragmentToolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
+        }
+        binding.selectedFragmentToolbar.setOnMenuItemClickListener {
+            when(it.itemId) {
+                R.id.action_media_details -> {
+                    showPopupWindow(imagePagerAdapter.getCurrentItem())
+                    true
+                }
+                else -> true
+            }
         }
         binding.selectedFragmentToolbar.visibility = View.VISIBLE
 
@@ -172,6 +184,87 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
             .fitCenter()
 
         return binding.root
+    }
+
+    private fun Double.format(digits: Int) = "%.${digits}f".format(this)
+
+    private fun sizeConvertedToString(value: Double) : String {
+        value.let {
+            when {
+                value >= 1024 * 1024 * 1024 -> {
+                    //gb
+                    return "${(value / 1024 / 1024 / 1024).format(2)} GBs"
+                }
+                value >= 1024 * 1024 -> {
+                    //mb
+                    return "${(value / 1024 / 1024).format(2)} MBs"
+                }
+                value >= 1024 -> {
+                    //kb
+                    return "${(value / 1024).format(2)} KBs"
+                }
+                else -> {
+                    //byte
+                    return "${value.format(2)} Bytes"
+                }
+            }
+        }
+    }
+
+    private fun showPopupWindow(mediaModel: MediaModel) {
+
+        //Create a View object yourself through inflater
+        val popupView: View = View.inflate(context, R.layout.details_popup_view, null)
+
+
+        binding.selectedPictureOverlay.visibility = View.VISIBLE
+
+        //Specify the length and width through constants
+        val width = LinearLayout.LayoutParams.MATCH_PARENT
+        val height = LinearLayout.LayoutParams.WRAP_CONTENT
+
+
+        //Make Inactive Items Outside Of PopupWindow
+        val focusable = true
+
+        //Create a window with our parameters
+        val popupWindow = PopupWindow(popupView, width, height, focusable)
+        popupWindow.setOnDismissListener {
+            binding.selectedPictureOverlay.visibility = View.GONE
+        }
+
+
+        //Set the location of the window on the screen
+        popupWindow.showAtLocation(view, Gravity.BOTTOM, 0, 0)
+
+        val size = mediaModel.details.size?.toDouble()?.let { sizeConvertedToString(it) }
+
+        var dimensions = ""
+        when(mediaModel.mediaType) {
+            MediaType.IMAGE -> {
+                popupView.findViewById<TextView>(R.id.detailsDimensionsValue).text =
+                    "${mediaModel.details.height}x${mediaModel.details.width}"
+            }
+            MediaType.VIDEO -> {
+                mediaModel.videoDuration?.let {
+                    val formattedDuration = String.format("%02d:%02d",
+                        TimeUnit.MILLISECONDS.toMinutes(it),
+                        TimeUnit.MILLISECONDS.toSeconds(it) -
+                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(it))
+                    )
+
+                    popupView.findViewById<TextView>(R.id.detailsDimensions).text =
+                        "Duration:"
+
+                    popupView.findViewById<TextView>(R.id.detailsDimensionsValue).text =
+                        formattedDuration
+                }
+            }
+        }
+        popupView.findViewById<TextView>(R.id.detailsSizeValue).text = size ?: "No Value"
+        popupView.findViewById<TextView>(R.id.detailsDateValue).text = "${SimpleDateFormat("dd MMMM yyyy hh:mm", Locale.US)
+            .format(mediaModel.details.dateAdded)}"
+        popupView.findViewById<TextView>(R.id.detailsPathValue).text = "${mediaModel.details.relativePath}"
     }
 
     override fun onDestroy() {

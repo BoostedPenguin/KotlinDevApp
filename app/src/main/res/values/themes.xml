@@ -53,10 +53,7 @@
     </style>
 
     <style name="Toolbar.SelectedPicture" parent="Widget.MaterialComponents.Toolbar.Primary">
-        <item name="android:backgroundTint">@color/black_overlay</item>
-        <item name="titleTextColor">@color/on_primary_dark</item>
-        <item name="subtitleTextColor">@color/on_primary_dark</item>
-        <item name="colorOnPrimary">@color/on_primary_dark</item>
+        <item name="android:background">@android:color/transparent</item>
     </style>
 
     <style name="AppTheme.DrawerArrowToggle" parent="Widget.AppCompat.DrawerArrowToggle">

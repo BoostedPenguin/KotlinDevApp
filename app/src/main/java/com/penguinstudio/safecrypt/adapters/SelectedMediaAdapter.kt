@@ -61,6 +61,10 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
         return media[position]
     }
 
+    fun getCurrentItem() : MediaModel {
+        return media[currentSelectedItem]
+    }
+
     fun setCurrentPosition(position: Int) {
 
         //Notify current selected item that it ain't selected anymore
