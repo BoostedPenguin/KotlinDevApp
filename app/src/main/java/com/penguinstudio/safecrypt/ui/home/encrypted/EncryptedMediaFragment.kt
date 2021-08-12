@@ -127,7 +127,7 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
                 TODO("Not yet implemented")
             }
         })
-        binding.enPicturesRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
+        binding.enPicturesRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.enPicturesRecyclerView.adapter = encryptedMediaAdapter
     }
 

@@ -49,7 +49,6 @@ class EncryptedGridAdapter(private var listener: EncryptedGridAdapter.AdapterLis
             .load(currentImage)
             .fitCenter()
             .placeholder(R.drawable.ic_baseline_image_24)
-            .thumbnail(0.1f)
             .into(holder.imageView)
     }
 

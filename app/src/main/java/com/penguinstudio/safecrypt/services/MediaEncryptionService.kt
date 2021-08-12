@@ -54,13 +54,10 @@ class MediaEncryptionService @Inject constructor(
 
 
             val result = async(Dispatchers.IO) {
-                val inputStream = context.contentResolver.openInputStream(image.mediaUri)
-                    ?: throw FileNotFoundException()
                 val outputStream = context.contentResolver.openOutputStream(encryptedEmptyFile.uri)
                     ?: throw FileNotFoundException()
 
-                val encryptedStatus = gcmEncryptionService.encryptData(inputStream, outputStream)
-                inputStream.close()
+                val encryptedStatus = gcmEncryptionService.encryptData(image.mediaUri, outputStream)
                 outputStream.flush()
                 outputStream.close()
 

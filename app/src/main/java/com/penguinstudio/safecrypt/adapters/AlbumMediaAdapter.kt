@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -73,54 +74,10 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners?,
     }
 
     override fun onBindViewHolder(holder: ImageHolder, position: Int) {
-        val currentImage = images[position]
-        holder.media = currentImage
+        val startTime = System.currentTimeMillis()
+        holder.bind(images[position])
+        Log.d("loadTime", "Time it took to encrypt media: ${System.currentTimeMillis() - startTime}ms")
 
-        if(isSelectionMode) {
-            holder.checkBox.visibility = View.VISIBLE
-
-            holder.checkBox.isChecked = images[position].isSelected
-
-            if(images[position].isSelected) {
-                holder.imageView.setColorFilter(Color.parseColor("#4D000000"), PorterDuff.Mode.SRC_ATOP)
-
-                holder.checkBox.isChecked = true
-            }
-            else {
-                holder.imageView.clearColorFilter()
-
-                holder.checkBox.isChecked = false
-            }
-
-        }
-        else {
-            holder.imageView.clearColorFilter()
-            holder.checkBox.visibility = View.INVISIBLE
-            holder.checkBox.isChecked = false
-        }
-
-        when(holder.media.mediaType) {
-            MediaType.VIDEO -> {
-                holder.media.videoDuration?.let {
-
-                    val formattedDuration = String.format("%02d:%02d",
-                        TimeUnit.MILLISECONDS.toMinutes(it),
-                        TimeUnit.MILLISECONDS.toSeconds(it) -
-                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(it))
-                    )
-
-                    holder.videoTextViewDuration.text = formattedDuration
-                    holder.videoLayoutCard.visibility = View.VISIBLE
-                }
-            }
-            else -> holder.videoLayoutCard.visibility = View.GONE
-        }
-
-        fullRequest
-            .load(currentImage.mediaUri)
-            .placeholder(R.drawable.ic_baseline_image_24)
-            .fitCenter()
-            .into(holder.imageView)
     }
 
     override fun getItemCount(): Int {
@@ -136,11 +93,66 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners?,
     }
 
     inner class ImageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        internal lateinit var media: MediaModel
-        internal var imageView: ImageView = itemView.findViewById(R.id.picturesInnerImage)
-        internal var checkBox: CheckBox = itemView.findViewById(R.id.picturesCheckbox)
-        internal var videoLayoutCard: CardView = itemView.findViewById(R.id.videoLayoutParentCard)
-        internal var videoTextViewDuration: TextView = itemView.findViewById(R.id.videoDuration)
+        private lateinit var media: MediaModel
+        private var imageView: ImageView = itemView.findViewById(R.id.picturesInnerImage)
+        private var checkBox: CheckBox = itemView.findViewById(R.id.picturesCheckbox)
+        private var videoLayoutCard: CardView = itemView.findViewById(R.id.videoLayoutParentCard)
+        private var videoTextViewDuration: TextView = itemView.findViewById(R.id.videoDuration)
+
+        fun bind(media: MediaModel) {
+            this.media = media
+
+            if(isSelectionMode) {
+                checkBox.visibility = View.VISIBLE
+
+                checkBox.isChecked = media.isSelected
+
+                if(media.isSelected) {
+                    imageView.setColorFilter(Color.parseColor("#4D000000"), PorterDuff.Mode.SRC_ATOP)
+
+                    checkBox.isChecked = true
+                }
+                else {
+                    imageView.clearColorFilter()
+
+                    checkBox.isChecked = false
+                }
+
+            }
+            else {
+                if(imageView.colorFilter != null)
+                    imageView.clearColorFilter()
+
+                if(checkBox.visibility != View.INVISIBLE)
+                    checkBox.visibility = View.INVISIBLE
+
+                if(!checkBox.isChecked)
+                    checkBox.isChecked = false
+            }
+
+            when(media.mediaType) {
+                MediaType.VIDEO -> {
+                    media.videoDuration?.let {
+
+                        val formattedDuration = String.format("%02d:%02d",
+                            TimeUnit.MILLISECONDS.toMinutes(it),
+                            TimeUnit.MILLISECONDS.toSeconds(it) -
+                                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(it))
+                        )
+
+                        videoTextViewDuration.text = formattedDuration
+                        videoLayoutCard.visibility = View.VISIBLE
+                    }
+                }
+                else -> videoLayoutCard.visibility = View.GONE
+            }
+
+            fullRequest
+                .load(media.mediaUri)
+                .placeholder(R.drawable.ic_baseline_image_24)
+                .fitCenter()
+                .into(imageView)
+        }
 
         init {
             imageView.setOnClickListener {
