@@ -13,8 +13,24 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-interface IPicturesViewModel {
+interface ISelectionViewModel<T> {
+    var itemSelectionMode: Boolean
+
+    fun clearSelections()
+
+    val selectedItems: MutableList<T>
+
+    fun addMediaToSelection(position: Int, media: T)
+
+    fun addAllMediaToSelection(media: ArrayList<T>)
+
+    fun removeMediaFromSelection(position: Int, media: T)
+}
+
+interface IPicturesViewModel : ISelectionViewModel<MediaModel> {
     fun getMedia()
+
+    fun setSelectedMedia(selectedMedia: MediaModel)
 
     val albums: LiveData<Resource<CollectionResponse<AlbumModel>>>
 
@@ -23,20 +39,6 @@ interface IPicturesViewModel {
     fun setSelectedAlbum(selectedItem: AlbumModel)
 
     fun clearSelectedAlbum()
-
-    var itemSelectionMode: Boolean
-
-    fun clearSelections()
-
-    val selectedItems: MutableList<MediaModel>
-
-    fun addMediaToSelection(position: Int, media: MediaModel)
-
-    fun addAllMediaToSelection(media: ArrayList<MediaModel>)
-
-    fun removeMediaFromSelection(position: Int, media: MediaModel)
-
-    fun setSelectedMedia(selectedMedia: MediaModel)
 
     fun encryptSelectedMedia()
 

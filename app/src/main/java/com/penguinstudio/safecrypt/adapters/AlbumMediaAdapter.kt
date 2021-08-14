@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
 
-class AlbumMediaAdapter constructor(private var listener: AdapterListeners?,
+class AlbumMediaAdapter constructor(private var listener: AdapterListeners,
                                     private var fullRequest: RequestBuilder<Drawable>,
                                     ) :
     RecyclerView.Adapter<AlbumMediaAdapter.ImageHolder>(),
@@ -155,16 +155,16 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners?,
             imageView.setOnClickListener {
                 val position = adapterPosition
 
-                if( listener != null && position != RecyclerView.NO_POSITION) {
-                    listener!!.onClickListener(position, media)
+                if(position != RecyclerView.NO_POSITION) {
+                    listener.onClickListener(position, media)
                 }
             }
 
             imageView.setOnLongClickListener {
                 val position = adapterPosition
 
-                if( listener != null && position != RecyclerView.NO_POSITION) {
-                    listener!!.onLongClickListener(position, media)
+                if(position != RecyclerView.NO_POSITION) {
+                    listener.onLongClickListener(position, media)
                 }
 
                 true
@@ -172,8 +172,8 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners?,
             checkBox.setOnClickListener {
                 val position = adapterPosition
 
-                if( listener != null && position != RecyclerView.NO_POSITION) {
-                    listener!!.onClickListener(position, media)
+                if(position != RecyclerView.NO_POSITION) {
+                    listener.onClickListener(position, media)
                 }
             }
         }

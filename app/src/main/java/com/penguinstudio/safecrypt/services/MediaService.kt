@@ -14,8 +14,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.lang.IllegalArgumentException
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.collections.ArrayList
 
 @Singleton
 class MediaService @Inject constructor(
@@ -161,7 +163,12 @@ class MediaService @Inject constructor(
 
             val uris = arrayListOf<EncryptedModel>()
 
-            root?.listFiles()?.forEach {
+            root?.listFiles()?.forEach lit@ {
+
+                // If it's not an encoded file continue
+                val ss = it.name
+                if(it.name == null || it.name!!.indexOf(".${GCMEncryptionService.ENC_FILE_EXTENSION}") <= 0) return@lit
+
                 uris.add(EncryptedModel(it.uri))
             }
             return@withContext uris

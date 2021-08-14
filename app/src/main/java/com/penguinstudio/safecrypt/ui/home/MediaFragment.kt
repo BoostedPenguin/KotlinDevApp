@@ -98,6 +98,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
 
         fullRequest = Glide.with(this)
             .asDrawable()
+            .thumbnail(0.25f)
             .placeholder(R.drawable.ic_baseline_image_24)
             .fitCenter()
 
@@ -163,6 +164,8 @@ class MediaFragment : Fragment(), LifecycleObserver {
                             photoAdapter.toggleSelectionMode(false)
 
                             exitSelectMode()
+
+                            return
                         }
                     }
                     else {
@@ -299,7 +302,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
                 }
                 EncryptionStatus.OPERATION_COMPLETE -> {
 
-                    exitSelectMode()
+                    //exitSelectMode()
 
                     // Fetch media, it will update adapter automatically
                     model.getMedia()

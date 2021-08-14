@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.TextUtils
 import androidx.fragment.app.Fragment
@@ -18,11 +19,14 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.EncryptedGridAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentEncryptedMediaBinding
 import com.penguinstudio.safecrypt.models.AlbumModel
+import com.penguinstudio.safecrypt.models.EncryptedModel
 import com.penguinstudio.safecrypt.services.EncryptionProcessIntentHandler
 import com.penguinstudio.safecrypt.utilities.Status
 import dagger.hilt.android.AndroidEntryPoint
@@ -33,6 +37,7 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
     private val model: EncryptedMediaViewModel by activityViewModels()
     private lateinit var binding: FragmentEncryptedMediaBinding
     private lateinit var encryptedMediaAdapter: EncryptedGridAdapter
+    private lateinit var fullRequest: RequestBuilder<Drawable>
 
     @Inject
     lateinit var encryptionProcessIntentHandler: EncryptionProcessIntentHandler
@@ -109,6 +114,11 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
             })
         }
 
+        fullRequest = Glide.with(this)
+            .asDrawable()
+            .placeholder(R.drawable.ic_baseline_image_24)
+            .fitCenter()
+
         checkForSaveLocation()
 
         initGrid()
@@ -134,10 +144,55 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
 
     private fun initGrid() {
         encryptedMediaAdapter = EncryptedGridAdapter(object : EncryptedGridAdapter.AdapterListeners {
-            override fun onImageClickListener(position: Int, album: AlbumModel) {
-                TODO("Not yet implemented")
+            override fun onClickListener(position: Int, media: EncryptedModel) {
+
+                // If in selection mode add / remove, else trigger normal action
+                if(model.itemSelectionMode) {
+
+                    if(model.selectedItems.contains(media)) {
+                        model.removeMediaFromSelection(position, media)
+
+                        if(model.selectedItems.size == 0) {
+
+                            encryptedMediaAdapter.toggleSelectionMode(false)
+
+                            exitSelectMode()
+
+                            return
+                        }
+                    }
+                    else {
+                        model.addMediaToSelection(position, media)
+                    }
+
+                    if (model.itemSelectionMode) {
+                        (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.size} selected"
+                    }
+
+                    // Notify adapter that this item has changed
+                    encryptedMediaAdapter.notifyItemChanged(position)
+                }
+                else {
+                    //TODO Enlarge image
+                    //model.setSelectedMedia(media)
+                    //findNavController().navigate(R.id.action_picturesFragment_to_selectedPicture)
+                }
             }
-        })
+
+            override fun onLongClickListener(position: Int, media: EncryptedModel) {
+                if(model.itemSelectionMode) return
+                encryptedMediaAdapter.toggleSelectionMode(true)
+
+                model.itemSelectionMode = true
+
+                model.addMediaToSelection(position, media)
+                (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.size} selected"
+
+                // Notify adapter that this item has changed
+                activity?.invalidateOptionsMenu()
+                encryptedMediaAdapter.notifyItemChanged(position)
+            }
+        }, fullRequest)
 
 
         val sharedPref = context?.getSharedPreferences(getString(R.string.main_shared_pref), Context.MODE_PRIVATE)
@@ -156,6 +211,7 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
     private fun registerEvents() {
 
         binding.enMediaSwipeToRefresh.setOnRefreshListener {
+            exitSelectMode()
             model.getEncryptedFiles()
         }
 
@@ -193,5 +249,15 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
                 }
             }
         })
+    }
+
+    private fun exitSelectMode() {
+        // Prevent invalidating if not in selection mode already
+        if(!model.itemSelectionMode) return
+
+        activity?.invalidateOptionsMenu()
+        model.itemSelectionMode = false
+        model.clearSelections()
+        encryptedMediaAdapter.toggleSelectionMode(false)
     }
 }
