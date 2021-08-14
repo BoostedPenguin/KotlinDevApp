@@ -8,7 +8,7 @@ data class MediaModel(
     var id: Long,
     val mediaUri: Uri,
     var albumName: String?,
-    var mediaType: MediaType?,
+    var mediaType: MediaType,
     var videoDuration: Long?,
     var mediaName: String,
 

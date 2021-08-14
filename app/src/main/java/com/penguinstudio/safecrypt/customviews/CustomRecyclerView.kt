@@ -75,9 +75,7 @@ class CustomRecyclerView(context: Context, attrs: AttributeSet ) : RecyclerView(
     @SuppressLint("NotifyDataSetChanged")
     private fun animateRecyclerLayoutChange(layoutSpanCount: Int) {
         val lm = layoutManager as GridLayoutManager
-        (adapter as AlbumMediaAdapter).apply {
-            notifyDataSetChanged()
-        }
+        adapter?.notifyDataSetChanged()
         post {
             TransitionManager.beginDelayedTransition(this)
             lm.spanCount = layoutSpanCount

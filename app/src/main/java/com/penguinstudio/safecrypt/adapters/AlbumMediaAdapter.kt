@@ -54,7 +54,7 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners?,
     fun setImages(images: ArrayList<MediaModel>, isSelectionMode: Boolean = false) {
         this.images = images
         this.isSelectionMode = isSelectionMode
-        adapterDataSetChanged()
+        //adapterDataSetChanged()
     }
 
     /**
@@ -74,10 +74,7 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners?,
     }
 
     override fun onBindViewHolder(holder: ImageHolder, position: Int) {
-        val startTime = System.currentTimeMillis()
         holder.bind(images[position])
-        Log.d("loadTime", "Time it took to encrypt media: ${System.currentTimeMillis() - startTime}ms")
-
     }
 
     override fun getItemCount(): Int {

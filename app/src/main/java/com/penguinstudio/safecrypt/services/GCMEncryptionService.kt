@@ -18,6 +18,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import androidx.exifinterface.media.ExifInterface
+import com.penguinstudio.safecrypt.models.MediaType
 import java.io.*
 import java.lang.IllegalArgumentException
 
@@ -113,18 +114,18 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
      *
      * @param uri
      */
-    fun getBitmapFormUri(uri: Uri): Bitmap? {
+    private fun getBitmapFormUri(uri: Uri): Bitmap? {
         var input = context.contentResolver.openInputStream(uri)
         val onlyBoundsOptions = BitmapFactory.Options()
         onlyBoundsOptions.inJustDecodeBounds = true
         onlyBoundsOptions.inDither = true //optional
         onlyBoundsOptions.inPreferredConfig = Bitmap.Config.ARGB_8888 //optional
         BitmapFactory.decodeStream(input, null, onlyBoundsOptions)
-        input!!.close()
+        input?.close()
         val originalWidth = onlyBoundsOptions.outWidth
         val originalHeight = onlyBoundsOptions.outHeight
         if (originalWidth == -1 || originalHeight == -1)
-            throw IllegalArgumentException("wtf")
+            throw IllegalArgumentException("Error trying to decode width / height of image")
         //Image resolution is based on 480x800
         val hh = 1600f //The height is set as 800f here
         val ww = 960f //Set the width here to 480f
@@ -143,7 +144,7 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
         bitmapOptions.inPreferredConfig = Bitmap.Config.ARGB_8888 //optional
         input = context.contentResolver.openInputStream(uri)
         val bitmap = BitmapFactory.decodeStream(input, null, bitmapOptions)
-        input!!.close()
+        input?.close()
         return bitmap?.let { compressImage(it) } //Mass compression again
     }
 
@@ -153,7 +154,7 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
      * @param image
      * @return
      */
-    fun compressImage(image: Bitmap): Bitmap? {
+    private fun compressImage(image: Bitmap): Bitmap? {
         val baos = ByteArrayOutputStream()
         image.compress(
             Bitmap.CompressFormat.JPEG,
@@ -173,7 +174,7 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
         }
 
         val bs = ByteArrayInputStream(baos.toByteArray()) //Store the compressed data in ByteArrayInputStream
-
+        baos.close()
         return BitmapFactory.decodeStream(
             bs,
             null,
@@ -189,7 +190,7 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
      * @param degree Rotation angle
      * @return Rotated picture
      */
-    fun rotateBitmapByDegree(bm: Bitmap, degree: Float): ByteArrayInputStream {
+    private fun rotateBitmapByDegree(bm: Bitmap, degree: Float): ByteArrayInputStream {
         var returnBm: Bitmap? = null
 
         // Generate rotation matrix according to rotation angle
@@ -221,14 +222,13 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
     /**
      * Read the rotation angle of the picture
      *
-     * @param path Absolute path of picture
      * @return Rotation angle of picture
      */
-    fun getBitmapDegree(uri: Uri): Int {
+    private fun getBitmapDegree(uri: Uri): Int {
         var degree = 0
         try {
             val inputStream = context.contentResolver.openInputStream(uri)
-                ?: throw IllegalArgumentException("Bullshit :)")
+                ?: throw IllegalArgumentException("Error opening input stream")
             // Read the picture from the specified path and obtain its EXIF information
             val exifInterface = ExifInterface(inputStream)
             // Get rotation information for pictures
@@ -241,6 +241,7 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
                 ExifInterface.ORIENTATION_ROTATE_180 -> degree = 180
                 ExifInterface.ORIENTATION_ROTATE_270 -> degree = 270
             }
+            inputStream.close()
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -252,6 +253,7 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
     */
     fun encryptData (
         uri: Uri,
+        mediaType: MediaType,
         outputStream: OutputStream) : Boolean {
 
         // Read/Write buffer
@@ -266,11 +268,19 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
         encryptCipher.init(Cipher.ENCRYPT_MODE, getSecretKey(), parameterSpec)
 
 
-        val compressed = getBitmapFormUri(uri)
-            ?: throw IllegalArgumentException("fun")
+        val inpStream = when(mediaType) {
+            MediaType.IMAGE -> {
+                val compressed = getBitmapFormUri(uri)
+                    ?: throw IllegalArgumentException("fun")
 
-        val degree = getBitmapDegree(uri)
-        val newbitmap = rotateBitmapByDegree(compressed, degree.toFloat())
+                val degree = getBitmapDegree(uri)
+                rotateBitmapByDegree(compressed, degree.toFloat())
+            }
+            MediaType.VIDEO -> {
+                throw NotImplementedError("Not implemented yet")
+            }
+        }
+
 
 
         // Prepend IV
@@ -278,12 +288,13 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
         var nread: Int
 
 
-        while (newbitmap.read(buffer).also { nread = it } > 0) {
+        while (inpStream.read(buffer).also { nread = it } > 0) {
             val enc: ByteArray = encryptCipher.update(buffer, 0, nread)
             outputStream.write(enc)
         }
         val enc: ByteArray = encryptCipher.doFinal()
         outputStream.write(enc)
+        inpStream.close()
 
         return true
     }
