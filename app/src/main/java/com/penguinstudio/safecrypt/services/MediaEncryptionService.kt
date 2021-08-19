@@ -57,7 +57,7 @@ class MediaEncryptionService @Inject constructor(
                 val outputStream = context.contentResolver.openOutputStream(encryptedEmptyFile.uri)
                     ?: throw FileNotFoundException()
 
-                val encryptedStatus = gcmEncryptionService.encryptData(image.mediaUri, image.mediaType, outputStream)
+                val encryptedStatus = gcmEncryptionService.encryptData(image.uri, image.mediaType, outputStream)
                 outputStream.flush()
                 outputStream.close()
 
@@ -66,7 +66,7 @@ class MediaEncryptionService @Inject constructor(
 
             // Delete original non-encrypted file
             val resultAwaited = result.await()
-            if(resultAwaited) deleteOriginalNonEncryptedFile(image.mediaUri)
+            if(resultAwaited) deleteOriginalNonEncryptedFile(image.uri)
         }
         Log.d("loadTime", "Time it took to encrypt media: ${System.currentTimeMillis() - startTime}ms")
         return@withContext EncryptionStatus.OPERATION_COMPLETE

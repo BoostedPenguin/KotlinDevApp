@@ -6,6 +6,7 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
@@ -14,12 +15,15 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.HomeTabPagerAdapter
+import com.penguinstudio.safecrypt.ui.home.encrypted.EncryptedMediaViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class HomeFragment : Fragment(), LifecycleObserver {
     private lateinit var pagerAdapter: HomeTabPagerAdapter
     private lateinit var viewPager: ViewPager2
+    private val model: EncryptedMediaViewModel by activityViewModels()
+
 
 
     /**
@@ -78,5 +82,11 @@ class HomeFragment : Fragment(), LifecycleObserver {
                 }
             }
         }.attach()
+        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.app_name)
+                model.clearSelections()
+            }
+        })
     }
 }

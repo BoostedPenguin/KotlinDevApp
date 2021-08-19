@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.ListPreloader
 import com.bumptech.glide.RequestBuilder
@@ -47,10 +48,17 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
         .setContentType(C.CONTENT_TYPE_MOVIE)
         .build()
 
-    @SuppressLint("NotifyDataSetChanged")
     fun setMedia(media: ArrayList<MediaModel>) {
+        calculateDiff(this.media, media)
         this.media = media
-        notifyDataSetChanged()
+    }
+
+
+    private fun calculateDiff(old: List<MediaModel>, new: List<MediaModel>) {
+        val diffCallback = ItemDiffUtilCallback(old, new)
+        val diffResults = DiffUtil.calculateDiff(diffCallback)
+
+        diffResults.dispatchUpdatesTo(this)
     }
 
     fun pausePlayer() {
@@ -80,7 +88,6 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
         return when (media[position].mediaType) {
             MediaType.IMAGE -> IMAGE_TYPE
             MediaType.VIDEO -> VIDEO_TYPE
-            null -> throw IllegalArgumentException("Supplied media item isn't neither Video nor Image")
         }
     }
 
@@ -138,7 +145,6 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
                     vh.createVideoPlayback()
                 }
             }
-            null -> throw IllegalArgumentException("No such type")
         }
     }
 
@@ -191,7 +197,7 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
             this.media = media
 
             fullRequest
-                .load(media.mediaUri)
+                .load(media.uri)
                 .placeholder(R.drawable.ic_baseline_image_24)
                 .fitCenter()
                 .into(imageView)
@@ -214,7 +220,7 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
 
 
             fullRequest
-                .load(media.mediaUri)
+                .load(media.uri)
                 .placeholder(R.drawable.ic_baseline_image_24)
                 .fitCenter()
                 .into(imageView)
@@ -248,7 +254,7 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
             }
 
 
-            val mediaItem: MediaItem = MediaItem.fromUri(media.mediaUri)
+            val mediaItem: MediaItem = MediaItem.fromUri(media.uri)
 
             player?.setMediaItem(mediaItem)
             player?.prepare()

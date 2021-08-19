@@ -128,11 +128,13 @@ class MediaFragment : Fragment(), LifecycleObserver {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             R.id.action_select_all -> {
                 model.addAllMediaToSelection(photoAdapter.getImages())
-                photoAdapter.adapterDataSetChanged()
+                (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.size} selected"
+                photoAdapter.notifyDataSetChanged()
                 true
             }
             R.id.action_encrypt -> {
@@ -160,8 +162,6 @@ class MediaFragment : Fragment(), LifecycleObserver {
                         model.removeMediaFromSelection(position, media)
 
                         if(model.selectedItems.size == 0) {
-
-                            photoAdapter.toggleSelectionMode(false)
 
                             exitSelectMode()
 

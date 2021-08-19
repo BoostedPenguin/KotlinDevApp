@@ -137,7 +137,7 @@ class MediaService @Inject constructor(
 
                         album.id = media.id
                         album.name = bucketName
-                        album.coverUri = media.mediaUri
+                        album.coverUri = media.uri
                         album.albumMedia.add(media)
 
                         allAlbums.add(album)

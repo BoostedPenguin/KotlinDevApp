@@ -1,12 +1,14 @@
 package com.penguinstudio.safecrypt.models
 
 import android.net.Uri
+import com.penguinstudio.safecrypt.services.glide_service.IPicture
+
 enum class MediaType {
     IMAGE, VIDEO
 }
 data class MediaModel(
     var id: Long,
-    val mediaUri: Uri,
+    override val uri: Uri,
     var albumName: String?,
     var mediaType: MediaType,
     var videoDuration: Long?,
@@ -15,7 +17,7 @@ data class MediaModel(
     val details: MediaModelDetails,
 
     var isSelected: Boolean = false,
-)
+) : IPicture
 
 data class MediaModelDetails(
     val dateAdded: Long? = null,

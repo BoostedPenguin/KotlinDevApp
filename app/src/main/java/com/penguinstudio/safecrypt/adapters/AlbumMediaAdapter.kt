@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +11,7 @@ import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.ListPreloader
 import com.bumptech.glide.RequestBuilder
@@ -42,28 +42,27 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners,
     private var isSelectionMode: Boolean = false
 
 
+    @SuppressLint("NotifyDataSetChanged")
     fun toggleSelectionMode(isSelectionMode: Boolean) {
         this.isSelectionMode = isSelectionMode
-        images.forEach {
-            it.isSelected = false
-        }
-        adapterDataSetChanged()
+
+        // Toggle checkboxes on all items
+        notifyDataSetChanged()
     }
 
 
     fun setImages(images: ArrayList<MediaModel>, isSelectionMode: Boolean = false) {
+        calculateDiff(this.images, images)
+
         this.images = images
         this.isSelectionMode = isSelectionMode
-        //adapterDataSetChanged()
     }
 
-    /**
-     * Use this instead of notifyDataSetChanged to ignore lint warnings
-     * @see notifyDataSetChanged
-     */
-    @SuppressLint("NotifyDataSetChanged")
-    fun adapterDataSetChanged() {
-        notifyDataSetChanged()
+    private fun calculateDiff(old: List<MediaModel>, new: List<MediaModel>) {
+        val diffCallback = ItemDiffUtilCallback(old, new)
+        val diffResults = DiffUtil.calculateDiff(diffCallback)
+
+        diffResults.dispatchUpdatesTo(this)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageHolder {
@@ -145,7 +144,7 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners,
             }
 
             fullRequest
-                .load(media.mediaUri)
+                .load(media.uri)
                 .placeholder(R.drawable.ic_baseline_image_24)
                 .fitCenter()
                 .into(imageView)
@@ -153,7 +152,7 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners,
 
         init {
             imageView.setOnClickListener {
-                val position = adapterPosition
+                val position = bindingAdapterPosition
 
                 if(position != RecyclerView.NO_POSITION) {
                     listener.onClickListener(position, media)
@@ -161,7 +160,7 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners,
             }
 
             imageView.setOnLongClickListener {
-                val position = adapterPosition
+                val position = bindingAdapterPosition
 
                 if(position != RecyclerView.NO_POSITION) {
                     listener.onLongClickListener(position, media)
@@ -170,7 +169,7 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners,
                 true
             }
             checkBox.setOnClickListener {
-                val position = adapterPosition
+                val position = bindingAdapterPosition
 
                 if(position != RecyclerView.NO_POSITION) {
                     listener.onClickListener(position, media)
