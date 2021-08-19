@@ -302,7 +302,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
                 }
                 EncryptionStatus.OPERATION_COMPLETE -> {
 
-                    //exitSelectMode()
+                    exitSelectMode()
 
                     // Fetch media, it will update adapter automatically
                     model.getMedia()

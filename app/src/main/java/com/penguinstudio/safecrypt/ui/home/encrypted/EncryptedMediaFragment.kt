@@ -200,11 +200,9 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
             sharedPref?.getInt(context?.getString(R.string.grid_columns), 3) ?: 3
 
         // Prevent redrawing recyclerview if current column is same size as requested
-        binding.enPicturesRecyclerView.layoutManager = GridLayoutManager(requireContext(), columns)
 
         binding.enPicturesRecyclerView.adapter = encryptedMediaAdapter
-
-        binding.enPicturesRecyclerView.setHasFixedSize(true)
+        binding.enPicturesRecyclerView.layoutManager = GridLayoutManager(requireContext(), columns)
 
     }
 

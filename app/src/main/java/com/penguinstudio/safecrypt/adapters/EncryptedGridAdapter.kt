@@ -10,6 +10,7 @@ import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.ListPreloader
@@ -19,6 +20,7 @@ import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.models.EncryptedModel
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.models.MediaType
+import com.penguinstudio.safecrypt.services.glide_service.IPicture
 import java.util.concurrent.TimeUnit
 
 
@@ -38,11 +40,29 @@ class EncryptedGridAdapter constructor(
     private var isSelectionMode: Boolean = false
 
     fun setImages(images:  MutableList<EncryptedModel>, isSelectionMode: Boolean = false) {
+        val diffCallback = EncryptedMediaDiffCallback(this.images, images)
+        val diffResults = DiffUtil.calculateDiff(diffCallback)
         this.images = images
-        this.isSelectionMode = isSelectionMode
 
-        notifyDataSetChanged()
+        diffResults.dispatchUpdatesTo(this)
     }
+
+    inner class EncryptedMediaDiffCallback(private val old: MutableList<EncryptedModel>,
+                           private val new: MutableList<EncryptedModel>
+    ) : DiffUtil.Callback() {
+        override fun getOldListSize(): Int = old.size
+
+        override fun getNewListSize(): Int = new.size
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return old[oldItemPosition].uri === new[newItemPosition].uri
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return old[oldItemPosition] === new[newItemPosition]
+        }
+    }
+
 
     fun toggleSelectionMode(isSelectionMode: Boolean) {
         this.isSelectionMode = isSelectionMode

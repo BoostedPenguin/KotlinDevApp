@@ -166,7 +166,6 @@ class MediaService @Inject constructor(
             root?.listFiles()?.forEach lit@ {
 
                 // If it's not an encoded file continue
-                val ss = it.name
                 if(it.name == null || it.name!!.indexOf(".${GCMEncryptionService.ENC_FILE_EXTENSION}") <= 0) return@lit
 
                 uris.add(EncryptedModel(it.uri))

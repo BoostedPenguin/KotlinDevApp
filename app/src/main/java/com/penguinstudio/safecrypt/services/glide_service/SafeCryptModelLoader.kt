@@ -32,7 +32,7 @@ class SafeCryptModelLoader constructor(private val context: Context) : ModelLoad
         width: Int,
         height: Int,
         options: Options
-    ): LoadData<InputStream> = LoadData(ObjectKey(model), MyDataFetcher(model, context))
+    ): LoadData<InputStream> = LoadData(ObjectKey(model.uri), MyDataFetcher(model, context))
 
     override fun handles(s: IPicture): Boolean {
         return true
