@@ -13,8 +13,11 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.bumptech.glide.ListPreloader
 import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.signature.MediaStoreSignature
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.models.MediaType
@@ -41,12 +44,18 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners,
     private var images: ArrayList<MediaModel> = ArrayList()
     private var isSelectionMode: Boolean = false
 
-
     @SuppressLint("NotifyDataSetChanged")
-    fun toggleSelectionMode(isSelectionMode: Boolean) {
+    fun toggleSelectionMode(isSelectionMode: Boolean, selectedPosition: Int = -1) {
         this.isSelectionMode = isSelectionMode
 
-        // Toggle checkboxes on all items
+        if(!isSelectionMode)
+            images.forEach {
+                if(it.isSelected) it.isSelected = false
+            }
+        else
+            if(selectedPosition != -1)
+                images[selectedPosition].isSelected = true
+
         notifyDataSetChanged()
     }
 
@@ -145,6 +154,7 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners,
 
             fullRequest
                 .load(media.uri)
+                .thumbnail(0.25f)
                 .placeholder(R.drawable.ic_baseline_image_24)
                 .fitCenter()
                 .into(imageView)

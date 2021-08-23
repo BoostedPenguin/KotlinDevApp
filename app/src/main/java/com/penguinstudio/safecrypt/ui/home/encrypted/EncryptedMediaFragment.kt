@@ -8,10 +8,8 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.activityViewModels
@@ -22,6 +20,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.snackbar.Snackbar
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.EncryptedGridAdapter
@@ -54,15 +53,6 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
             }
 
         requireActivity().onBackPressedDispatcher.addCallback(this, callback)
-    }
-
-    private fun onBackPress() {
-        // Handle the back button event
-//        if(model.itemSelectionMode) {
-//            exitSelectMode()
-//            return
-//        }
-        findNavController().popBackStack()
     }
 
 
@@ -98,6 +88,7 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
         // Inflate the layout for this fragment
         binding = FragmentEncryptedMediaBinding.inflate(layoutInflater, container, false)
         (activity as AppCompatActivity).supportActionBar?.show()
+        setHasOptionsMenu(true)
 
         binding.enMediaSaveLocation.setOnClickListener {
             encryptionProcessIntentHandler.chooseDefaultSaveLocation().observe(viewLifecycleOwner, {
@@ -148,7 +139,7 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
             override fun onClickListener(position: Int, media: EncryptedModel) {
 
                 // If in selection mode add / remove, else trigger normal action
-                if(model.itemSelectionMode) {
+                if(model.itemSelectionMode.value == true) {
 
                     if(model.selectedItems.contains(media)) {
                         model.removeMediaFromSelection(position, media)
@@ -159,7 +150,7 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
 
                             (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.app_name)
 
-                            exitSelectMode()
+                            model.itemSelectionMode.postValue(false)
 
                             return
                         }
@@ -168,7 +159,7 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
                         model.addMediaToSelection(position, media)
                     }
 
-                    if (model.itemSelectionMode) {
+                    if (model.itemSelectionMode.value == true) {
                         (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.size} selected"
                     }
 
@@ -183,17 +174,16 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
             }
 
             override fun onLongClickListener(position: Int, media: EncryptedModel) {
-                if(model.itemSelectionMode) return
-                encryptedMediaAdapter.toggleSelectionMode(true)
+                if(model.itemSelectionMode.value == true) return
+                encryptedMediaAdapter.toggleSelectionMode(true, position)
 
-                model.itemSelectionMode = true
+                model.itemSelectionMode.value = true
 
                 model.addMediaToSelection(position, media)
                 (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.size} selected"
 
                 // Notify adapter that this item has changed
                 activity?.invalidateOptionsMenu()
-                encryptedMediaAdapter.notifyItemChanged(position)
             }
         }, fullRequest)
 
@@ -212,9 +202,14 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
     private fun registerEvents() {
 
         binding.enMediaSwipeToRefresh.setOnRefreshListener {
-            exitSelectMode()
+            model.itemSelectionMode.postValue(false)
+
             model.getEncryptedFiles()
         }
+
+        model.itemSelectionMode.observe(viewLifecycleOwner, {
+            if(!it) exitSelectMode()
+        })
 
         model.encryptedFiles.observe(viewLifecycleOwner, {
             when(it.status) {
@@ -252,12 +247,49 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
         })
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        menu.clear()
+        super.onPrepareOptionsMenu(menu)
+
+        if(model.itemSelectionMode.value == true) {
+            activity?.menuInflater?.inflate(R.menu.encrypted_item_selected_menu , menu)
+            (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        }
+        else {
+            activity?.menuInflater?.inflate(R.menu.main_menu , menu)
+            (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        return when(item.itemId) {
+            android.R.id.home -> {
+                onBackPress()
+                true
+            }
+            R.id.action_encrypt_select_all -> {
+                model.addAllMediaToSelection(encryptedMediaAdapter.getImages())
+                (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.size} selected"
+                encryptedMediaAdapter.notifyDataSetChanged()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun onBackPress() {
+        // Handle the back button event
+        if(model.itemSelectionMode.value == true) {
+            model.itemSelectionMode.postValue(false)
+        }
+    }
+
     private fun exitSelectMode() {
         // Prevent invalidating if not in selection mode already
-        if(!model.itemSelectionMode) return
-
         activity?.invalidateOptionsMenu()
-        model.itemSelectionMode = false
+        (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.app_name)
         model.clearSelections()
         encryptedMediaAdapter.toggleSelectionMode(false)
     }

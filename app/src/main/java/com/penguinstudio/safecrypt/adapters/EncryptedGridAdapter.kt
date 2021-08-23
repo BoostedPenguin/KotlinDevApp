@@ -1,5 +1,6 @@
 package com.penguinstudio.safecrypt.adapters
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
@@ -14,6 +15,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.ListPreloader
 import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.signature.MediaStoreSignature
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.EncryptedModel
 
@@ -30,10 +33,10 @@ class EncryptedGridAdapter constructor(
         fun onLongClickListener(position: Int, media: EncryptedModel)
     }
 
-    private var images: MutableList<EncryptedModel> = ArrayList()
+    private var images: ArrayList<EncryptedModel> = ArrayList()
     private var isSelectionMode: Boolean = false
 
-    fun setImages(images:  MutableList<EncryptedModel>, isSelectionMode: Boolean = false) {
+    fun setImages(images:  ArrayList<EncryptedModel>, isSelectionMode: Boolean = false) {
         calculateDiff(this.images, images)
 
         this.images = images
@@ -41,15 +44,24 @@ class EncryptedGridAdapter constructor(
     }
 
 
-    fun toggleSelectionMode(isSelectionMode: Boolean) {
+    @SuppressLint("NotifyDataSetChanged")
+    fun toggleSelectionMode(isSelectionMode: Boolean, selectedPosition: Int = -1) {
         this.isSelectionMode = isSelectionMode
+
+        if(!isSelectionMode)
+            images.forEach {
+                if(it.isSelected) it.isSelected = false
+            }
+        else
+            if(selectedPosition != -1)
+                images[selectedPosition].isSelected = true
+
         notifyDataSetChanged()
     }
 
     private fun calculateDiff(old: List<EncryptedModel>, new: List<EncryptedModel>) {
         val diffCallback = ItemDiffUtilCallback(old, new)
         val diffResults = DiffUtil.calculateDiff(diffCallback)
-
         diffResults.dispatchUpdatesTo(this)
     }
 
@@ -71,7 +83,7 @@ class EncryptedGridAdapter constructor(
         return images.size
     }
 
-    fun getImages() : MutableList<EncryptedModel> {
+    fun getImages() : ArrayList<EncryptedModel> {
         return this.images
     }
 

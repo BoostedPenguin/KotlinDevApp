@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 interface ISelectionViewModel<T> {
-    var itemSelectionMode: Boolean
+    val itemSelectionMode: MutableLiveData<Boolean>
 
     fun clearSelections()
 
@@ -137,7 +137,7 @@ class GalleryViewModel @Inject constructor(
         _selectedAlbumName = null
     }
 
-    override var itemSelectionMode = false
+    override val itemSelectionMode = MutableLiveData<Boolean>()
     override val selectedItems: MutableList<MediaModel> = mutableListOf()
 
 

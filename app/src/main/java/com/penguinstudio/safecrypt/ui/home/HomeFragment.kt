@@ -85,7 +85,13 @@ class HomeFragment : Fragment(), LifecycleObserver {
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.app_name)
-                model.clearSelections()
+                (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
+
+                when(position) {
+                    1 -> {
+                        model.itemSelectionMode.postValue(false)
+                    }
+                }
             }
         })
     }

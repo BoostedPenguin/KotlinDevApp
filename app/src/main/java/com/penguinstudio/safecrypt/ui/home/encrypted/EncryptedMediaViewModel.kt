@@ -36,7 +36,7 @@ class EncryptedMediaViewModel @Inject constructor(
         }
     }
 
-    override var itemSelectionMode = false
+    override val itemSelectionMode = MutableLiveData<Boolean>()
 
     override fun clearSelections() {
         selectedItems.clear()

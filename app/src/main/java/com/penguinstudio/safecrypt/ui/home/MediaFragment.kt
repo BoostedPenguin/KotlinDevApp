@@ -81,7 +81,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
 
     private fun onBackPress() {
         // Handle the back button event
-        if(model.itemSelectionMode) {
+        if(model.itemSelectionMode.value == true) {
             exitSelectMode()
             return
         }
@@ -156,7 +156,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
             override fun onClickListener(position: Int, media: MediaModel) {
 
                 // If in selection mode add / remove, else trigger normal action
-                if(model.itemSelectionMode) {
+                if(model.itemSelectionMode.value == true) {
 
                     if(model.selectedItems.contains(media)) {
                         model.removeMediaFromSelection(position, media)
@@ -172,7 +172,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
                         model.addMediaToSelection(position, media)
                     }
 
-                    if (model.itemSelectionMode) {
+                    if (model.itemSelectionMode.value == true) {
                         (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.size} selected"
                     }
 
@@ -185,17 +185,16 @@ class MediaFragment : Fragment(), LifecycleObserver {
                 }
             }
             override fun onLongClickListener(position: Int, media: MediaModel) {
-                if(model.itemSelectionMode) return
-                photoAdapter.toggleSelectionMode(true)
+                if(model.itemSelectionMode.value == true) return
+                photoAdapter.toggleSelectionMode(true, position)
 
-                model.itemSelectionMode = true
+                model.itemSelectionMode.value = true
 
                 model.addMediaToSelection(position, media)
                 (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.size} selected"
 
                 // Notify adapter that this item has changed
                 activity?.invalidateOptionsMenu()
-                photoAdapter.notifyItemChanged(position)
             }
         }, fullRequest)
 
@@ -237,9 +236,9 @@ class MediaFragment : Fragment(), LifecycleObserver {
                         return@observe
                     }
 
-                    photoAdapter.setImages(it.data.albumMedia, model.itemSelectionMode)
+                    photoAdapter.setImages(it.data.albumMedia, model.itemSelectionMode.value ?: false)
 
-                    if(model.itemSelectionMode) {
+                    if(model.itemSelectionMode.value == true) {
                         (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.size} selected"
                     }
                     else {
@@ -321,15 +320,16 @@ class MediaFragment : Fragment(), LifecycleObserver {
 
     private fun exitSelectMode() {
         // Prevent invalidating if not in selection mode already
-        if(!model.itemSelectionMode) return
+        if(model.itemSelectionMode.value == true) {
 
-        (activity as AppCompatActivity?)?.supportActionBar?.title = model.selectedAlbum.value?.data?.name
+            (activity as AppCompatActivity?)?.supportActionBar?.title = model.selectedAlbum.value?.data?.name
 
-        if(defaultStorageLocationSnackbar.isShown) defaultStorageLocationSnackbar.dismiss()
-        activity?.invalidateOptionsMenu()
-        model.itemSelectionMode = false
-        model.clearSelections()
-        photoAdapter.toggleSelectionMode(false)
+            if(defaultStorageLocationSnackbar.isShown) defaultStorageLocationSnackbar.dismiss()
+            activity?.invalidateOptionsMenu()
+            model.itemSelectionMode.value = false
+            model.clearSelections()
+            photoAdapter.toggleSelectionMode(false)
+        }
     }
 
     /**
@@ -346,7 +346,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
         menu.clear()
         super.onPrepareOptionsMenu(menu)
 
-        if(model.itemSelectionMode) {
+        if(model.itemSelectionMode.value == true) {
             activity?.menuInflater?.inflate(R.menu.item_selected_menu , menu)
         }
         else {
