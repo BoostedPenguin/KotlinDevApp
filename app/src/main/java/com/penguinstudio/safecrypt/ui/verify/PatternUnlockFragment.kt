@@ -137,6 +137,8 @@ class PatternUnlockFragment : Fragment() {
         if(inputPattern == storedPattern) {
             // Correct
             binding.patternLockView.setViewMode(PatternLockView.PatternViewMode.CORRECT)
+            binding.patternLockView.clearPattern()
+            model.pattern = ""
 
             findNavController().navigate(R.id.action_patternUnlockFragment_to_homeFragment)
         }

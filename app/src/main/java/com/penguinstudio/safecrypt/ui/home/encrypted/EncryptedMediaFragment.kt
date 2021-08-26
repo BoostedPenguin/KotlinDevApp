@@ -48,7 +48,12 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
         val callback: OnBackPressedCallback =
             object : OnBackPressedCallback(true /* enabled by default */) {
                 override fun handleOnBackPressed() {
-                    onBackPress()
+                    if(model.itemSelectionMode.value == true) {
+                        model.itemSelectionMode.postValue(false)
+                    } else {
+                        isEnabled = false
+                        activity?.onBackPressed()
+                    }
                 }
             }
 
@@ -219,7 +224,15 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
 
                     binding.enMediaProgressBar.visibility = View.GONE
 
-                    it.data?.let { it1 -> encryptedMediaAdapter.setImages(it1.collection) }
+                    it.data?.let { collectionResponse ->
+                        if(collectionResponse.collection.size == 0) {
+                            binding.enMediaHint.visibility = View.VISIBLE
+                            binding.enMediaHint.text = "No encrypted files found."
+                        } else {
+                            binding.enMediaHint.visibility = View.GONE
+                        }
+                        encryptedMediaAdapter.setImages(collectionResponse.collection)
+                    }
                 }
                 Status.ERROR -> {
                     binding.enMediaProgressBar.visibility = View.GONE

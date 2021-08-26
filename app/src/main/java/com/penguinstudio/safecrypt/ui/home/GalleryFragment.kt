@@ -30,19 +30,6 @@ class GalleryFragment : Fragment() {
     private lateinit var galleryAdapter: AlbumsAdapter
     private lateinit var fullRequest: RequestBuilder<Drawable>
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        val callback: OnBackPressedCallback =
-            object : OnBackPressedCallback(true /* enabled by default */) {
-                override fun handleOnBackPressed() {
-                    // Handle the back button event
-                    activity?.finishAndRemoveTask()
-                }
-            }
-
-        requireActivity().onBackPressedDispatcher.addCallback(this, callback)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

@@ -1,20 +1,14 @@
 package com.penguinstudio.safecrypt
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.NavigationUI
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.preference.PreferenceManager
-import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.penguinstudio.safecrypt.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -43,7 +37,13 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-
+    /**
+     * Go back to pattern unlock view when the app gets switched
+     */
+    override fun onPause() {
+        findNavController(R.id.nav_host_fragment_content_main).popBackStack(R.id.patternUnlockFragment, false)
+        super.onPause()
+    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.

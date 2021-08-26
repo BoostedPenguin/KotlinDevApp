@@ -46,9 +46,6 @@
             app:argType="boolean"
             android:defaultValue="false" />
         <action
-            app:launchSingleTop="true"
-            app:popUpToInclusive="true"
-            app:popUpTo="@id/nav_graph"
             android:id="@+id/action_patternUnlockFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
     </fragment>

@@ -3,6 +3,7 @@ package com.penguinstudio.safecrypt.ui.home
 import android.content.Context
 import android.os.Bundle
 import android.view.*
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
@@ -25,6 +26,19 @@ class HomeFragment : Fragment(), LifecycleObserver {
     private val model: EncryptedMediaViewModel by activityViewModels()
 
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val callback: OnBackPressedCallback =
+            object : OnBackPressedCallback(true /* enabled by default */) {
+                override fun handleOnBackPressed() {
+                    // Handle the back button event
+                    activity?.finishAndRemoveTask()
+                }
+            }
+
+        requireActivity().onBackPressedDispatcher.addCallback(this, callback)
+    }
 
     /**
      * After activity onCreate is completed
