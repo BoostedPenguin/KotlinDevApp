@@ -27,7 +27,12 @@ import com.penguinstudio.safecrypt.models.MediaType
 import android.content.Context.LAYOUT_INFLATER_SERVICE
 import android.view.*
 import android.widget.*
+import androidx.navigation.fragment.navArgs
 import com.penguinstudio.safecrypt.R
+import com.penguinstudio.safecrypt.models.EncryptedModel
+import com.penguinstudio.safecrypt.services.glide_service.IPicture
+import com.penguinstudio.safecrypt.ui.home.encrypted.EncryptedMediaViewModel
+import com.penguinstudio.safecrypt.utilities.MediaMode
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -38,12 +43,14 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
     private lateinit var binding: FragmentSelectedPictureBinding
     private lateinit var viewPager: ViewPager2
     private lateinit var imagePagerAdapter: SelectedMediaAdapter
-    private var content: ArrayList<MediaModel> = ArrayList()
     private lateinit var fullRequest: RequestBuilder<Drawable>
+    private lateinit var model: ISelectedMediaViewModel
+    val args: SelectedMediaFragmentArgs by navArgs()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
 
         val callback: OnBackPressedCallback =
             object : OnBackPressedCallback(true) {
@@ -56,6 +63,17 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        this.model = when(args.mediaMode) {
+            MediaMode.NORMAL_MEDIA -> {
+                val model: GalleryViewModel by activityViewModels()
+                model
+            }
+            MediaMode.ENCRYPTED_MEDIA -> {
+                val model: EncryptedMediaViewModel by activityViewModels()
+                model
+            }
+        }
 
         viewPager = binding.pager
         viewPager.clipToPadding = false
@@ -82,7 +100,7 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
         binding.selectedFragmentToolbar.visibility = View.VISIBLE
 
         imagePagerAdapter = SelectedMediaAdapter(object: SelectedMediaAdapter.ImagePagerListeners {
-            override fun onViewClickListener(position: Int, media: MediaModel) {
+            override fun onViewClickListener(position: Int, media: IPicture) {
                 handleToolbarOnImageClick().observe(viewLifecycleOwner, {
                     (viewPager.adapter as SelectedMediaAdapter).isHandleVisible = it
                 })
@@ -110,14 +128,12 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
             }
         })
 
-        content = model.selectedAlbum.value?.data?.albumMedia
-            ?: return
+        val awe = model.selectedAlbum.value?.data?.albumMedia ?: return
 
-        imagePagerAdapter.setMedia(content)
+        imagePagerAdapter.setMedia(awe)
 
         viewPager.setCurrentItem(imagePagerAdapter.getItemPosition(model.selectedMedia!!), false)
     }
-
     override fun onPause() {
         super.onPause()
 
@@ -130,7 +146,6 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
     }
 
 
-    private val model: GalleryViewModel by activityViewModels()
 //    private val model: IPicturesViewModel
 //        get() {
 //            return _model
@@ -211,8 +226,9 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
         }
     }
 
-    private fun showPopupWindow(mediaModel: MediaModel) {
+    private fun showPopupWindow(mediaModel: IPicture) {
 
+        if(mediaModel !is MediaModel) return
         //Create a View object yourself through inflater
         val popupView: View = View.inflate(context, R.layout.details_popup_view, null)
 
@@ -239,7 +255,6 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
 
         val size = mediaModel.details.size?.toDouble()?.let { sizeConvertedToString(it) }
 
-        var dimensions = ""
         when(mediaModel.mediaType) {
             MediaType.IMAGE -> {
                 popupView.findViewById<TextView>(R.id.detailsDimensionsValue).text =

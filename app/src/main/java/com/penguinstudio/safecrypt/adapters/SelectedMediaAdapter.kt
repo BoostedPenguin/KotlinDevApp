@@ -22,13 +22,14 @@ import com.penguinstudio.safecrypt.models.MediaType
 import kotlin.collections.ArrayList
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.audio.AudioAttributes
+import com.penguinstudio.safecrypt.services.glide_service.IPicture
 
 
 class SelectedMediaAdapter(private var listener: ImagePagerListeners,
                            var fullRequest: RequestBuilder<Drawable>,
                            val glide: RequestManager)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>(),
-    ListPreloader.PreloadModelProvider<MediaModel> {
+    ListPreloader.PreloadModelProvider<IPicture> {
 
     companion object {
         const val IMAGE_TYPE = 1
@@ -36,9 +37,9 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
     }
 
     interface ImagePagerListeners {
-        fun onViewClickListener(position: Int, media: MediaModel)
+        fun onViewClickListener(position: Int, media: IPicture)
     }
-    private var media: ArrayList<MediaModel> = ArrayList()
+    private var media: List<IPicture> = listOf()
     private var player: SimpleExoPlayer? = null
     private var currentSelectedItem = -1
     var isHandleVisible = true
@@ -48,13 +49,13 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
         .setContentType(C.CONTENT_TYPE_MOVIE)
         .build()
 
-    fun setMedia(media: ArrayList<MediaModel>) {
+    fun setMedia(media: List<IPicture>) {
         calculateDiff(this.media, media)
         this.media = media
     }
 
 
-    private fun calculateDiff(old: List<MediaModel>, new: List<MediaModel>) {
+    private fun calculateDiff(old: List<IPicture>, new: List<IPicture>) {
         val diffCallback = ItemDiffUtilCallback(old, new)
         val diffResults = DiffUtil.calculateDiff(diffCallback)
 
@@ -65,11 +66,11 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
         player?.pause()
     }
 
-    fun getItem(position: Int) : MediaModel {
+    fun getItem(position: Int) : IPicture {
         return media[position]
     }
 
-    fun getCurrentItem() : MediaModel {
+    fun getCurrentItem() : IPicture {
         return media[currentSelectedItem]
     }
 
@@ -171,7 +172,7 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
     }
 
     private interface CommonViewHolderItems {
-        fun setMediaItem(media: MediaModel)
+        fun setMediaItem(media: IPicture)
         var imageView: ImageView
     }
 
@@ -179,7 +180,7 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
     inner class InnerGalleryImageViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView), CommonViewHolderItems {
 
-        lateinit var media: MediaModel
+        lateinit var media: IPicture
         override var imageView: ImageView = itemView.findViewById(R.id.selected_picture)
 
         init {
@@ -193,7 +194,7 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
             }
         }
 
-        override fun setMediaItem(media: MediaModel) {
+        override fun setMediaItem(media: IPicture) {
             this.media = media
 
             fullRequest
@@ -208,12 +209,12 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
     inner class InnerGalleryVideoViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView), CommonViewHolderItems {
 
-        lateinit var media: MediaModel
+        lateinit var media: IPicture
         private var selectedVideo: StyledPlayerView = itemView.findViewById(R.id.selected_video)
         override var imageView: ImageView = itemView.findViewById(R.id.selected_video_thumbnail)
         private var progressBar: ProgressBar = itemView.findViewById(R.id.selected_video_progressbar)
 
-        override fun setMediaItem(media: MediaModel) {
+        override fun setMediaItem(media: IPicture) {
             this.media = media
             selectedVideo.controllerAutoShow = false
             selectedVideo.controllerShowTimeoutMs = -1
@@ -275,11 +276,12 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
         }
     }
 
-    override fun getPreloadItems(position: Int): MutableList<MediaModel> {
-        return media.subList(position, position + 1)
+
+    override fun getPreloadRequestBuilder(item: IPicture): RequestBuilder<*> {
+        return fullRequest.clone()
     }
 
-    override fun getPreloadRequestBuilder(item: MediaModel): RequestBuilder<*> {
-        return fullRequest.clone()
+    override fun getPreloadItems(position: Int): List<IPicture> {
+        return media.subList(position, position + 1)
     }
 }

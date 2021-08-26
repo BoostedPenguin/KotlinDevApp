@@ -10,7 +10,7 @@ data class MediaModel(
     var id: Long,
     override val uri: Uri,
     var albumName: String?,
-    var mediaType: MediaType,
+    override var mediaType: MediaType,
     var videoDuration: Long?,
     var mediaName: String,
 

@@ -28,6 +28,9 @@ import com.penguinstudio.safecrypt.databinding.FragmentEncryptedMediaBinding
 import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.models.EncryptedModel
 import com.penguinstudio.safecrypt.services.EncryptionProcessIntentHandler
+import com.penguinstudio.safecrypt.ui.home.HomeFragmentDirections
+import com.penguinstudio.safecrypt.ui.home.SelectedMediaFragmentDirections
+import com.penguinstudio.safecrypt.utilities.MediaMode
 import com.penguinstudio.safecrypt.utilities.Status
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -173,8 +176,9 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
                 }
                 else {
                     //TODO Enlarge image
-                    //model.setSelectedMedia(media)
-                    //findNavController().navigate(R.id.action_picturesFragment_to_selectedPicture)
+                    model.setSelectedMedia(media)
+                    val action = HomeFragmentDirections.actionHomeFragmentToSelectedPicture(MediaMode.ENCRYPTED_MEDIA)
+                    findNavController().navigate(action)
                 }
             }
 

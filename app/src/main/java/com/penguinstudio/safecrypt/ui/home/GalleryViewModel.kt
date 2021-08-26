@@ -48,6 +48,8 @@ interface IPicturesViewModel : ISelectionViewModel<MediaModel> {
 }
 
 interface ISelectedMediaViewModel {
+    val selectedAlbum: LiveData<Resource<AlbumModel>>
+
     val selectedMedia: MediaModel?
 
     fun setSelectedMedia(selectedMedia: MediaModel)

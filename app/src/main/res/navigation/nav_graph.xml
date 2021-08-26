@@ -57,6 +57,9 @@
         <action
             android:id="@+id/action_homeFragment_to_picturesFragment"
             app:destination="@id/picturesFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_selectedPicture"
+            app:destination="@id/selectedPicture" />
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
@@ -75,5 +78,10 @@
         android:id="@+id/selectedPicture"
         android:name="com.penguinstudio.safecrypt.ui.home.SelectedMediaFragment"
         android:label="SelectedPicture"
-        tools:layout="@layout/fragment_selected_picture" />
+        tools:layout="@layout/fragment_selected_picture" >
+        <argument
+            android:name="media_mode"
+            app:argType="com.penguinstudio.safecrypt.utilities.MediaMode"
+            android:defaultValue="NORMAL_MEDIA" />
+    </fragment>
 </navigation>
