@@ -5,6 +5,7 @@ import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.repository.MediaRepository
 import com.penguinstudio.safecrypt.services.MediaEncryptionService
+import com.penguinstudio.safecrypt.services.glide_service.IPicture
 import com.penguinstudio.safecrypt.utilities.CollectionResponse
 import com.penguinstudio.safecrypt.utilities.EncryptionResource
 import com.penguinstudio.safecrypt.utilities.Resource
@@ -30,7 +31,7 @@ interface ISelectionViewModel<T> {
 interface IPicturesViewModel : ISelectionViewModel<MediaModel> {
     fun getMedia()
 
-    fun setSelectedMedia(selectedMedia: MediaModel)
+    fun setSelectedMedia(selectedMedia: IPicture)
 
     val albums: LiveData<Resource<CollectionResponse<AlbumModel>>>
 
@@ -48,11 +49,12 @@ interface IPicturesViewModel : ISelectionViewModel<MediaModel> {
 }
 
 interface ISelectedMediaViewModel {
-    val selectedAlbum: LiveData<Resource<AlbumModel>>
+    //val selectedAlbum: LiveData<Resource<AlbumModel>>
+    val allAlbumMedia: List<IPicture>
 
-    val selectedMedia: MediaModel?
+    val selectedMedia: IPicture?
 
-    fun setSelectedMedia(selectedMedia: MediaModel)
+    fun setSelectedMedia(selectedMedia: IPicture)
 
     fun clearSelectedMedia()
 }
@@ -60,7 +62,6 @@ interface ISelectedMediaViewModel {
 @HiltViewModel
 class GalleryViewModel @Inject constructor(
     private val mediaRepository: MediaRepository,
-    private val mediaEncryptionService: MediaEncryptionService
 ) :
     ViewModel(), IPicturesViewModel, ISelectedMediaViewModel {
 
@@ -175,13 +176,19 @@ class GalleryViewModel @Inject constructor(
      * Selected Media Implementation
      */
     private var _selectedMedia: MediaModel? = null
+    override val allAlbumMedia: List<IPicture>
+        get() {
+            return selectedAlbum.value?.data?.albumMedia?.toList()
+                ?: emptyList()
+        }
     override val selectedMedia: MediaModel?
         get() {
             return _selectedMedia
         }
 
-    override fun setSelectedMedia(selectedMedia: MediaModel) {
-        this._selectedMedia = selectedMedia
+    override fun setSelectedMedia(selectedMedia: IPicture) {
+        if(selectedMedia is MediaModel)
+            this._selectedMedia = selectedMedia
     }
 
     override fun clearSelectedMedia() {

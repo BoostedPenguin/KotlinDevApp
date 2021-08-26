@@ -1,6 +1,5 @@
 package com.penguinstudio.safecrypt.adapters
 
-import android.annotation.SuppressLint
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
@@ -17,17 +16,17 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.penguinstudio.safecrypt.R
-import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.models.MediaType
-import kotlin.collections.ArrayList
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.audio.AudioAttributes
 import com.penguinstudio.safecrypt.services.glide_service.IPicture
+import com.penguinstudio.safecrypt.utilities.MediaMode
 
 
 class SelectedMediaAdapter(private var listener: ImagePagerListeners,
                            var fullRequest: RequestBuilder<Drawable>,
-                           val glide: RequestManager)
+                           val glide: RequestManager,
+                           val mediaMode: MediaMode = MediaMode.NORMAL_MEDIA)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>(),
     ListPreloader.PreloadModelProvider<IPicture> {
 
@@ -93,7 +92,7 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
     }
 
 
-    fun getItemPosition(item: MediaModel) : Int {
+    fun getItemPosition(item: IPicture) : Int {
         return media.indexOf(item)
     }
 
@@ -197,12 +196,22 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
         override fun setMediaItem(media: IPicture) {
             this.media = media
 
-            fullRequest
-                .load(media.uri)
-                .placeholder(R.drawable.ic_baseline_image_24)
-                .fitCenter()
-                .into(imageView)
-
+            when(mediaMode) {
+                MediaMode.NORMAL_MEDIA -> {
+                    fullRequest
+                        .load(media.uri)
+                        .placeholder(R.drawable.ic_baseline_image_24)
+                        .fitCenter()
+                        .into(imageView)
+                }
+                MediaMode.ENCRYPTED_MEDIA -> {
+                    fullRequest
+                        .load(media)
+                        .placeholder(R.drawable.ic_baseline_image_24)
+                        .fitCenter()
+                        .into(imageView)
+                }
+            }
         }
     }
 

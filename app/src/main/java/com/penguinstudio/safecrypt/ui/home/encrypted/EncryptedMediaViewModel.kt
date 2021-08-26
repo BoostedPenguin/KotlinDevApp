@@ -9,6 +9,7 @@ import com.penguinstudio.safecrypt.models.EncryptedModel
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.repository.MediaRepository
 import com.penguinstudio.safecrypt.services.MediaEncryptionService
+import com.penguinstudio.safecrypt.services.glide_service.IPicture
 import com.penguinstudio.safecrypt.ui.home.ISelectedMediaViewModel
 import com.penguinstudio.safecrypt.ui.home.ISelectionViewModel
 import com.penguinstudio.safecrypt.utilities.CollectionResponse
@@ -23,7 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EncryptedMediaViewModel @Inject constructor(
     private val mediaRepository: MediaRepository)
-    : ViewModel(), ISelectionViewModel<EncryptedModel> {
+    : ViewModel(), ISelectionViewModel<EncryptedModel>, ISelectedMediaViewModel {
 
     private val _encryptedFiles = MutableLiveData<Resource<CollectionResponse<EncryptedModel>>>()
     val encryptedFiles: LiveData<Resource<CollectionResponse<EncryptedModel>>> = _encryptedFiles
@@ -69,5 +70,28 @@ class EncryptedMediaViewModel @Inject constructor(
             it == media
         }
         media.isSelected = false
+    }
+
+    /**
+     * Selected Media Implementation
+     */
+    private var _selectedMedia: EncryptedModel? = null
+    override val allAlbumMedia: List<IPicture>
+        get() {
+            return encryptedFiles.value?.data?.collection?.toList()
+                ?: emptyList()
+        }
+    override val selectedMedia: IPicture?
+        get() {
+            return _selectedMedia
+        }
+
+    override fun setSelectedMedia(selectedMedia: IPicture) {
+        if(selectedMedia is EncryptedModel)
+            this._selectedMedia = selectedMedia
+    }
+
+    override fun clearSelectedMedia() {
+        _selectedMedia = null
     }
 }

@@ -33,6 +33,7 @@ import com.penguinstudio.safecrypt.models.EncryptedModel
 import com.penguinstudio.safecrypt.services.glide_service.IPicture
 import com.penguinstudio.safecrypt.ui.home.encrypted.EncryptedMediaViewModel
 import com.penguinstudio.safecrypt.utilities.MediaMode
+import java.lang.IllegalArgumentException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -45,7 +46,7 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
     private lateinit var imagePagerAdapter: SelectedMediaAdapter
     private lateinit var fullRequest: RequestBuilder<Drawable>
     private lateinit var model: ISelectedMediaViewModel
-    val args: SelectedMediaFragmentArgs by navArgs()
+    private val args: SelectedMediaFragmentArgs by navArgs()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,7 +106,7 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
                     (viewPager.adapter as SelectedMediaAdapter).isHandleVisible = it
                 })
             }
-        }, fullRequest, Glide.with(this))
+        }, fullRequest, Glide.with(this), args.mediaMode)
 
         viewPager.adapter = imagePagerAdapter
 
@@ -128,9 +129,7 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
             }
         })
 
-        val awe = model.selectedAlbum.value?.data?.albumMedia ?: return
-
-        imagePagerAdapter.setMedia(awe)
+        imagePagerAdapter.setMedia(model.allAlbumMedia)
 
         viewPager.setCurrentItem(imagePagerAdapter.getItemPosition(model.selectedMedia!!), false)
     }
