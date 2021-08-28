@@ -54,7 +54,7 @@ class EncryptedMediaViewModel @Inject constructor(
         selectedItems.add(media)
     }
 
-    override fun addAllMediaToSelection(media: ArrayList<EncryptedModel>) {
+    override fun addAllMediaToSelection(media: MutableList<EncryptedModel>) {
         selectedItems.let {
             for(obj in media) {
                 if(!it.contains(obj)) {

@@ -23,7 +23,7 @@ interface ISelectionViewModel<T> {
 
     fun addMediaToSelection(position: Int, media: T)
 
-    fun addAllMediaToSelection(media: ArrayList<T>)
+    fun addAllMediaToSelection(media: MutableList<T>)
 
     fun removeMediaFromSelection(position: Int, media: T)
 }
@@ -154,7 +154,7 @@ class GalleryViewModel @Inject constructor(
         selectedItems.add(media)
     }
 
-    override fun addAllMediaToSelection(media: ArrayList<MediaModel>) {
+    override fun addAllMediaToSelection(media: MutableList<MediaModel>) {
         selectedItems.let {
             for(obj in media) {
                 if(!it.contains(obj)) {

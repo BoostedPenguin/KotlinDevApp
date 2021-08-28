@@ -20,7 +20,7 @@ import javax.inject.Singleton
 import kotlin.collections.ArrayList
 
 @Singleton
-class MediaService @Inject constructor(
+class MediaFetchingService @Inject constructor(
     @ApplicationContext private val context: Context
     ) {
     suspend fun getAllVideosWithAlbums(): ArrayList<AlbumModel> {

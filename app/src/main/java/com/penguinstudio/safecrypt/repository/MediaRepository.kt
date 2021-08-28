@@ -7,7 +7,7 @@ import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.models.EncryptedModel
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.services.MediaEncryptionService
-import com.penguinstudio.safecrypt.services.MediaService
+import com.penguinstudio.safecrypt.services.MediaFetchingService
 import com.penguinstudio.safecrypt.services.NoDefaultDirFound
 import com.penguinstudio.safecrypt.utilities.*
 import javax.inject.Inject
@@ -15,13 +15,13 @@ import javax.inject.Singleton
 
 @Singleton
 class MediaRepository @Inject constructor(
-    private val mediaService: MediaService,
+    private val mediaFetchingService: MediaFetchingService,
     private val encryptionService: MediaEncryptionService,
     ) {
 
     suspend fun getMedia(): Resource<CollectionResponse<AlbumModel>> {
         return try {
-            val result = mediaService.getAllVideosWithAlbums()
+            val result = mediaFetchingService.getAllVideosWithAlbums()
             Resource.success(CollectionResponse(result))
 
         } catch (ex: Exception) {
@@ -31,7 +31,7 @@ class MediaRepository @Inject constructor(
 
     suspend fun getEncryptedMediaUris() : Resource<CollectionResponse<EncryptedModel>> {
         return try {
-            val result = mediaService.getAllEncryptedMedia()
+            val result = mediaFetchingService.getAllEncryptedMedia()
             Resource.success(CollectionResponse(result))
         }
         catch (ex: Exception) {

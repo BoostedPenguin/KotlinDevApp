@@ -41,7 +41,7 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners,
         fun onClickListener(position: Int, media: MediaModel)
         fun onLongClickListener(position: Int, media: MediaModel)
     }
-    private var images: ArrayList<MediaModel> = ArrayList()
+    private var images: MutableList<MediaModel> = mutableListOf()
     private var isSelectionMode: Boolean = false
 
     @SuppressLint("NotifyDataSetChanged")
@@ -93,7 +93,7 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners,
         return images[position].id
     }
 
-    fun getImages() : ArrayList<MediaModel> {
+    fun getImages() : MutableList<MediaModel> {
         return this.images
     }
 
