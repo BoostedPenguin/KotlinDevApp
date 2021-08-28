@@ -48,18 +48,7 @@ class SplashFragment : Fragment() {
     }
 
     private fun navigateToPasswordUnlock() {
-
-        val sp = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
-        val storedPattern = sp.getString(getString(R.string.pattern), null)
-
-        // Checks if user is a first timer
-        val action: NavDirections = if(storedPattern == null) {
-            SplashFragmentDirections.actionSplashFragmentToPatternUnlockFragment(true)
-        } else {
-            SplashFragmentDirections.actionSplashFragmentToPatternUnlockFragment(false)
-        }
-
-        findNavController().navigate(action)
+        findNavController().navigate(R.id.patternUnlockFragment)
     }
 
     /**

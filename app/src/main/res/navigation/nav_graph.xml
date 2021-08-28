@@ -41,10 +41,7 @@
         <action
             android:id="@+id/action_patternUnlockFragment_to_passwordUnlockFragment"
             app:destination="@id/passwordUnlockFragment" />
-        <argument
-            android:name="isRegistering"
-            app:argType="boolean"
-            android:defaultValue="false" />
+
         <action
             android:id="@+id/action_patternUnlockFragment_to_homeFragment"
             app:destination="@id/homeFragment" />

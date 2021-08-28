@@ -11,6 +11,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.PatternLockView.Dot
@@ -20,6 +21,7 @@ import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.databinding.FragmentPatternUnlockBinding
 import com.penguinstudio.safecrypt.services.CBCEncryptionService
 import com.penguinstudio.safecrypt.services.GCMEncryptionService
+import com.penguinstudio.safecrypt.ui.main.SplashFragmentDirections
 
 
 /**
@@ -39,22 +41,26 @@ class PatternUnlockFragment : Fragment() {
 
         binding.patternLockView.addPatternLockListener(mPatternLockViewListener)
 
-        arguments?.let {
-            val safeArgs = PatternUnlockFragmentArgs.fromBundle(it)
-            model.isRegistering = safeArgs.isRegistering
+        val sp = activity?.getPreferences(Context.MODE_PRIVATE)
+        val storedPattern = sp?.getString(getString(R.string.pattern), null)
 
-            if(model.isRegistering) {
-                binding.patternHint.text = getString(R.string.pattern_create)
-            }
-            else {
-                binding.patternHint.text = getString(R.string.pattern_enter)
-                binding.patternWarning.visibility = View.INVISIBLE
-            }
+        model.isRegistering = storedPattern == null
+
+        if(model.isRegistering) {
+            binding.patternHint.text = getString(R.string.pattern_create)
+        }
+        else {
+            binding.patternHint.text = getString(R.string.pattern_enter)
+            binding.patternWarning.visibility = View.INVISIBLE
         }
 
         val s = (activity as AppCompatActivity).supportActionBar
         s?.hide()
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
     }
 
 
@@ -89,8 +95,9 @@ class PatternUnlockFragment : Fragment() {
             // Stores securely in KeyStore
             GCMEncryptionService.generateKey()
 
+            binding.patternLockView.clearPattern()
+            model.pattern = ""
             findNavController().navigate(R.id.action_patternUnlockFragment_to_homeFragment)
-
         }
 
         if(pattern.length < 4) {
@@ -136,7 +143,7 @@ class PatternUnlockFragment : Fragment() {
 
         if(inputPattern == storedPattern) {
             // Correct
-            binding.patternLockView.setViewMode(PatternLockView.PatternViewMode.CORRECT)
+            //binding.patternLockView.setViewMode(PatternLockView.PatternViewMode.CORRECT)
             binding.patternLockView.clearPattern()
             model.pattern = ""
 
