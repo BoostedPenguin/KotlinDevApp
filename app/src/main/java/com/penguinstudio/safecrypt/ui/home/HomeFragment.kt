@@ -23,7 +23,8 @@ import dagger.hilt.android.AndroidEntryPoint
 class HomeFragment : Fragment(), LifecycleObserver {
     private lateinit var pagerAdapter: HomeTabPagerAdapter
     private lateinit var viewPager: ViewPager2
-    private val model: EncryptedMediaViewModel by activityViewModels()
+    private val encryptedViewModel: EncryptedMediaViewModel by activityViewModels()
+    private val galleryViewModel: GalleryViewModel by activityViewModels()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,8 +103,11 @@ class HomeFragment : Fragment(), LifecycleObserver {
                 (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
 
                 when(position) {
+                    0 -> {
+                        galleryViewModel.getMedia()
+                    }
                     1 -> {
-                        model.itemSelectionMode.postValue(false)
+                        encryptedViewModel.itemSelectionMode.postValue(false)
                     }
                 }
             }

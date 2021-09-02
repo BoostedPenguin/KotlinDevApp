@@ -30,6 +30,7 @@ import com.penguinstudio.safecrypt.models.EncryptedModel
 import com.penguinstudio.safecrypt.services.EncryptionProcessIntentHandler
 import com.penguinstudio.safecrypt.ui.home.HomeFragmentDirections
 import com.penguinstudio.safecrypt.ui.home.SelectedMediaFragmentDirections
+import com.penguinstudio.safecrypt.utilities.EncryptionStatus
 import com.penguinstudio.safecrypt.utilities.MediaMode
 import com.penguinstudio.safecrypt.utilities.Status
 import dagger.hilt.android.AndroidEntryPoint
@@ -44,6 +45,7 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
 
     @Inject
     lateinit var encryptionProcessIntentHandler: EncryptionProcessIntentHandler
+    private lateinit var defaultStorageLocationSnackbar: Snackbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,6 +85,13 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Instantiate snack-bars
+        defaultStorageLocationSnackbar = Snackbar
+            .make(requireActivity().findViewById(android.R.id.content), "Choose default storage location before encryption proceeds.", Snackbar.LENGTH_INDEFINITE)
+            .setAction("Choose") {
+                encryptionProcessIntentHandler.chooseDefaultSaveLocation()
+            }
 
         binding.enPicturesRecyclerView.setOnTouchListener { v, event ->
             binding.enMediaSwipeToRefresh.isEnabled = event.pointerCount <= 1
@@ -262,6 +271,61 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
                 }
             }
         })
+
+        model.encryptionStatus.observe(viewLifecycleOwner, {
+            if(it == null) return@observe
+
+            when(it.status) {
+                EncryptionStatus.LOADING -> {
+                    binding.enMediaProgressBar.visibility = View.VISIBLE
+                }
+                EncryptionStatus.REQUEST_STORAGE -> {
+                    binding.enMediaProgressBar.visibility = View.GONE
+
+                    encryptionProcessIntentHandler.chooseDefaultSaveLocation(viewLifecycleOwner)
+                        .observe(viewLifecycleOwner, { result ->
+                            when(result) {
+                                Activity.RESULT_OK -> {
+                                    model.decryptSelectedMedia()
+                                }
+                                Activity.RESULT_CANCELED -> {
+                                    defaultStorageLocationSnackbar.show()
+                                }
+                            }
+                        })
+                }
+                EncryptionStatus.DELETE_RECOVERABLE -> {
+                    binding.enMediaProgressBar.visibility = View.GONE
+                    if(it.intentSender == null) return@observe
+
+                    encryptionProcessIntentHandler.deleteOriginalFile(it.intentSender)
+                        .observe(viewLifecycleOwner, { result ->
+                            when(result) {
+                                Activity.RESULT_OK -> {
+                                    //Successfully deleted
+                                }
+                                Activity.RESULT_CANCELED -> {
+                                    Snackbar.make(binding.root,
+                                        "Original media item wasn't deleted. Please delete it manually.",
+                                        Snackbar.LENGTH_INDEFINITE).show()
+                                }
+                            }
+                        })
+                }
+                EncryptionStatus.OPERATION_COMPLETE -> {
+                    model.itemSelectionMode.postValue(false)
+
+                    // Fetch media, it will update adapter automatically
+                    model.getEncryptedFiles()
+
+                    binding.enMediaProgressBar.visibility = View.GONE
+                }
+                EncryptionStatus.ERROR -> {
+                    binding.enMediaProgressBar.visibility = View.GONE
+                }
+            }
+            model.clearEncryptionStatus()
+        })
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
@@ -284,6 +348,10 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
         return when(item.itemId) {
             android.R.id.home -> {
                 onBackPress()
+                true
+            }
+            R.id.action_decrypt -> {
+                model.decryptSelectedMedia()
                 true
             }
             R.id.action_encrypt_select_all -> {

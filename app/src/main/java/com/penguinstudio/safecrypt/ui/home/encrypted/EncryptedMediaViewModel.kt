@@ -13,6 +13,7 @@ import com.penguinstudio.safecrypt.services.glide_service.IPicture
 import com.penguinstudio.safecrypt.ui.home.ISelectedMediaViewModel
 import com.penguinstudio.safecrypt.ui.home.ISelectionViewModel
 import com.penguinstudio.safecrypt.utilities.CollectionResponse
+import com.penguinstudio.safecrypt.utilities.EncryptionResource
 import com.penguinstudio.safecrypt.utilities.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -93,5 +94,30 @@ class EncryptedMediaViewModel @Inject constructor(
 
     override fun clearSelectedMedia() {
         _selectedMedia = null
+    }
+
+    /**
+     * Decryption
+     */
+
+    private val _encryptionStatus = MutableLiveData<EncryptionResource?>()
+    val encryptionStatus: LiveData<EncryptionResource?>
+        get() {
+            return _encryptionStatus
+        }
+    fun clearEncryptionStatus() {
+        _encryptionStatus.postValue(null)
+    }
+
+
+    fun decryptSelectedMedia() {
+        viewModelScope.launch {
+
+            _encryptionStatus.postValue(EncryptionResource.loading())
+
+            mediaRepository.decryptSelectedMedia(selectedItems.toList()).let {
+                _encryptionStatus.postValue(it)
+            }
+        }
     }
 }

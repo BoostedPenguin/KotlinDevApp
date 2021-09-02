@@ -154,7 +154,7 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners,
 
             fullRequest
                 .load(media.uri)
-                .thumbnail(0.25f)
+                .override(200)
                 .placeholder(R.drawable.ic_baseline_image_24)
                 .fitCenter()
                 .into(imageView)

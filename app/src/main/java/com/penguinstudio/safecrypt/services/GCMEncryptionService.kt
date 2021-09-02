@@ -17,6 +17,7 @@ import javax.inject.Inject
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.util.Log
 import androidx.exifinterface.media.ExifInterface
 import com.penguinstudio.safecrypt.models.MediaType
 import java.io.*
@@ -107,6 +108,45 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
         val endArray = outputStream.toByteArray()
 
         return endArray
+    }
+
+    fun decryptData (
+        uri: Uri,
+        mediaType: MediaType,
+        outputStream: OutputStream) : Boolean {
+        val startTime = System.currentTimeMillis()
+
+        // Doesn't support videos yet
+        if(mediaType == MediaType.VIDEO) return false
+
+        val buffer = ByteArray(8192)
+
+        val iv = ByteArray(GCM_IV_LENGTH)
+
+        val inputStream = context.contentResolver.openInputStream(uri)!!
+
+        val decryptCipher = Cipher.getInstance(AES_MODE)
+
+        // Read the IV and use it for init
+        inputStream.read(iv, 0, iv.size)
+
+        val gcmIv: AlgorithmParameterSpec = GCMParameterSpec(128, iv)
+
+        decryptCipher.init(Cipher.DECRYPT_MODE, getSecretKey(), gcmIv)
+
+        var read: Int
+
+        val cis = CipherInputStream(inputStream, decryptCipher)
+
+        while (cis.read(buffer).also { read = it } != -1) {
+            outputStream.write(buffer, 0, read)
+        }
+        cis.close()
+        outputStream.flush()
+        outputStream.close()
+        Log.d("loadTime", "Time it took to decrypt bytes: ${System.currentTimeMillis() - startTime}ms")
+
+        return true
     }
 
     /**

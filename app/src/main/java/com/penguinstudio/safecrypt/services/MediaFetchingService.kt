@@ -168,7 +168,7 @@ class MediaFetchingService @Inject constructor(
                 // If it's not an encoded file continue
                 if(it.name == null || it.name!!.indexOf(".${GCMEncryptionService.ENC_FILE_EXTENSION}") <= 0) return@lit
 
-                uris.add(EncryptedModel(it.uri))
+                uris.add(EncryptedModel(it.uri, it.name))
             }
             return@withContext uris
         }

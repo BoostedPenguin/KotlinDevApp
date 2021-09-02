@@ -98,7 +98,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
 
         fullRequest = Glide.with(this)
             .asDrawable()
-            .thumbnail(0.25f)
+            .override(200)
             .placeholder(R.drawable.ic_baseline_image_24)
             .fitCenter()
 

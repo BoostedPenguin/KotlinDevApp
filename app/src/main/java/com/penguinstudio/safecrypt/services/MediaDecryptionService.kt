@@ -8,31 +8,36 @@ import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.EncryptedModel
-import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.services.glide_service.IPicture
 import com.penguinstudio.safecrypt.utilities.EncryptionStatus
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
 import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import javax.inject.Singleton
 
-class NoDefaultDirFound(message: String) : Exception(message)
-
 @Singleton
-class MediaEncryptionService @Inject constructor(
-    @ApplicationContext private val context: Context,
-    private val gcmEncryptionService: GCMEncryptionService
-    ) {
+class MediaDecryptionService @Inject constructor(@ApplicationContext private val context: Context,
+                                                 private val gcmEncryptionService: GCMEncryptionService,
+                                                 ) {
+    suspend fun decryptMedia(media: IPicture) = withContext(Dispatchers.IO) {
+        // Check if user has permissions for the "encrypted folder"
+        // If he doesn't redirect to select folder for images
 
-    suspend fun encryptImage(
-        image: IPicture,
-    ) = withContext(Dispatchers.IO) {
+        // Create a normal file .png / .jpeg || Empty at start
+        // Write the decrypted information to the file
+
+        // Delete the original ENCRYPTED file
+        // Ask for external permission to delete file if deleting fails
+
         val startTime = System.currentTimeMillis()
 
-        if(image !is MediaModel)
+        if(media !is EncryptedModel)
             throw IllegalArgumentException("Wrong model")
+
 
         // Get Default Encryption storage and store
         val sp: SharedPreferences =
@@ -55,14 +60,15 @@ class MediaEncryptionService @Inject constructor(
             }
 
             // Serialize encrypted file in given root location
-            val encryptedEmptyFile = createEncryptedFile(root, image.mediaName)
+            val decryptedEmptyFile = createDecryptedFile(root, media.imageName
+                ?: throw IllegalArgumentException("File name was empty"))
 
 
             val result = async(Dispatchers.IO) {
-                val outputStream = context.contentResolver.openOutputStream(encryptedEmptyFile.uri)
+                val outputStream = context.contentResolver.openOutputStream(decryptedEmptyFile.uri)
                     ?: throw FileNotFoundException()
 
-                val encryptedStatus = gcmEncryptionService.encryptData(image.uri, image.mediaType, outputStream)
+                val encryptedStatus = gcmEncryptionService.decryptData(media.uri, media.mediaType, outputStream)
                 outputStream.flush()
                 outputStream.close()
 
@@ -71,43 +77,53 @@ class MediaEncryptionService @Inject constructor(
 
             // Delete original non-encrypted file
             val resultAwaited = result.await()
-            if(resultAwaited) deleteOriginalNonEncryptedFile(image.uri)
+            if(resultAwaited) deleteOriginalNonEncryptedFile(media.uri)
         }
         Log.d("loadTime", "Time it took to encrypt media: ${System.currentTimeMillis() - startTime}ms")
         return@withContext EncryptionStatus.OPERATION_COMPLETE
-
     }
 
     /**
-     * Create a file in the specified directory and write the encrypted bytes
+     * Create a file in the specified directory and write the decrypted bytes
      */
-    private suspend fun createEncryptedFile(
+    private suspend fun createDecryptedFile(
         root: DocumentFile,
         imageName: String
     ): DocumentFile = withContext(Dispatchers.IO) {
 
-        val encryptedFile = async(Dispatchers.IO) {
+        val decryptedFile = async(Dispatchers.IO) {
+
+            // Check the file extension before the .enc extra file extension
+            // Create a file with that extension
+
+            val startIndexOfExtension = imageName.indexOf(".${GCMEncryptionService.ENC_FILE_EXTENSION}")
+            if(startIndexOfExtension <= 0)
+                throw IllegalArgumentException("The given file wasn't an encrypted file")
+
+            // Search from the previous "." to the startindexofextension for a file extension and use that
+            // Don't use regex for available mime types yet
+
+            val original = imageName.substring(0, startIndexOfExtension)
+            val extension = imageName.substring(imageName.lastIndexOf("."), original.length + 1)
+
+            if(!original.contains(".")) throw IllegalArgumentException("Original file didn't have an extension")
+
 
             return@async root.createFile(
-                GCMEncryptionService.ENC_FILE_EXTENSION,
-                imageName.plus(".${GCMEncryptionService.ENC_FILE_EXTENSION}")
-            )
+                extension,
+                original)
                 ?: throw NoDefaultDirFound("Couldn't create a file in the specified location")
         }
 
-        return@withContext encryptedFile.await()
+        return@withContext decryptedFile.await()
     }
 
     private fun deleteOriginalNonEncryptedFile(
         originalFileUri: Uri,
     ): Boolean {
-        val resolver = context.contentResolver
+        val srcDoc = DocumentFile.fromSingleUri(context, originalFileUri)
+        srcDoc?.delete()
 
-        val numImagesRemoved = resolver.delete(
-            originalFileUri,
-            null,
-            null
-        )
-        return numImagesRemoved == 1
+        return srcDoc?.delete() ?: false
     }
 }
