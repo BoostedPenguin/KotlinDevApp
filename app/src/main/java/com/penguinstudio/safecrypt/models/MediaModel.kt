@@ -12,17 +12,17 @@ data class MediaModel(
     var albumName: String?,
     override var mediaType: MediaType,
     var videoDuration: Long?,
-    var mediaName: String,
+    override var mediaName: String,
 
+    override val size: String? = null,
     val details: MediaModelDetails,
 
-    var isSelected: Boolean = false,
+    override var isSelected: Boolean = false,
 ) : IPicture
 
 data class MediaModelDetails(
     val dateAdded: Long? = null,
     val relativePath: String? = null,
-    val size: String? = null,
     val width: String? = null,
     val height: String? = null,
 )

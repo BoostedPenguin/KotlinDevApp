@@ -252,7 +252,7 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
         //Set the location of the window on the screen
         popupWindow.showAtLocation(view, Gravity.BOTTOM, 0, 0)
 
-        val size = mediaModel.details.size?.toDouble()?.let { sizeConvertedToString(it) }
+        val size = mediaModel.size?.toDouble()?.let { sizeConvertedToString(it) }
 
         when(mediaModel.mediaType) {
             MediaType.IMAGE -> {

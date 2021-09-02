@@ -88,12 +88,12 @@ class HomeFragment : Fragment(), LifecycleObserver {
                 0 -> {
                     tab.icon =
                         AppCompatResources.getDrawable(requireContext(), R.drawable.ic_baseline_image_24)
-                    tab.text = "VISIBLE"
+                    tab.text = "Gallery"
                 }
                 1 -> {
                     tab.icon =
                         AppCompatResources.getDrawable(requireContext(), R.drawable.ic_baseline_lock_24)
-                    tab.text = "INVISIBLE"
+                    tab.text = "Encrypted"
                 }
             }
         }.attach()

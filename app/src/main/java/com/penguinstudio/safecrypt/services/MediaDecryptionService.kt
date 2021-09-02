@@ -60,7 +60,7 @@ class MediaDecryptionService @Inject constructor(@ApplicationContext private val
             }
 
             // Serialize encrypted file in given root location
-            val decryptedEmptyFile = createDecryptedFile(root, media.imageName
+            val decryptedEmptyFile = createDecryptedFile(root, media.mediaName
                 ?: throw IllegalArgumentException("File name was empty"))
 
 

@@ -17,6 +17,9 @@ import java.nio.ByteBuffer
 interface IPicture {
     val uri: Uri
     var mediaType: MediaType
+    val mediaName: String?
+    val size: String?
+    var isSelected: Boolean
 }
 
 @GlideModule
