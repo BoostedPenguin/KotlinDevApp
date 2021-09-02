@@ -41,7 +41,11 @@ class MainActivity : AppCompatActivity() {
      * Go back to pattern unlock view when the app gets switched
      */
     override fun onPause() {
-        findNavController(R.id.nav_host_fragment_content_main).popBackStack(R.id.patternUnlockFragment, false)
+        if(!isPaused) {
+            findNavController(R.id.nav_host_fragment_content_main).popBackStack(R.id.patternUnlockFragment, false)
+        }
+
+        unpausePattern()
         super.onPause()
     }
 
@@ -68,5 +72,23 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
+    }
+
+    companion object {
+        private var isPaused = false
+
+        /**
+         * Return back to normal tab-out-to-pattern behavior
+         */
+        fun unpausePattern() {
+            isPaused = false
+        }
+
+        /**
+         * Pause temporary the tab-out-to-pattern behavior
+         */
+        fun pausePattern() {
+            isPaused = true
+        }
     }
 }

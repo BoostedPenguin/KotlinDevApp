@@ -276,8 +276,13 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
             }
         }
         popupView.findViewById<TextView>(R.id.detailsSizeValue).text = size ?: "No Value"
-        popupView.findViewById<TextView>(R.id.detailsDateValue).text = "${SimpleDateFormat("dd MMMM yyyy hh:mm", Locale.US)
-            .format(mediaModel.details.dateAdded)}"
+        popupView.findViewById<TextView>(R.id.detailsDateValue).text = if(mediaModel.details.dateAdded == null) {
+            "Unknown"
+        }
+        else {
+            SimpleDateFormat("dd MMMM yyyy hh:mm", Locale.US)
+                .format(mediaModel.details.dateAdded)
+        }
         popupView.findViewById<TextView>(R.id.detailsPathValue).text = "${mediaModel.details.relativePath}"
     }
 

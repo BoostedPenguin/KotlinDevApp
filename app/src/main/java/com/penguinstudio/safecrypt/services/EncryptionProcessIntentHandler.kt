@@ -12,6 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.penguinstudio.safecrypt.MainActivity
 import com.penguinstudio.safecrypt.utilities.Event
 import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.scopes.FragmentScoped
@@ -33,6 +34,7 @@ class EncryptionProcessIntentHandler @Inject constructor (
         if(lifecycleOwner != null)
             _saveLocationResult.removeObservers(lifecycleOwner)
 
+        MainActivity.pausePattern()
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
         intent.addFlags(
             Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -46,6 +48,8 @@ class EncryptionProcessIntentHandler @Inject constructor (
     }
 
     fun deleteOriginalFile(intentSenderRequest: IntentSenderRequest) : LiveData<Int> {
+        MainActivity.pausePattern()
+
         deleteOriginalFileLauncher.launch(intentSenderRequest)
 
         return deleteFileResult

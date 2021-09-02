@@ -11,6 +11,7 @@ import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
+import com.penguinstudio.safecrypt.MainActivity
 import com.penguinstudio.safecrypt.R
 
 class SettingsFragment : Fragment(),
@@ -60,6 +61,7 @@ class SettingsFragment : Fragment(),
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         val darkModeString = getString(R.string.dark_mode)
+        MainActivity.pausePattern()
         key?.let {
             if (it == darkModeString) sharedPreferences?.let { pref ->
                 val darkModeValues = resources.getStringArray(R.array.dark_mode_values)
