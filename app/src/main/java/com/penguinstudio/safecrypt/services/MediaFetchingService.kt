@@ -106,8 +106,7 @@ class MediaFetchingService @Inject constructor(
                                 MediaType.IMAGE,
                                 null,
                                 mediaName,
-                                size,
-                                MediaModelDetails(dateAdded, relativePath, width, height)
+                                MediaModelDetails(dateAdded, relativePath, size, width, height)
                                 )
                         }
                         MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO -> {
@@ -118,8 +117,7 @@ class MediaFetchingService @Inject constructor(
                                 MediaType.VIDEO,
                                 it.getLong(durationColumn),
                                 mediaName,
-                                size,
-                                MediaModelDetails(dateAdded, relativePath)
+                                MediaModelDetails(dateAdded, relativePath, size)
                             )
                         }
                         else -> {
@@ -170,7 +168,7 @@ class MediaFetchingService @Inject constructor(
                 // If it's not an encoded file continue
                 if(it.name == null || it.name!!.indexOf(".${GCMEncryptionService.ENC_FILE_EXTENSION}") <= 0) return@lit
 
-                uris.add(EncryptedModel(it.uri, it.name!!, it.length().toString()))
+                uris.add(EncryptedModel(it.uri, it.name!!))
             }
             return@withContext uris
         }

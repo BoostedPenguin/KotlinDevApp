@@ -14,7 +14,6 @@ data class MediaModel(
     var videoDuration: Long?,
     override var mediaName: String,
 
-    override val size: String? = null,
     val details: MediaModelDetails,
 
     override var isSelected: Boolean = false,
@@ -23,6 +22,7 @@ data class MediaModel(
 data class MediaModelDetails(
     val dateAdded: Long? = null,
     val relativePath: String? = null,
+    val size: String? = null,
     val width: String? = null,
     val height: String? = null,
-)
+    )

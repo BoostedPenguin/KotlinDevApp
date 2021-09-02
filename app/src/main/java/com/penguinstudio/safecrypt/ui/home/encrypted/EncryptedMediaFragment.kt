@@ -28,6 +28,8 @@ import com.penguinstudio.safecrypt.databinding.FragmentEncryptedMediaBinding
 import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.models.EncryptedModel
 import com.penguinstudio.safecrypt.services.EncryptionProcessIntentHandler
+import com.penguinstudio.safecrypt.services.glide_service.GlideApp
+import com.penguinstudio.safecrypt.services.glide_service.GlideRequest
 import com.penguinstudio.safecrypt.ui.home.HomeFragmentDirections
 import com.penguinstudio.safecrypt.ui.home.SelectedMediaFragmentDirections
 import com.penguinstudio.safecrypt.utilities.EncryptionStatus
@@ -41,7 +43,7 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
     private val model: EncryptedMediaViewModel by activityViewModels()
     private lateinit var binding: FragmentEncryptedMediaBinding
     private lateinit var encryptedMediaAdapter: EncryptedGridAdapter
-    private lateinit var fullRequest: RequestBuilder<Drawable>
+    private lateinit var fullRequest: GlideRequest<Drawable>
 
     @Inject
     lateinit var encryptionProcessIntentHandler: EncryptionProcessIntentHandler
@@ -123,10 +125,11 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
             })
         }
 
-        fullRequest = Glide.with(this)
+        fullRequest = GlideApp.with(this)
             .asDrawable()
             .placeholder(R.drawable.ic_baseline_image_24)
             .fitCenter()
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
 
         checkForSaveLocation()
 

@@ -30,6 +30,8 @@ import android.widget.*
 import androidx.navigation.fragment.navArgs
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.EncryptedModel
+import com.penguinstudio.safecrypt.services.glide_service.GlideApp
+import com.penguinstudio.safecrypt.services.glide_service.GlideRequest
 import com.penguinstudio.safecrypt.services.glide_service.IPicture
 import com.penguinstudio.safecrypt.ui.home.encrypted.EncryptedMediaViewModel
 import com.penguinstudio.safecrypt.utilities.MediaMode
@@ -44,7 +46,7 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
     private lateinit var binding: FragmentSelectedPictureBinding
     private lateinit var viewPager: ViewPager2
     private lateinit var imagePagerAdapter: SelectedMediaAdapter
-    private lateinit var fullRequest: RequestBuilder<Drawable>
+    private lateinit var fullRequest: GlideRequest<Drawable>
     private lateinit var model: ISelectedMediaViewModel
     private val args: SelectedMediaFragmentArgs by navArgs()
 
@@ -192,7 +194,7 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
     ): View {
         binding = FragmentSelectedPictureBinding.inflate(layoutInflater, container, false)
         activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        fullRequest = Glide.with(this)
+        fullRequest = GlideApp.with(this)
             .asDrawable()
             .placeholder(R.drawable.ic_baseline_image_24)
             .fitCenter()
@@ -252,7 +254,7 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
         //Set the location of the window on the screen
         popupWindow.showAtLocation(view, Gravity.BOTTOM, 0, 0)
 
-        val size = mediaModel.size?.toDouble()?.let { sizeConvertedToString(it) }
+        val size = mediaModel.details.size?.toDouble()?.let { sizeConvertedToString(it) }
 
         when(mediaModel.mediaType) {
             MediaType.IMAGE -> {

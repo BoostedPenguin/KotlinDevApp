@@ -25,6 +25,8 @@ import com.penguinstudio.safecrypt.adapters.AlbumMediaAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentPicturesBinding
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.services.EncryptionProcessIntentHandler
+import com.penguinstudio.safecrypt.services.glide_service.GlideApp
+import com.penguinstudio.safecrypt.services.glide_service.GlideRequest
 import com.penguinstudio.safecrypt.utilities.EncryptionStatus
 import com.penguinstudio.safecrypt.utilities.Status
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,7 +39,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
     private lateinit var photoAdapter: AlbumMediaAdapter
     private val _model: GalleryViewModel by activityViewModels()
 
-    private lateinit var fullRequest: RequestBuilder<Drawable>
+    private lateinit var fullRequest: GlideRequest<Drawable>
 
     private lateinit var defaultStorageLocationSnackbar: Snackbar
 
@@ -96,7 +98,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
         binding = FragmentPicturesBinding.inflate(layoutInflater, container, false)
         setHasOptionsMenu(true)
 
-        fullRequest = Glide.with(this)
+        fullRequest = GlideApp.with(this)
             .asDrawable()
             .override(200)
             .placeholder(R.drawable.ic_baseline_image_24)

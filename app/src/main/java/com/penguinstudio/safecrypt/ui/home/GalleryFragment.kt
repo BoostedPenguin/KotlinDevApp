@@ -18,6 +18,8 @@ import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.AlbumsAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentGalleryBinding
 import com.penguinstudio.safecrypt.models.AlbumModel
+import com.penguinstudio.safecrypt.services.glide_service.GlideApp
+import com.penguinstudio.safecrypt.services.glide_service.GlideRequest
 import com.penguinstudio.safecrypt.utilities.Status
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -28,7 +30,7 @@ class GalleryFragment : Fragment() {
     private val model: GalleryViewModel by activityViewModels()
     private lateinit var binding: FragmentGalleryBinding
     private lateinit var galleryAdapter: AlbumsAdapter
-    private lateinit var fullRequest: RequestBuilder<Drawable>
+    private lateinit var fullRequest: GlideRequest<Drawable>
 
 
     override fun onCreateView(
@@ -38,7 +40,7 @@ class GalleryFragment : Fragment() {
         // Inflate the layout for this fragment
         binding = FragmentGalleryBinding.inflate(layoutInflater)
 
-        fullRequest = Glide.with(this)
+        fullRequest = GlideApp.with(this)
             .asDrawable()
             .placeholder(R.drawable.ic_baseline_image_24)
             .fitCenter()
