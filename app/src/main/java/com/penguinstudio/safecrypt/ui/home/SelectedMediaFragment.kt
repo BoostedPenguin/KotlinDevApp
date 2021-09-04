@@ -35,6 +35,7 @@ import com.penguinstudio.safecrypt.services.glide_service.GlideRequest
 import com.penguinstudio.safecrypt.services.glide_service.IPicture
 import com.penguinstudio.safecrypt.ui.home.encrypted.EncryptedMediaViewModel
 import com.penguinstudio.safecrypt.utilities.MediaMode
+import com.penguinstudio.safecrypt.utilities.getGlideRequest
 import java.lang.IllegalArgumentException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -194,11 +195,7 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
     ): View {
         binding = FragmentSelectedPictureBinding.inflate(layoutInflater, container, false)
         activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        fullRequest = GlideApp.with(this)
-            .asDrawable()
-            .placeholder(R.drawable.ic_baseline_image_24)
-            .fitCenter()
-
+        fullRequest = this.getGlideRequest()
         return binding.root
     }
 

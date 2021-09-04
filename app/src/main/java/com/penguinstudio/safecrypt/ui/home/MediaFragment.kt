@@ -29,6 +29,7 @@ import com.penguinstudio.safecrypt.services.glide_service.GlideApp
 import com.penguinstudio.safecrypt.services.glide_service.GlideRequest
 import com.penguinstudio.safecrypt.utilities.EncryptionStatus
 import com.penguinstudio.safecrypt.utilities.Status
+import com.penguinstudio.safecrypt.utilities.getGlideRequest
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -98,11 +99,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
         binding = FragmentPicturesBinding.inflate(layoutInflater, container, false)
         setHasOptionsMenu(true)
 
-        fullRequest = GlideApp.with(this)
-            .asDrawable()
-            .override(200)
-            .placeholder(R.drawable.ic_baseline_image_24)
-            .fitCenter()
+        fullRequest = this.getGlideRequest()
 
         (activity as AppCompatActivity).supportActionBar?.show()
 

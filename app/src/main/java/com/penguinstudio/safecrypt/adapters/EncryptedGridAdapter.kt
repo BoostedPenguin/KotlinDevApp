@@ -15,10 +15,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.ListPreloader
 import com.bumptech.glide.RequestBuilder
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.signature.MediaStoreSignature
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.EncryptedModel
+import com.penguinstudio.safecrypt.utilities.loadImage
 
 
 class EncryptedGridAdapter constructor(
@@ -157,11 +156,7 @@ class EncryptedGridAdapter constructor(
             videoLayoutCard.visibility = View.GONE
 
 
-            fullRequest
-                .load(encryptedModel)
-                .placeholder(R.drawable.ic_baseline_image_24)
-                .fitCenter()
-                .into(imageView)
+            fullRequest.loadImage(encryptedModel, imageView)
         }
     }
 

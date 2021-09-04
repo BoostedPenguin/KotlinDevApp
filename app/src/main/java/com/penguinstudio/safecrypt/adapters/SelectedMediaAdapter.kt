@@ -21,6 +21,7 @@ import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.audio.AudioAttributes
 import com.penguinstudio.safecrypt.services.glide_service.IPicture
 import com.penguinstudio.safecrypt.utilities.MediaMode
+import com.penguinstudio.safecrypt.utilities.loadImage
 
 
 class SelectedMediaAdapter(private var listener: ImagePagerListeners,
@@ -201,6 +202,7 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
                     fullRequest
                         .load(media.uri)
                         .placeholder(R.drawable.ic_baseline_image_24)
+                        .override(1200)
                         .fitCenter()
                         .into(imageView)
                 }
@@ -208,6 +210,7 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
                     fullRequest
                         .load(media)
                         .placeholder(R.drawable.ic_baseline_image_24)
+                        .override(1200)
                         .fitCenter()
                         .into(imageView)
                 }
@@ -229,11 +232,7 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
             selectedVideo.controllerShowTimeoutMs = -1
 
 
-            fullRequest
-                .load(media.uri)
-                .placeholder(R.drawable.ic_baseline_image_24)
-                .fitCenter()
-                .into(imageView)
+            fullRequest.loadImage(media.uri, imageView)
         }
 
         fun createVideoPlayback() {
