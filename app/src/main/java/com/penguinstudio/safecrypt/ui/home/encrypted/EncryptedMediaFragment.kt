@@ -176,7 +176,7 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
                         }
                     }
                     else {
-                        model.addMediaToSelection(position, media)
+                        model.addMediaToSelection(media)
                     }
 
                     if (model.itemSelectionMode.value == true) {
@@ -200,7 +200,7 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
 
                 model.itemSelectionMode.value = true
 
-                model.addMediaToSelection(position, media)
+                model.addMediaToSelection(media)
                 (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.size} selected"
 
                 // Notify adapter that this item has changed

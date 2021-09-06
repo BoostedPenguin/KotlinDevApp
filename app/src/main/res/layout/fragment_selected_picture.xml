@@ -9,7 +9,6 @@
 
     <androidx.appcompat.widget.Toolbar
         android:visibility="gone"
-        app:menu="@menu/selected_picture_menu"
         android:id="@+id/selected_fragment_toolbar"
         app:layout_constraintTop_toTopOf="parent"
         android:theme="@style/Toolbar.SelectedPicture"

@@ -49,7 +49,7 @@ class EncryptedMediaViewModel @Inject constructor(
     override val selectedItems: MutableList<EncryptedModel> = mutableListOf()
 
 
-    override fun addMediaToSelection(position: Int, media: EncryptedModel) {
+    override fun addMediaToSelection(media: EncryptedModel) {
         media.isSelected = true
 
         selectedItems.add(media)

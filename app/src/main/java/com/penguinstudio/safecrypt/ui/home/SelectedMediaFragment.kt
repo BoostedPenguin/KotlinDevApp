@@ -71,10 +71,12 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
         this.model = when(args.mediaMode) {
             MediaMode.NORMAL_MEDIA -> {
                 val model: GalleryViewModel by activityViewModels()
+                binding.selectedFragmentToolbar.inflateMenu(R.menu.selected_picture_menu)
                 model
             }
             MediaMode.ENCRYPTED_MEDIA -> {
                 val model: EncryptedMediaViewModel by activityViewModels()
+                binding.selectedFragmentToolbar.inflateMenu(R.menu.selected_encrypted_picture_menu)
                 model
             }
         }
@@ -96,6 +98,22 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
             when(it.itemId) {
                 R.id.action_media_details -> {
                     showPopupWindow(imagePagerAdapter.getCurrentItem())
+                    true
+                }
+                R.id.action_media_encrypt -> {
+                    (model as GalleryViewModel).clearSelections()
+                    (model as GalleryViewModel).addMediaToSelection(model.selectedMedia as MediaModel)
+
+                    findNavController().popBackStack()
+                    (model as GalleryViewModel).encryptSelectedMedia()
+                    true
+                }
+                R.id.action_media_decrypt -> {
+                    (model as EncryptedMediaViewModel).clearSelections()
+                    (model as EncryptedMediaViewModel).addMediaToSelection(model.selectedMedia as EncryptedModel)
+
+                    findNavController().popBackStack()
+                    (model as EncryptedMediaViewModel).decryptSelectedMedia()
                     true
                 }
                 else -> true

@@ -21,7 +21,7 @@ interface ISelectionViewModel<T> {
 
     val selectedItems: MutableList<T>
 
-    fun addMediaToSelection(position: Int, media: T)
+    fun addMediaToSelection(media: T)
 
     fun addAllMediaToSelection(media: MutableList<T>)
 
@@ -148,7 +148,7 @@ class GalleryViewModel @Inject constructor(
         selectedItems.clear()
     }
 
-    override fun addMediaToSelection(position: Int, media: MediaModel) {
+    override fun addMediaToSelection(media: MediaModel) {
         media.isSelected = true
 
         selectedItems.add(media)
