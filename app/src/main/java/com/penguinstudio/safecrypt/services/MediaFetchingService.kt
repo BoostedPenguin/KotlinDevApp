@@ -14,6 +14,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.lang.IllegalArgumentException
+import java.net.URLConnection
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -166,11 +167,40 @@ class MediaFetchingService @Inject constructor(
             root?.listFiles()?.forEach lit@ {
 
                 // If it's not an encoded file continue
-                if(it.name == null || it.name!!.indexOf(".${GCMEncryptionService.ENC_FILE_EXTENSION}") <= 0) return@lit
 
-                uris.add(EncryptedModel(it.uri, it.name!!))
+
+                val fileName = it.name ?: return@lit
+
+                val startIndexOfExtension = fileName.indexOf(".${GCMEncryptionService.ENC_FILE_EXTENSION}")
+                if(startIndexOfExtension <= 0)
+                    return@lit
+
+                val original = fileName.substring(0, startIndexOfExtension)
+
+                if(!original.contains("."))
+                    return@lit
+
+                when {
+                    isImageFile(original) -> {
+                        uris.add(EncryptedModel(it.uri, fileName, MediaType.IMAGE))
+                    }
+                    isVideoFile(original) -> {
+                        uris.add(EncryptedModel(it.uri, fileName, MediaType.VIDEO))
+                    }
+                    else -> return@lit
+                }
             }
             return@withContext uris
         }
+    }
+
+    fun isImageFile(path: String?): Boolean {
+        val mimeType: String = URLConnection.guessContentTypeFromName(path)
+        return mimeType.startsWith("image")
+    }
+
+    fun isVideoFile(path: String?): Boolean {
+        val mimeType: String = URLConnection.guessContentTypeFromName(path)
+        return mimeType.startsWith("video")
     }
 }

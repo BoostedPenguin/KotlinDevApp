@@ -27,6 +27,7 @@ import com.penguinstudio.safecrypt.adapters.EncryptedGridAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentEncryptedMediaBinding
 import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.models.EncryptedModel
+import com.penguinstudio.safecrypt.models.MediaType
 import com.penguinstudio.safecrypt.services.EncryptionProcessIntentHandler
 import com.penguinstudio.safecrypt.services.glide_service.GlideApp
 import com.penguinstudio.safecrypt.services.glide_service.GlideRequest
@@ -188,6 +189,11 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
                 }
                 else {
                     //TODO Enlarge image
+                    if(media.mediaType == MediaType.VIDEO) {
+                        Snackbar.make(requireActivity().findViewById(android.R.id.content), "Videos can't be previewed currently.", Snackbar.LENGTH_LONG)
+                            .show()
+                        return
+                    }
                     model.setSelectedMedia(media)
                     val action = HomeFragmentDirections.actionHomeFragmentToSelectedPicture(MediaMode.ENCRYPTED_MEDIA)
                     findNavController().navigate(action)
@@ -257,7 +263,7 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
                     binding.enMediaSwipeToRefresh.isRefreshing = false
                     binding.enMediaSwipeToRefresh.isEnabled = true
 
-                    Snackbar.make(binding.root, "Something went wrong", Snackbar.LENGTH_SHORT)
+                    Snackbar.make(requireActivity().findViewById(android.R.id.content), "Something went wrong", Snackbar.LENGTH_SHORT)
                         .show()
                 }
                 Status.LOADING -> {

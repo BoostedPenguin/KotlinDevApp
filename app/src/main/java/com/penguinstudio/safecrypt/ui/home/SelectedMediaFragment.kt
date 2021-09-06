@@ -47,14 +47,12 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
     private lateinit var binding: FragmentSelectedPictureBinding
     private lateinit var viewPager: ViewPager2
     private lateinit var imagePagerAdapter: SelectedMediaAdapter
-    private lateinit var fullRequest: GlideRequest<Drawable>
     private lateinit var model: ISelectedMediaViewModel
     private val args: SelectedMediaFragmentArgs by navArgs()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
 
         val callback: OnBackPressedCallback =
             object : OnBackPressedCallback(true) {
@@ -102,7 +100,7 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
                 }
                 R.id.action_media_encrypt -> {
                     (model as GalleryViewModel).clearSelections()
-                    (model as GalleryViewModel).addMediaToSelection(model.selectedMedia as MediaModel)
+                    (model as GalleryViewModel).addMediaToSelection(imagePagerAdapter.getCurrentItem() as MediaModel)
 
                     findNavController().popBackStack()
                     (model as GalleryViewModel).encryptSelectedMedia()
@@ -110,7 +108,7 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
                 }
                 R.id.action_media_decrypt -> {
                     (model as EncryptedMediaViewModel).clearSelections()
-                    (model as EncryptedMediaViewModel).addMediaToSelection(model.selectedMedia as EncryptedModel)
+                    (model as EncryptedMediaViewModel).addMediaToSelection(imagePagerAdapter.getCurrentItem() as EncryptedModel)
 
                     findNavController().popBackStack()
                     (model as EncryptedMediaViewModel).decryptSelectedMedia()
@@ -127,7 +125,7 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
                     (viewPager.adapter as SelectedMediaAdapter).isHandleVisible = it
                 })
             }
-        }, fullRequest, Glide.with(this), args.mediaMode)
+        }, this.getGlideRequest(), Glide.with(this), args.mediaMode)
 
         viewPager.adapter = imagePagerAdapter
 
@@ -150,7 +148,15 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
             }
         })
 
-        imagePagerAdapter.setMedia(model.allAlbumMedia)
+        when(args.mediaMode) {
+            MediaMode.ENCRYPTED_MEDIA -> {
+                // Excluding videos
+                imagePagerAdapter.setMedia(model.allAlbumMedia.filter {
+                    it.mediaType == MediaType.IMAGE
+                })
+            }
+            else -> imagePagerAdapter.setMedia(model.allAlbumMedia)
+        }
 
         viewPager.setCurrentItem(imagePagerAdapter.getItemPosition(model.selectedMedia!!), false)
     }
@@ -164,12 +170,6 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
         viewPager.adapter = null
         super.onDestroyView()
     }
-
-
-//    private val model: IPicturesViewModel
-//        get() {
-//            return _model
-//        }
 
     private var _handle = MutableLiveData<Boolean>()
     private fun handleToolbarOnImageClick() : LiveData<Boolean> {
@@ -212,8 +212,7 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentSelectedPictureBinding.inflate(layoutInflater, container, false)
-        activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        fullRequest = this.getGlideRequest()
+        activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
         return binding.root
     }
 
