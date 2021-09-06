@@ -124,12 +124,10 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
 
     fun decryptData (
         uri: Uri,
-        mediaType: MediaType,
         outputStream: OutputStream) : Boolean {
         val startTime = System.currentTimeMillis()
 
         // Doesn't support videos yet
-        if(mediaType == MediaType.VIDEO) return false
 
         val buffer = ByteArray(8192)
 

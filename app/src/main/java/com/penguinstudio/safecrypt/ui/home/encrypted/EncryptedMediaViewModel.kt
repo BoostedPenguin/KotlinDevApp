@@ -115,7 +115,10 @@ class EncryptedMediaViewModel @Inject constructor(
 
             _encryptionStatus.postValue(EncryptionResource.loading())
 
-            mediaRepository.decryptSelectedMedia(selectedItems.toList()).let {
+            val selectedItems = selectedItems.toList()
+            clearSelections()
+
+            mediaRepository.decryptSelectedMedia(selectedItems).let {
                 _encryptionStatus.postValue(it)
             }
         }

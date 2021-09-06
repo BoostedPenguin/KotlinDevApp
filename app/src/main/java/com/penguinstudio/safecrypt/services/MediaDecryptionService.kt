@@ -68,7 +68,7 @@ class MediaDecryptionService @Inject constructor(@ApplicationContext private val
                 val outputStream = context.contentResolver.openOutputStream(decryptedEmptyFile.uri)
                     ?: throw FileNotFoundException()
 
-                val encryptedStatus = gcmEncryptionService.decryptData(media.uri, media.mediaType, outputStream)
+                val encryptedStatus = gcmEncryptionService.decryptData(media.uri, outputStream)
                 outputStream.flush()
                 outputStream.close()
 
