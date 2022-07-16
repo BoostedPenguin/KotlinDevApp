@@ -1,6 +1,7 @@
 package com.penguinstudio.safecrypt.adapters
 
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,9 +20,21 @@ import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.MediaType
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.audio.AudioAttributes
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory
+import com.google.android.exoplayer2.extractor.ExtractorsFactory
+import com.google.android.exoplayer2.extractor.mp4.Mp4Extractor
+import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.source.MediaSourceFactory
+import com.google.android.exoplayer2.source.ProgressiveMediaExtractor
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import com.google.android.exoplayer2.source.hls.HlsMediaSource
+import com.google.android.exoplayer2.upstream.DataSource
+import com.google.android.exoplayer2.util.MimeTypes
+import com.penguinstudio.safecrypt.services.EncryptedDataSource
 import com.penguinstudio.safecrypt.services.glide_service.IPicture
 import com.penguinstudio.safecrypt.utilities.MediaMode
 import com.penguinstudio.safecrypt.utilities.loadImage
+import java.security.KeyStore
 
 
 class SelectedMediaAdapter(private var listener: ImagePagerListeners,
@@ -235,14 +248,40 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
             fullRequest.loadImage(media.uri, imageView)
         }
 
+        private fun createMediaSourceFactory(): MediaSourceFactory {
+            val keyStore = KeyStore.getInstance("AndroidKeyStore")
+            keyStore.load(null)
+
+            val localKey = keyStore.getKey("MyKey", null)
+
+            val aesDataSource: DataSource = EncryptedDataSource(itemView.context, localKey) // Use your Cipher instance
+
+            val factory = DataSource.Factory {
+                aesDataSource
+            }
+
+            return ProgressiveMediaSource.Factory(factory)
+        }
+
         fun createVideoPlayback() {
             player?.stop()
             player?.clearMediaItems()
             player?.release()
             player = null
 
-            player = SimpleExoPlayer.Builder(itemView.context)
-                .build()
+            val mi = MediaItem.fromUri(media.uri)
+
+            player = when(mediaMode) {
+                MediaMode.NORMAL_MEDIA ->
+                    SimpleExoPlayer.Builder(itemView.context)
+                        .build()
+                MediaMode.ENCRYPTED_MEDIA ->
+                    SimpleExoPlayer.Builder(itemView.context)
+                        .setMediaSourceFactory(createMediaSourceFactory())
+                        .build()
+            }
+
+            player?.setMediaItem(mi)
 
             player?.setAudioAttributes(audioAttributes, true)
 
@@ -263,9 +302,6 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
             }
 
 
-            val mediaItem: MediaItem = MediaItem.fromUri(media.uri)
-
-            player?.setMediaItem(mediaItem)
             player?.prepare()
 
             player?.addListener(object: Player.Listener {

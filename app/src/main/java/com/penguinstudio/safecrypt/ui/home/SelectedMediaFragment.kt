@@ -151,9 +151,7 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
         when(args.mediaMode) {
             MediaMode.ENCRYPTED_MEDIA -> {
                 // Excluding videos
-                imagePagerAdapter.setMedia(model.allAlbumMedia.filter {
-                    it.mediaType == MediaType.IMAGE
-                })
+                imagePagerAdapter.setMedia(model.allAlbumMedia)
             }
             else -> imagePagerAdapter.setMedia(model.allAlbumMedia)
         }
