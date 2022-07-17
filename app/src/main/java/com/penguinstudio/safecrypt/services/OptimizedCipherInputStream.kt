@@ -71,7 +71,7 @@ import javax.crypto.*
  *
  * @since 1.4
  */
-class BetterCypherInput : FilterInputStream {
+class OptimizedCipherInputStream : FilterInputStream {
     // the cipher engine to use to process stream data
     private var cipher: Cipher
 

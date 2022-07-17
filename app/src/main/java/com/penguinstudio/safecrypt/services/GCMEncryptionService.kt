@@ -1,6 +1,6 @@
 package com.penguinstudio.safecrypt.services
 
-import BetterCypherInput
+import OptimizedCipherInputStream
 import android.content.Context
 import android.net.Uri
 import android.security.keystore.KeyGenParameterSpec
@@ -15,20 +15,14 @@ import javax.crypto.CipherInputStream
 import javax.crypto.KeyGenerator
 import javax.crypto.spec.GCMParameterSpec
 import javax.inject.Inject
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import android.util.Log
-import androidx.exifinterface.media.ExifInterface
 import com.penguinstudio.safecrypt.models.MediaType
-import com.penguinstudio.safecrypt.services.glide_service.SafeCryptModelLoader
 import dagger.hilt.EntryPoint
 import dagger.hilt.EntryPoints
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import java.io.*
 import java.lang.IllegalArgumentException
-import javax.inject.Singleton
 
 class GCMEncryptionService @Inject constructor(@ApplicationContext private val context: Context) {
     companion object {
@@ -87,7 +81,7 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
 
 //        return CipherInputStream(inputStream, decryptCipher)
 
-        return BetterCypherInput(inputStream!!, decryptCipher)
+        return OptimizedCipherInputStream(inputStream!!, decryptCipher)
     }
 
     fun decryptFileToByteArray(uri: Uri): ByteArray {
@@ -149,7 +143,7 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
 
         var read: Int
 
-        val cis = BetterCypherInput(inputStream, decryptCipher)
+        val cis = OptimizedCipherInputStream(inputStream, decryptCipher)
 
 //        val cis = DataInputStream(CipherInputStream(inputStream, decryptCipher))
 //        cis.buffered(8192)
