@@ -70,7 +70,7 @@ class ImageCompressor @Inject constructor(@ApplicationContext private val contex
             baos
         ) //Quality compression method, here 100 means no compression, store the compressed data in the BIOS
         var options = 100
-        while (baos.toByteArray().size / 1024 > 1000) {  //Cycle to determine if the compressed image is greater than 100kb, greater than continue compression
+        while (baos.toByteArray().size / 1024 > 10000) {  //Cycle to determine if the compressed image is greater than 100kb, greater than continue compression
             baos.reset() //Reset the BIOS to clear it
             //First parameter: picture format, second parameter: picture quality, 100 is the highest, 0 is the worst, third parameter: save the compressed data stream
             image.compress(

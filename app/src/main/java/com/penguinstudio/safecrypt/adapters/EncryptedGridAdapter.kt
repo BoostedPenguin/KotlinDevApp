@@ -156,7 +156,7 @@ class EncryptedGridAdapter constructor(
             videoLayoutCard.visibility = View.GONE
 
 
-            fullRequest.loadImage(encryptedModel, imageView)
+            fullRequest.loadImage(encryptedModel, imageView, encryptedModel.mediaType)
         }
     }
 

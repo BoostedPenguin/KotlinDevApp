@@ -245,7 +245,7 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
             selectedVideo.controllerShowTimeoutMs = -1
 
 
-            fullRequest.loadImage(media.uri, imageView)
+            fullRequest.loadImage(media.uri, imageView, media.mediaType)
         }
 
         private fun createMediaSourceFactory(): MediaSourceFactory {
