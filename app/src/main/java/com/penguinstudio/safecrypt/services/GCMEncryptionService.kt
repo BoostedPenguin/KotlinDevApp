@@ -1,5 +1,6 @@
 package com.penguinstudio.safecrypt.services
 
+import BetterCypherInput
 import android.content.Context
 import android.net.Uri
 import android.security.keystore.KeyGenParameterSpec
@@ -84,7 +85,9 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
         decryptCipher.init(Cipher.DECRYPT_MODE,
             getSecretKey(), GCMParameterSpec(128, iv))
 
-        return CipherInputStream(inputStream, decryptCipher)
+//        return CipherInputStream(inputStream, decryptCipher)
+
+        return BetterCypherInput(inputStream!!, decryptCipher)
     }
 
     fun decryptFileToByteArray(uri: Uri): ByteArray {
@@ -146,7 +149,11 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
 
         var read: Int
 
-        val cis = CipherInputStream(inputStream, decryptCipher)
+        val cis = BetterCypherInput(inputStream, decryptCipher)
+
+//        val cis = DataInputStream(CipherInputStream(inputStream, decryptCipher))
+//        cis.buffered(8192)
+
 
         while (cis.read(buffer).also { read = it } != -1) {
             outputStream.write(buffer, 0, read)
