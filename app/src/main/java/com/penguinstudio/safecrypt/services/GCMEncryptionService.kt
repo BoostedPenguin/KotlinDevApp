@@ -57,7 +57,13 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface ImageCompressorServicePoint {
-        fun getService(): ImageCompressor
+        fun getImageCompressor(): ImageCompressor
+    }
+
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface InnerVideoCompressorServicePoint {
+        fun getInnerVideoCompressor(): InnerVideoCompressor
     }
 
     fun getSecretKey(): Key {
@@ -168,8 +174,9 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
         mediaType: MediaType,
         outputStream: OutputStream) : Boolean {
 
-        val imageCompressor = EntryPoints.get(context, ImageCompressorServicePoint::class.java).getService()
+        val imageCompressor = EntryPoints.get(context, ImageCompressorServicePoint::class.java).getImageCompressor()
 
+        val innerVideoCompressor = EntryPoints.get(context, InnerVideoCompressorServicePoint::class.java).getInnerVideoCompressor()
         // Read/Write buffer
         val buffer = ByteArray(8192)
 
@@ -184,15 +191,18 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
 
         val inpStream = when(mediaType) {
             MediaType.IMAGE -> {
-                val compressed = imageCompressor.getBitmapFormUri(uri)
+                val compressed = imageCompressor.getBitmapFormUri(uri, context)
                     ?: throw IllegalArgumentException("Couldn't open an input stream")
 
-                val degree = imageCompressor.getBitmapDegree(uri)
+                val degree = imageCompressor.getBitmapDegree(uri, context)
                 imageCompressor.rotateBitmapByDegree(compressed, degree.toFloat())
             }
             MediaType.VIDEO -> {
                 context.contentResolver.openInputStream(uri)
                     ?: throw IllegalArgumentException("Couldn't open an input stream")
+
+                innerVideoCompressor.notFun(uri, context)
+                return false
             }
         }
 

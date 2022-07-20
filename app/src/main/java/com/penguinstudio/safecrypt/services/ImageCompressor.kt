@@ -14,7 +14,7 @@ import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import javax.inject.Singleton
 
-class ImageCompressor @Inject constructor(@ApplicationContext private val context: Context) {
+class ImageCompressor @Inject constructor() {
 
 
     /**
@@ -22,7 +22,7 @@ class ImageCompressor @Inject constructor(@ApplicationContext private val contex
      *
      * @param uri
      */
-    fun getBitmapFormUri(uri: Uri): Bitmap? {
+    fun getBitmapFormUri(uri: Uri, context: Context): Bitmap? {
         var input = context.contentResolver.openInputStream(uri)
         val onlyBoundsOptions = BitmapFactory.Options()
         onlyBoundsOptions.inJustDecodeBounds = true
@@ -132,7 +132,7 @@ class ImageCompressor @Inject constructor(@ApplicationContext private val contex
      *
      * @return Rotation angle of picture
      */
-    fun getBitmapDegree(uri: Uri): Int {
+    fun getBitmapDegree(uri: Uri, context: Context): Int {
         var degree = 0
         try {
             val inputStream = context.contentResolver.openInputStream(uri)
