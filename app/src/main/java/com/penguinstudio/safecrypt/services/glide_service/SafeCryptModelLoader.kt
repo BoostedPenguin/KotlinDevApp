@@ -1,6 +1,8 @@
 package com.penguinstudio.safecrypt.services.glide_service
 
+import android.R.attr.bitmap
 import android.content.Context
+import android.graphics.Bitmap.CompressFormat
 import android.util.Log
 import androidx.annotation.Nullable
 import com.bumptech.glide.Priority
@@ -12,16 +14,18 @@ import com.bumptech.glide.load.model.ModelLoader.LoadData
 import com.bumptech.glide.load.model.ModelLoaderFactory
 import com.bumptech.glide.load.model.MultiModelLoaderFactory
 import com.bumptech.glide.signature.ObjectKey
-import com.penguinstudio.safecrypt.services.CBCEncryptionService
+import com.penguinstudio.safecrypt.models.MediaType
 import com.penguinstudio.safecrypt.services.GCMEncryptionService
 import dagger.hilt.EntryPoint
 import dagger.hilt.EntryPoints
 import dagger.hilt.InstallIn
-import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
+import org.bytedeco.javacv.AndroidFrameConverter
+import org.bytedeco.javacv.FFmpegFrameGrabber
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
-import javax.inject.Inject
 
 
 class SafeCryptModelLoader constructor(private val context: Context) : ModelLoader<IPicture, InputStream> {
@@ -49,7 +53,8 @@ class SafeCryptModelLoader constructor(private val context: Context) : ModelLoad
         }
 
         private var isCanceled = false
-        var mInputStream: InputStream? = null
+        private var mInputStream: InputStream? = null
+        private var videoByteArrayOutputStream: ByteArrayOutputStream? = null
         override fun loadData(
             priority: Priority,
             callback: DataFetcher.DataCallback<in InputStream?>
@@ -63,6 +68,22 @@ class SafeCryptModelLoader constructor(private val context: Context) : ModelLoad
 
                 mInputStream = cbcEncryptionService.getCipherInputStream(file.uri)
             }
+
+            if(file.mediaType == MediaType.VIDEO) {
+                val frameGrabber = FFmpegFrameGrabber(mInputStream)
+                frameGrabber.start()
+                val frame = frameGrabber.grabImage()
+                val bitmap = AndroidFrameConverter().convert(frame)
+
+                frameGrabber.stop()
+
+                videoByteArrayOutputStream = ByteArrayOutputStream()
+                bitmap.compress(CompressFormat.PNG, 0 /*ignored for PNG*/, videoByteArrayOutputStream)
+
+                callback.onDataReady(ByteArrayInputStream(videoByteArrayOutputStream!!.toByteArray()))
+                return
+            }
+
             callback.onDataReady(mInputStream)
         }
 
@@ -72,6 +93,13 @@ class SafeCryptModelLoader constructor(private val context: Context) : ModelLoad
             if (mInputStream != null) {
                 try {
                     mInputStream!!.close()
+                } catch (e: IOException) {
+                }
+            }
+
+            if (videoByteArrayOutputStream != null) {
+                try {
+                    videoByteArrayOutputStream!!.close()
                 } catch (e: IOException) {
                 }
             }

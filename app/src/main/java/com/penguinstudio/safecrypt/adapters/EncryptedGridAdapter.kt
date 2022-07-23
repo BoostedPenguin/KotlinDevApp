@@ -17,7 +17,9 @@ import com.bumptech.glide.ListPreloader
 import com.bumptech.glide.RequestBuilder
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.EncryptedModel
+import com.penguinstudio.safecrypt.models.MediaType
 import com.penguinstudio.safecrypt.utilities.loadImage
+import org.bytedeco.javacv.FFmpegFrameGrabber
 
 
 class EncryptedGridAdapter constructor(
@@ -69,7 +71,7 @@ class EncryptedGridAdapter constructor(
         viewType: Int
     ): EncryptedGridAdapter.MediaHolder {
         val itemView: View = LayoutInflater.from(parent.context)
-            .inflate(R.layout.pictures_grid_item, parent, false)
+            .inflate(R.layout.encrypted_pictures_grid_item, parent, false)
 
         return MediaHolder(itemView)
     }
@@ -89,10 +91,9 @@ class EncryptedGridAdapter constructor(
     inner class MediaHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private lateinit var encryptedModel: EncryptedModel
 
-        private var imageView: ImageView = itemView.findViewById(R.id.picturesInnerImage)
-        private var checkBox: CheckBox = itemView.findViewById(R.id.picturesCheckbox)
-        private var videoLayoutCard: CardView = itemView.findViewById(R.id.videoLayoutParentCard)
-        private var videoTextViewDuration: TextView = itemView.findViewById(R.id.videoDuration)
+        private var imageView: ImageView = itemView.findViewById(R.id.encryptedPicturesInnerImage)
+        private var checkBox: CheckBox = itemView.findViewById(R.id.encryptedPicturesCheckbox)
+        private var videoLayoutCard: CardView = itemView.findViewById(R.id.encryptedVideoLayoutParentCard)
 
 
         init {
@@ -153,7 +154,12 @@ class EncryptedGridAdapter constructor(
                     checkBox.isChecked = false
             }
 
-            videoLayoutCard.visibility = View.GONE
+            if(encryptedModel.mediaType == MediaType.VIDEO) {
+                videoLayoutCard.visibility = View.VISIBLE
+            }
+            else {
+                videoLayoutCard.visibility = View.GONE
+            }
 
 
             fullRequest.loadImage(encryptedModel, imageView, encryptedModel.mediaType)

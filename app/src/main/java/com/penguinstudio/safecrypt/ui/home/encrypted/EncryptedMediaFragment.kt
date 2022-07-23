@@ -188,7 +188,6 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
                     encryptedMediaAdapter.notifyItemChanged(position)
                 }
                 else {
-                    //TODO Enlarge image
                     if(media.mediaType == MediaType.VIDEO) {
                         Snackbar.make(requireActivity().findViewById(android.R.id.content), "(BETA) Currently videos take a lot of time to preview", Snackbar.LENGTH_LONG)
                             .show()

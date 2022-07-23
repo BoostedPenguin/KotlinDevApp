@@ -166,7 +166,7 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
         return true
     }
 
-    /** TODO Encrypts files
+    /**
     * Do ##NOT Encrypt videos. At the moment is supports only images
     */
     fun encryptData (
