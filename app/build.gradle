@@ -41,8 +41,26 @@ android {
     }
 }
 
+
 dependencies {
-    implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.7'
+
+    implementation (group: 'org.bytedeco', name: 'javacv', version: '1.4.2' , {
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'flandmark'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'flycapture'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'leptonica'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'opencv'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'libdc1394'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'libfreenect2'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'libfreenect'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'librealsense'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'tesseract'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'videoinput'
+        exclude group: 'org.bytedeco.javacpp-presets', module: 'artoolkitplus'
+
+    })
+    implementation group: 'org.bytedeco.javacpp-presets', name: 'ffmpeg', version: '4.0.1-1.4.2', classifier: 'android-arm'
+    implementation group: 'org.bytedeco.javacpp-presets', name: 'ffmpeg', version: '4.0.1-1.4.2', classifier: 'android-x86'
+
 
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
