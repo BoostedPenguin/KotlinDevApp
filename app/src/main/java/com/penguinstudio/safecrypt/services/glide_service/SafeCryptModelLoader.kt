@@ -53,7 +53,8 @@ class SafeCryptModelLoader constructor(private val context: Context) : ModelLoad
         }
 
         private var isCanceled = false
-        var mInputStream: InputStream? = null
+        private var mInputStream: InputStream? = null
+        private var videoByteArrayOutputStream: ByteArrayOutputStream? = null
         override fun loadData(
             priority: Priority,
             callback: DataFetcher.DataCallback<in InputStream?>
@@ -72,14 +73,14 @@ class SafeCryptModelLoader constructor(private val context: Context) : ModelLoad
                 val frameGrabber = FFmpegFrameGrabber(mInputStream)
                 frameGrabber.start()
                 val frame = frameGrabber.grabImage()
-                val g = AndroidFrameConverter().convert(frame)
+                val bitmap = AndroidFrameConverter().convert(frame)
 
-                val bos = ByteArrayOutputStream()
-                g.compress(CompressFormat.PNG, 0 /*ignored for PNG*/, bos)
-                val bitmapdata: ByteArray = bos.toByteArray()
-                val bs = ByteArrayInputStream(bitmapdata)
+                frameGrabber.stop()
 
-                callback.onDataReady(bs)
+                videoByteArrayOutputStream = ByteArrayOutputStream()
+                bitmap.compress(CompressFormat.PNG, 0 /*ignored for PNG*/, videoByteArrayOutputStream)
+
+                callback.onDataReady(ByteArrayInputStream(videoByteArrayOutputStream!!.toByteArray()))
                 return
             }
 
@@ -92,6 +93,13 @@ class SafeCryptModelLoader constructor(private val context: Context) : ModelLoad
             if (mInputStream != null) {
                 try {
                     mInputStream!!.close()
+                } catch (e: IOException) {
+                }
+            }
+
+            if (videoByteArrayOutputStream != null) {
+                try {
+                    videoByteArrayOutputStream!!.close()
                 } catch (e: IOException) {
                 }
             }
