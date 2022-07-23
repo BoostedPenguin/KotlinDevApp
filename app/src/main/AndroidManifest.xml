@@ -3,6 +3,7 @@
     package="com.penguinstudio.safecrypt">
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
 
 
     <application
@@ -20,7 +21,6 @@
             android:name=".MainActivity"
             android:configChanges="screenSize|layoutDirection"
             android:label="@string/app_name"
-            android:excludeFromRecents="true"
             android:theme="@style/Theme.SafeCrypt.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

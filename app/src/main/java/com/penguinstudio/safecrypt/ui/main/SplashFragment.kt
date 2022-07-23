@@ -1,24 +1,23 @@
 package com.penguinstudio.safecrypt.ui.main
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
-import com.karumi.dexter.Dexter
-import com.karumi.dexter.MultiplePermissionsReport
-import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import com.google.common.reflect.Reflection.getPackageName
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.databinding.FragmentSplashBinding
 
@@ -42,79 +41,102 @@ class SplashFragment : Fragment() {
     }
 
 
-    override fun onStart() {
-        super.onStart()
-        checkPermissionsOnStart()
+
+    private val PERMISSIONS = arrayOf(
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+    )
+
+    private fun hasPermissions(permissions: Array<String>): Boolean {
+        for (permission in permissions) {
+            if (ContextCompat.checkSelfPermission(
+                    context!!,
+                    permission
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                Log.d("PERMISSIONS", "Permission is not granted: $permission")
+                return false
+            }
+            Log.d("PERMISSIONS", "Permission already granted: $permission")
+        }
+        return true
+    }
+
+    private fun askPermissions(multiplePermissionLauncher: ActivityResultLauncher<Array<String>>) {
+        if (!hasPermissions(PERMISSIONS)) {
+            Log.d(
+                "PERMISSIONS",
+                "Launching multiple contract permission launcher for ALL required permissions"
+            )
+            multiplePermissionLauncher.launch(PERMISSIONS)
+        } else {
+            Log.d("PERMISSIONS", "All permissions are already granted")
+        }
+    }
+
+    private var multiplePermissionsContract: RequestMultiplePermissions? = null
+    private var multiplePermissionLauncher: ActivityResultLauncher<Array<String>>? = null
+
+
+    val requestPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                // Permission is granted. Continue the action or workflow in your
+                // app.
+                Log.d("PERMISSIONS", "MF FINE")
+
+
+            } else {
+                Log.d("PERMISSIONS", "MF DID NOT WANT FULL ACCESS")
+                // Explain to the user that the feature is unavailable because the
+                // features requires a permission that the user has denied. At the
+                // same time, respect the user's decision. Don't link to system
+                // settings in an effort to convince the user to change their
+                // decision.
+            }
+        }
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+
+        multiplePermissionsContract = RequestMultiplePermissions()
+        multiplePermissionLauncher = registerForActivityResult(
+            RequestMultiplePermissions()
+        ) { isGranted ->
+            Log.d("PERMISSIONS", "Launcher result: $isGranted")
+            if (isGranted.containsValue(false)) {
+                Log.d(
+                    "PERMISSIONS",
+                    "At least one of the permissions was not granted, launching again..."
+                )
+                multiplePermissionLauncher?.launch(PERMISSIONS)
+            }
+            else {
+                if (Environment.isExternalStorageManager()) {
+                    //todo when permission is granted
+                    Log.d("PERMISSIONS", "MF FINE")
+
+                } else {
+                    //request for the permission
+                    val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                    val uri: Uri = Uri.fromParts("package", activity!!.packageName, null)
+                    intent.data = uri
+                    startActivity(intent)
+                    Log.d("PERMISSIONS", "MF DID NOT WANT FULL ACCESS")
+
+                }
+            }
+        }
+
+        askPermissions(multiplePermissionLauncher as ActivityResultLauncher<Array<String>>)
     }
 
     private fun navigateToPasswordUnlock() {
         findNavController().navigate(R.id.patternUnlockFragment)
     }
 
-    /**
-     * Validates if storage permissions were given
-     * Requests them at runtime if they are required
-     */
-    private fun checkPermissionsOnStart() {
-        Dexter.withActivity(activity)
-            .withPermissions(
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )
-            .withListener(object: MultiplePermissionsListener {
-                override fun onPermissionsChecked(report: MultiplePermissionsReport) {
-                    if(report.areAllPermissionsGranted()) {
-                        navigateToPasswordUnlock()
-                    }
-                    else {
-                        showSettingsDialog();
-                    }
-                }
-
-                override fun onPermissionRationaleShouldBeShown(
-                    permissions: MutableList<PermissionRequest>?,
-                    token: PermissionToken?
-                ) {
-                    // this method is called when user grants some
-                    // permission and denies some of them.
-                    token?.continuePermissionRequest();
-                }
-
-            }).check()
-    }
-
-    /**
-     * Opens app settings to let user change permissions
-     * Closes app if user refuses
-     */
-    private fun showSettingsDialog() {
-        val builder = AlertDialog.Builder(requireContext())
-
-        builder.setTitle("Require permissions")
-        builder.setMessage("This app needs storage permissions to operate. You can grant them in app settings.");
-        builder.setPositiveButton(
-            "Go to settings"
-        ) { dialog, _ ->
-
-            dialog.cancel()
-
-            // below is the intent from which we
-            // are redirecting our user.
-            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            val uri: Uri = Uri.fromParts("package", context?.packageName, null)
-            intent.data = uri
-            context?.startActivity(intent)
-        }
-        builder.setNegativeButton(
-            "Exit"
-        ) { dialog, _ -> // this method is called when
-            // user click on negative button.
-            activity?.finishAndRemoveTask();
-
-            dialog.cancel()
-        }
-
-        builder.setCancelable(false)
-        builder.show()
-    }
 }
