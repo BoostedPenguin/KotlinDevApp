@@ -6,6 +6,7 @@
 
 
     <application
+        android:extractNativeLibs="true"
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
         android:allowBackup="true"

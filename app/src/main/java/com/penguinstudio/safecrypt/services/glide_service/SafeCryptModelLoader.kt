@@ -1,6 +1,8 @@
 package com.penguinstudio.safecrypt.services.glide_service
 
+import android.R.attr.bitmap
 import android.content.Context
+import android.graphics.Bitmap.CompressFormat
 import android.util.Log
 import androidx.annotation.Nullable
 import com.bumptech.glide.Priority
@@ -12,16 +14,18 @@ import com.bumptech.glide.load.model.ModelLoader.LoadData
 import com.bumptech.glide.load.model.ModelLoaderFactory
 import com.bumptech.glide.load.model.MultiModelLoaderFactory
 import com.bumptech.glide.signature.ObjectKey
-import com.penguinstudio.safecrypt.services.CBCEncryptionService
+import com.penguinstudio.safecrypt.models.MediaType
 import com.penguinstudio.safecrypt.services.GCMEncryptionService
 import dagger.hilt.EntryPoint
 import dagger.hilt.EntryPoints
 import dagger.hilt.InstallIn
-import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
+import org.bytedeco.javacv.AndroidFrameConverter
+import org.bytedeco.javacv.FFmpegFrameGrabber
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
-import javax.inject.Inject
 
 
 class SafeCryptModelLoader constructor(private val context: Context) : ModelLoader<IPicture, InputStream> {
@@ -63,6 +67,22 @@ class SafeCryptModelLoader constructor(private val context: Context) : ModelLoad
 
                 mInputStream = cbcEncryptionService.getCipherInputStream(file.uri)
             }
+
+            if(file.mediaType == MediaType.VIDEO) {
+                val frameGrabber = FFmpegFrameGrabber(mInputStream)
+                frameGrabber.start()
+                val frame = frameGrabber.grabImage()
+                val g = AndroidFrameConverter().convert(frame)
+
+                val bos = ByteArrayOutputStream()
+                g.compress(CompressFormat.PNG, 0 /*ignored for PNG*/, bos)
+                val bitmapdata: ByteArray = bos.toByteArray()
+                val bs = ByteArrayInputStream(bitmapdata)
+
+                callback.onDataReady(bs)
+                return
+            }
+
             callback.onDataReady(mInputStream)
         }
 

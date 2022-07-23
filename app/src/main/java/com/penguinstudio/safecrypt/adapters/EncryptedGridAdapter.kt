@@ -18,6 +18,7 @@ import com.bumptech.glide.RequestBuilder
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.EncryptedModel
 import com.penguinstudio.safecrypt.utilities.loadImage
+import org.bytedeco.javacv.FFmpegFrameGrabber
 
 
 class EncryptedGridAdapter constructor(
