@@ -33,6 +33,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
+            <com.google.android.exoplayer2.ui.StyledPlayerView
+                android:layout_width="match_parent"
+                android:visibility="gone"
+                android:id="@+id/selected_video"
+                app:surface_type="surface_view"
+                app:show_next_button="false"
+                app:show_previous_button="false"
+                app:show_fastforward_button="true"
+                app:show_rewind_button="true"
+                app:show_shuffle_button="false"
+                app:show_subtitle_button="false"
+                app:show_vr_button="false"
+                android:layout_height="match_parent" />
+
             <ImageView
                 android:id="@+id/picturesInnerImage"
                 android:layout_width="match_parent"

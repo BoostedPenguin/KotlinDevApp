@@ -15,9 +15,22 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.ListPreloader
 import com.bumptech.glide.RequestBuilder
+import com.google.android.exoplayer2.C
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.audio.AudioAttributes
+import com.google.android.exoplayer2.source.MediaSourceFactory
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import com.google.android.exoplayer2.ui.StyledPlayerView
+import com.google.android.exoplayer2.upstream.DataSource
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.EncryptedModel
+import com.penguinstudio.safecrypt.models.MediaType
+import com.penguinstudio.safecrypt.services.EncryptedDataSource
+import com.penguinstudio.safecrypt.utilities.MediaMode
 import com.penguinstudio.safecrypt.utilities.loadImage
+import java.security.KeyStore
 
 
 class EncryptedGridAdapter constructor(
@@ -31,6 +44,11 @@ class EncryptedGridAdapter constructor(
         fun onClickListener(position: Int, media: EncryptedModel)
         fun onLongClickListener(position: Int, media: EncryptedModel)
     }
+
+    val audioAttributes: AudioAttributes = AudioAttributes.Builder()
+        .setUsage(C.USAGE_MEDIA)
+        .setContentType(C.CONTENT_TYPE_MOVIE)
+        .build()
 
     private var images: ArrayList<EncryptedModel> = ArrayList()
     private var isSelectionMode: Boolean = false
@@ -88,11 +106,15 @@ class EncryptedGridAdapter constructor(
 
     inner class MediaHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private lateinit var encryptedModel: EncryptedModel
+        private var selectedVideo: StyledPlayerView = itemView.findViewById(R.id.selected_video)
 
         private var imageView: ImageView = itemView.findViewById(R.id.picturesInnerImage)
         private var checkBox: CheckBox = itemView.findViewById(R.id.picturesCheckbox)
         private var videoLayoutCard: CardView = itemView.findViewById(R.id.videoLayoutParentCard)
         private var videoTextViewDuration: TextView = itemView.findViewById(R.id.videoDuration)
+
+        private var player: SimpleExoPlayer? = null
+
 
 
         init {
@@ -120,6 +142,63 @@ class EncryptedGridAdapter constructor(
                     listener.onClickListener(position, encryptedModel)
                 }
             }
+        }
+
+        private fun createMediaSourceFactory(): MediaSourceFactory {
+            val keyStore = KeyStore.getInstance("AndroidKeyStore")
+            keyStore.load(null)
+
+            val localKey = keyStore.getKey("MyKey", null)
+
+            val aesDataSource: DataSource = EncryptedDataSource(itemView.context, localKey) // Use your Cipher instance
+
+            val factory = DataSource.Factory {
+                aesDataSource
+            }
+
+            return ProgressiveMediaSource.Factory(factory)
+        }
+
+        
+
+        private fun createVideoPlayback() {
+            player?.stop()
+            player?.clearMediaItems()
+            player?.release()
+            player = null
+
+            val mi = MediaItem.fromUri(encryptedModel.uri)
+
+            player =
+            SimpleExoPlayer.Builder(itemView.context)
+                .setMediaSourceFactory(createMediaSourceFactory())
+                .build()
+
+            player?.setMediaItem(mi)
+
+            player?.setAudioAttributes(audioAttributes, true)
+
+            selectedVideo.player = player
+
+            selectedVideo.setOnClickListener {
+
+            }
+
+
+            player?.prepare()
+
+            player?.addListener(object: Player.Listener {
+                override fun onIsLoadingChanged(isLoading: Boolean) {
+                    if(!isLoading) {
+
+
+                        imageView.visibility = View.GONE
+                        selectedVideo.visibility = View.VISIBLE
+                        //Glide.with(itemView.context).clear(imageView)
+
+                    }
+                }
+            })
         }
 
         fun bind(media: EncryptedModel) {
@@ -154,6 +233,12 @@ class EncryptedGridAdapter constructor(
             }
 
             videoLayoutCard.visibility = View.GONE
+
+
+            if(this.encryptedModel.mediaType == MediaType.VIDEO) {
+                createVideoPlayback()
+                return
+            }
 
 
             fullRequest.loadImage(encryptedModel, imageView, encryptedModel.mediaType)
