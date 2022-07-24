@@ -1,9 +1,11 @@
 package com.penguinstudio.safecrypt.services
 
+import android.app.RecoverableSecurityException
 import android.content.ContentUris
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore
 import android.text.TextUtils
 import androidx.core.database.getLongOrNull
@@ -90,10 +92,21 @@ class MediaFetchingService @Inject constructor(
                     val height = it.getStringOrNull(itemHeightColumn)
                     val relativePath = it.getStringOrNull(relativePathColumn)
 
-                    val contentUri = ContentUris.withAppendedId(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                        imageId
-                    )
+                    val contentUri = when {
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                            ContentUris.withAppendedId(
+                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                imageId
+                            )
+                        }
+                        Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q -> {
+                            ContentUris.withAppendedId(
+                                MediaStore.Files.getContentUri("external"),
+                                imageId
+                            )
+                        }
+                        else -> throw Exception("Invalid build version")
+                    }
 
                     var media: MediaModel
 
