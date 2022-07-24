@@ -2,24 +2,34 @@ package com.penguinstudio.safecrypt.ui.home
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Activity.RESULT_OK
+import android.app.RecoverableSecurityException
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.penguinstudio.safecrypt.MainActivity
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.AlbumMediaAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentPicturesBinding
@@ -31,6 +41,9 @@ import com.penguinstudio.safecrypt.utilities.EncryptionStatus
 import com.penguinstudio.safecrypt.utilities.Status
 import com.penguinstudio.safecrypt.utilities.getGlideRequest
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -78,6 +91,19 @@ class MediaFragment : Fragment(), LifecycleObserver {
                     onBackPress()
                 }
             }
+
+        intentSenderLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
+            if(it.resultCode == RESULT_OK) {
+                if(Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+                    lifecycleScope.launch {
+                        deletePhotoFromExternalStorage(deletedImageUri ?: return@launch)
+                    }
+                }
+                Toast.makeText(context, "Photo deleted successfully", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Photo couldn't be deleted", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         requireActivity().onBackPressedDispatcher.addCallback(this, callback)
     }
@@ -154,6 +180,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
         photoAdapter = AlbumMediaAdapter(object: AlbumMediaAdapter.AdapterListeners {
             override fun onClickListener(position: Int, media: MediaModel) {
 
+
                 // If in selection mode add / remove, else trigger normal action
                 if(model.itemSelectionMode.value == true) {
 
@@ -221,26 +248,29 @@ class MediaFragment : Fragment(), LifecycleObserver {
             exitSelectMode()
             model.getMedia()
         }
-        model.selectedAlbum.observe(viewLifecycleOwner, {
-            if(it == null) return@observe
+        model.selectedAlbum.observe(viewLifecycleOwner) {
+            if (it == null) return@observe
 
-            when(it.status) {
+            when (it.status) {
                 Status.SUCCESS -> {
                     binding.picturesProgressBar.visibility = View.GONE
                     binding.picturesSwipeToRefresh.isRefreshing = false
 
                     // If this album doesn't exist anymore // No media inside it
-                    if(it.data == null || it.data.albumMedia.size == 0) {
+                    if (it.data == null || it.data.albumMedia.size == 0) {
                         findNavController().popBackStack()
                         return@observe
                     }
 
-                    photoAdapter.setImages(it.data.albumMedia, model.itemSelectionMode.value ?: false)
+                    photoAdapter.setImages(
+                        it.data.albumMedia,
+                        model.itemSelectionMode.value ?: false
+                    )
 
-                    if(model.itemSelectionMode.value == true) {
-                        (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.size} selected"
-                    }
-                    else {
+                    if (model.itemSelectionMode.value == true) {
+                        (activity as AppCompatActivity).supportActionBar?.title =
+                            "${model.selectedItems.size} selected"
+                    } else {
                         (activity as AppCompatActivity?)?.supportActionBar?.title =
                             it.data.name
                     }
@@ -251,17 +281,17 @@ class MediaFragment : Fragment(), LifecycleObserver {
                     findNavController().popBackStack()
                 }
                 Status.LOADING -> {
-                    if(!binding.picturesSwipeToRefresh.isRefreshing) {
+                    if (!binding.picturesSwipeToRefresh.isRefreshing) {
                         binding.picturesProgressBar.visibility = View.VISIBLE
                     }
                 }
             }
-        })
+        }
 
-        model.encryptionStatus.observe(viewLifecycleOwner, { it ->
-            if(it == null) return@observe
+        model.encryptionStatus.observe(viewLifecycleOwner) { it ->
+            if (it == null) return@observe
 
-            when(it.status) {
+            when (it.status) {
                 EncryptionStatus.LOADING -> {
                     binding.picturesProgressBar.visibility = View.VISIBLE
                 }
@@ -269,8 +299,8 @@ class MediaFragment : Fragment(), LifecycleObserver {
                     binding.picturesProgressBar.visibility = View.GONE
 
                     encryptionProcessIntentHandler.chooseDefaultSaveLocation(viewLifecycleOwner)
-                        .observe(viewLifecycleOwner, { result ->
-                            when(result) {
+                        .observe(viewLifecycleOwner) { result ->
+                            when (result) {
                                 Activity.RESULT_OK -> {
                                     model.encryptSelectedMedia()
                                 }
@@ -278,25 +308,27 @@ class MediaFragment : Fragment(), LifecycleObserver {
                                     defaultStorageLocationSnackbar.show()
                                 }
                             }
-                    })
+                        }
                 }
                 EncryptionStatus.DELETE_RECOVERABLE -> {
                     binding.picturesProgressBar.visibility = View.GONE
-                    if(it.intentSender == null) return@observe
+                    if (it.intentSender == null) return@observe
 
                     encryptionProcessIntentHandler.deleteOriginalFile(it.intentSender)
-                        .observe(viewLifecycleOwner, { result ->
-                            when(result) {
+                        .observe(viewLifecycleOwner) { result ->
+                            when (result) {
                                 Activity.RESULT_OK -> {
                                     //Successfully deleted
                                 }
                                 Activity.RESULT_CANCELED -> {
-                                    Snackbar.make(binding.root,
+                                    Snackbar.make(
+                                        binding.root,
                                         "Original media item wasn't deleted. Please delete it manually.",
-                                        Snackbar.LENGTH_INDEFINITE).show()
+                                        Snackbar.LENGTH_INDEFINITE
+                                    ).show()
                                 }
                             }
-                        })
+                        }
                 }
                 EncryptionStatus.OPERATION_COMPLETE -> {
 
@@ -313,7 +345,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
                 }
             }
             model.clearEncryptionStatus()
-        })
+        }
     }
 
 
@@ -328,6 +360,33 @@ class MediaFragment : Fragment(), LifecycleObserver {
             model.itemSelectionMode.value = false
             model.clearSelections()
             photoAdapter.toggleSelectionMode(false)
+        }
+    }
+    private lateinit var intentSenderLauncher: ActivityResultLauncher<IntentSenderRequest>
+    private var deletedImageUri: Uri? = null
+
+
+    private suspend fun deletePhotoFromExternalStorage(photoUri: Uri) {
+        try {
+            val g = context!!.contentResolver.delete(photoUri, null, null)
+            val s = g
+            Log.e("FUCK", g.toString())
+        } catch (e: SecurityException) {
+            val intentSender = when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                    MediaStore.createDeleteRequest(context!!.contentResolver, listOf(photoUri)).intentSender
+                }
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                    val recoverableSecurityException = e as? RecoverableSecurityException
+                    recoverableSecurityException?.userAction?.actionIntent?.intentSender
+                }
+                else -> null
+            }
+            intentSender?.let { sender ->
+                intentSenderLauncher.launch(
+                    IntentSenderRequest.Builder(sender).build()
+                )
+            }
         }
     }
 

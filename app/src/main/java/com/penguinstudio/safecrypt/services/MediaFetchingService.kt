@@ -90,8 +90,8 @@ class MediaFetchingService @Inject constructor(
                     val height = it.getStringOrNull(itemHeightColumn)
                     val relativePath = it.getStringOrNull(relativePathColumn)
 
-                    val contentUri: Uri = ContentUris.withAppendedId(
-                        MediaStore.Files.getContentUri("external"),
+                    val contentUri = ContentUris.withAppendedId(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                         imageId
                     )
 

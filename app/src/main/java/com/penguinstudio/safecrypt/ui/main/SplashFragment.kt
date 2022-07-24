@@ -44,7 +44,6 @@ class SplashFragment : Fragment() {
 
     private val PERMISSIONS = arrayOf(
         Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE,
     )
 
     private fun hasPermissions(permissions: Array<String>): Boolean {
@@ -102,6 +101,10 @@ class SplashFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        if(hasPermissions(PERMISSIONS)) {
+            findNavController().navigate(R.id.patternUnlockFragment)
+            return
+        }
 
         multiplePermissionsContract = RequestMultiplePermissions()
         multiplePermissionLauncher = registerForActivityResult(
@@ -116,12 +119,18 @@ class SplashFragment : Fragment() {
                 multiplePermissionLauncher?.launch(PERMISSIONS)
             }
             else {
+
+                findNavController().navigate(R.id.patternUnlockFragment)
+                return@registerForActivityResult
                 if (Environment.isExternalStorageManager()) {
                     //todo when permission is granted
                     Log.d("PERMISSIONS", "MF FINE")
 
                 } else {
                     //request for the permission
+                    findNavController().navigate(R.id.patternUnlockFragment)
+                    return@registerForActivityResult
+
                     val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
                     val uri: Uri = Uri.fromParts("package", activity!!.packageName, null)
                     intent.data = uri
