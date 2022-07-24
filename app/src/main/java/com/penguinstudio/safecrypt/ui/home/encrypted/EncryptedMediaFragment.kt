@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
 import android.view.*
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -232,12 +233,12 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
             model.getEncryptedFiles()
         }
 
-        model.itemSelectionMode.observe(viewLifecycleOwner, {
-            if(!it) exitSelectMode()
-        })
+        model.itemSelectionMode.observe(viewLifecycleOwner) {
+            if (!it) exitSelectMode()
+        }
 
-        model.encryptedFiles.observe(viewLifecycleOwner, {
-            when(it.status) {
+        model.encryptedFiles.observe(viewLifecycleOwner) {
+            when (it.status) {
                 Status.SUCCESS -> {
                     binding.enMediaSwipeToRefresh.isRefreshing = false
                     binding.enMediaSwipeToRefresh.isEnabled = true
@@ -245,7 +246,7 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
                     binding.enMediaProgressBar.visibility = View.GONE
 
                     it.data?.let { collectionResponse ->
-                        if(collectionResponse.collection.size == 0) {
+                        if (collectionResponse.collection.size == 0) {
                             binding.enMediaHint.visibility = View.VISIBLE
                             binding.enMediaHint.text = "No encrypted files found."
                         } else {
@@ -261,7 +262,11 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
                     binding.enMediaSwipeToRefresh.isRefreshing = false
                     binding.enMediaSwipeToRefresh.isEnabled = true
 
-                    Snackbar.make(requireActivity().findViewById(android.R.id.content), "Something went wrong", Snackbar.LENGTH_SHORT)
+                    Snackbar.make(
+                        requireActivity().findViewById(android.R.id.content),
+                        "Something went wrong",
+                        Snackbar.LENGTH_SHORT
+                    )
                         .show()
                 }
                 Status.LOADING -> {
@@ -277,12 +282,12 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
                     }
                 }
             }
-        })
+        }
 
-        model.encryptionStatus.observe(viewLifecycleOwner, {
-            if(it == null) return@observe
+        model.encryptionStatus.observe(viewLifecycleOwner) {
+            if (it == null) return@observe
 
-            when(it.status) {
+            when (it.status) {
                 EncryptionStatus.LOADING -> {
                     binding.enMediaProgressBar.visibility = View.VISIBLE
                 }
@@ -290,8 +295,8 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
                     binding.enMediaProgressBar.visibility = View.GONE
 
                     encryptionProcessIntentHandler.chooseDefaultSaveLocation(viewLifecycleOwner)
-                        .observe(viewLifecycleOwner, { result ->
-                            when(result) {
+                        .observe(viewLifecycleOwner) { result ->
+                            when (result) {
                                 Activity.RESULT_OK -> {
                                     model.decryptSelectedMedia()
                                 }
@@ -299,25 +304,27 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
                                     defaultStorageLocationSnackbar.show()
                                 }
                             }
-                        })
+                        }
                 }
                 EncryptionStatus.DELETE_RECOVERABLE -> {
                     binding.enMediaProgressBar.visibility = View.GONE
-                    if(it.intentSender == null) return@observe
+                    if (it.intentSender == null) return@observe
 
                     encryptionProcessIntentHandler.deleteOriginalFile(it.intentSender)
-                        .observe(viewLifecycleOwner, { result ->
-                            when(result) {
+                        .observe(viewLifecycleOwner) { result ->
+                            when (result) {
                                 Activity.RESULT_OK -> {
                                     //Successfully deleted
                                 }
                                 Activity.RESULT_CANCELED -> {
-                                    Snackbar.make(binding.root,
+                                    Snackbar.make(
+                                        binding.root,
                                         "Original media item wasn't deleted. Please delete it manually.",
-                                        Snackbar.LENGTH_INDEFINITE).show()
+                                        Snackbar.LENGTH_INDEFINITE
+                                    ).show()
                                 }
                             }
-                        })
+                        }
                 }
                 EncryptionStatus.OPERATION_COMPLETE -> {
                     model.itemSelectionMode.postValue(false)
@@ -328,11 +335,15 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
                     binding.enMediaProgressBar.visibility = View.GONE
                 }
                 EncryptionStatus.ERROR -> {
+                    model.itemSelectionMode.postValue(false)
+                    model.getEncryptedFiles()
+
+                    Toast.makeText(context, it.error, Toast.LENGTH_SHORT).show();
                     binding.enMediaProgressBar.visibility = View.GONE
                 }
             }
             model.clearEncryptionStatus()
-        })
+        }
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {

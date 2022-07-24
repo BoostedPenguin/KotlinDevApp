@@ -1,5 +1,6 @@
 package com.penguinstudio.safecrypt.ui.home
 
+import android.util.Log
 import androidx.lifecycle.*
 import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.models.MediaModel
@@ -105,8 +106,14 @@ class GalleryViewModel @Inject constructor(
             val selectedItems = selectedItems.toList()
             clearSelections()
 
-            mediaRepository.encryptSelectedMedia(selectedItems).let {
-                _encryptionStatus.postValue(it)
+            try {
+                mediaRepository.encryptSelectedMedia(selectedItems).let {
+                    _encryptionStatus.postValue(it)
+                }
+            }
+            catch (ex: Exception) {
+                _encryptionStatus.postValue(EncryptionResource.error("Unknown error occurred. Image wasn't encrypted."))
+                Log.e("SafeCryptCritical", ex.message.toString())
             }
         }
     }

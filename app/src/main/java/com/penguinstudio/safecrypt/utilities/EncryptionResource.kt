@@ -7,7 +7,8 @@ data class EncryptionResource(
     val status: EncryptionStatus,
     val mediaUris: List<Uri>? = null,
     val intentSender: IntentSenderRequest? = null,
-    val positions: MutableList<Int>? = null
+    val positions: MutableList<Int>? = null,
+    val error: String? = null
 ){
     companion object{
 
@@ -25,6 +26,10 @@ data class EncryptionResource(
 
         fun loading(): EncryptionResource {
             return EncryptionResource(EncryptionStatus.LOADING)
+        }
+
+        fun error(error: String): EncryptionResource {
+            return EncryptionResource(EncryptionStatus.ERROR, null, null, null, error)
         }
     }
 }

@@ -349,6 +349,8 @@ class MediaFragment : Fragment(), LifecycleObserver {
 
                 }
                 EncryptionStatus.ERROR -> {
+                    exitSelectMode()
+                    Toast.makeText(context, it.error, Toast.LENGTH_SHORT).show();
                     binding.picturesProgressBar.visibility = View.GONE
                 }
             }

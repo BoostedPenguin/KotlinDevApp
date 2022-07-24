@@ -1,5 +1,6 @@
 package com.penguinstudio.safecrypt.ui.home.encrypted
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -118,8 +119,15 @@ class EncryptedMediaViewModel @Inject constructor(
             val selectedItems = selectedItems.toList()
             clearSelections()
 
-            mediaRepository.decryptSelectedMedia(selectedItems).let {
-                _encryptionStatus.postValue(it)
+            try {
+                mediaRepository.decryptSelectedMedia(selectedItems).let {
+                    _encryptionStatus.postValue(it)
+                }
+            }
+            catch (ex: Exception) {
+                _encryptionStatus.postValue(EncryptionResource.error("Unknown error occurred. Image wasn't encrypted."))
+
+                Log.e("SafeCryptCritical", ex.message.toString())
             }
         }
     }
