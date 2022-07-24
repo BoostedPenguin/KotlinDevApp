@@ -1,44 +1,49 @@
 package com.penguinstudio.safecrypt.ui.home.encrypted
 
+import android.R.attr.data
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.text.TextUtils
 import android.util.Log
 import android.view.*
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.documentfile.provider.DocumentFile
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import com.bumptech.glide.Glide
-import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.snackbar.Snackbar
+import com.penguinstudio.safecrypt.MainActivity
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.EncryptedGridAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentEncryptedMediaBinding
-import com.penguinstudio.safecrypt.models.AlbumModel
 import com.penguinstudio.safecrypt.models.EncryptedModel
 import com.penguinstudio.safecrypt.models.MediaType
 import com.penguinstudio.safecrypt.services.EncryptionProcessIntentHandler
 import com.penguinstudio.safecrypt.services.glide_service.GlideApp
 import com.penguinstudio.safecrypt.services.glide_service.GlideRequest
 import com.penguinstudio.safecrypt.ui.home.HomeFragmentDirections
-import com.penguinstudio.safecrypt.ui.home.SelectedMediaFragmentDirections
 import com.penguinstudio.safecrypt.utilities.EncryptionStatus
 import com.penguinstudio.safecrypt.utilities.MediaMode
 import com.penguinstudio.safecrypt.utilities.Status
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class EncryptedMediaFragment : Fragment(), LifecycleObserver {
@@ -50,6 +55,7 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
     @Inject
     lateinit var encryptionProcessIntentHandler: EncryptionProcessIntentHandler
     private lateinit var defaultStorageLocationSnackbar: Snackbar
+    private lateinit var intentSenderLauncher: ActivityResultLauncher<IntentSenderRequest>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,19 +118,23 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
         setHasOptionsMenu(true)
 
         binding.enMediaSaveLocation.setOnClickListener {
-            encryptionProcessIntentHandler.chooseDefaultSaveLocation().observe(viewLifecycleOwner, {
-                when(it) {
+            encryptionProcessIntentHandler.chooseDefaultSaveLocation().observe(viewLifecycleOwner) {
+                when (it) {
                     Activity.RESULT_OK -> {
                         binding.enMediaSaveLocation.visibility = View.GONE
                         binding.enMediaHint.visibility = View.GONE
                         binding.enPicturesRecyclerView.visibility = View.VISIBLE
                     }
                     Activity.RESULT_CANCELED -> {
-                        Snackbar.make(binding.root, "You must choose a default save location before you can encrypt media", Snackbar.LENGTH_SHORT)
+                        Snackbar.make(
+                            binding.root,
+                            "You must choose a default save location before you can encrypt media",
+                            Snackbar.LENGTH_SHORT
+                        )
                             .show()
                     }
                 }
-            })
+            }
         }
 
         fullRequest = GlideApp.with(this)
@@ -377,6 +387,30 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
                 (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.size} selected"
                 encryptedMediaAdapter.notifyDataSetChanged()
                 true
+            }
+            R.id.action_encrypt_delete -> {
+                MainActivity.pausePattern()
+
+                try {
+                    for(selectedItem in model.selectedItems) {
+                        val srcDoc = DocumentFile.fromSingleUri(requireContext(), selectedItem.uri)
+
+                        if (srcDoc?.delete() == true) {
+                            Toast.makeText(context, "Encrypted file(s) deleted", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+                catch (ex: Exception) {
+                    Log.e("SafeCryptCritical", ex.message.toString())
+                    Toast.makeText(context, "Encrypted file(s) NOT deleted", Toast.LENGTH_LONG).show()
+                }
+                finally {
+                    model.itemSelectionMode.postValue(false)
+                    model.clearSelections()
+
+                    model.getEncryptedFiles()
+                }
+                return true
             }
             else -> super.onOptionsItemSelected(item)
         }
