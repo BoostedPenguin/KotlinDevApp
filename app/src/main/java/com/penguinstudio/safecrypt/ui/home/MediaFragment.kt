@@ -56,6 +56,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
     private lateinit var fullRequest: GlideRequest<Drawable>
 
     private lateinit var defaultStorageLocationSnackbar: Snackbar
+    private lateinit var OverMbLimitSnackbar: Snackbar
 
     @Inject
     lateinit var encryptionProcessIntentHandler: EncryptionProcessIntentHandler
@@ -149,6 +150,12 @@ class MediaFragment : Fragment(), LifecycleObserver {
                 encryptionProcessIntentHandler.chooseDefaultSaveLocation()
             }
 
+        OverMbLimitSnackbar = Snackbar.make(
+            binding.root,
+            "Total size of selected files is more than 10mb.",
+            Snackbar.LENGTH_INDEFINITE
+        )
+
         binding.picturesRecyclerView.setOnTouchListener { v, event ->
             binding.picturesSwipeToRefresh.isEnabled = event.pointerCount <= 1
             return@setOnTouchListener v.onTouchEvent(event)
@@ -198,6 +205,8 @@ class MediaFragment : Fragment(), LifecycleObserver {
                     }
                     else {
                         model.addMediaToSelection(media)
+                        activity?.invalidateOptionsMenu()
+
                     }
 
                     if (model.itemSelectionMode.value == true) {
@@ -438,10 +447,37 @@ class MediaFragment : Fragment(), LifecycleObserver {
         menu.clear()
         super.onPrepareOptionsMenu(menu)
 
+        val g = model.selectedItems.sumOf {
+            if(it.details.size == null) return@sumOf 0
+
+            return@sumOf it.details.size.toInt()
+        }
+
+
         if(model.itemSelectionMode.value == true) {
             activity?.menuInflater?.inflate(R.menu.item_selected_menu , menu)
+
+            val encryptMenuItem = menu.findItem(R.id.action_encrypt)
+
+            if(g <= 10 * 1024 * 1024) {
+                encryptMenuItem.isEnabled = true;
+                encryptMenuItem.icon.alpha = 255
+
+                if(OverMbLimitSnackbar.isShown)
+                    OverMbLimitSnackbar.dismiss()
+
+            }
+            else {
+                encryptMenuItem.isEnabled = false;
+                encryptMenuItem.icon.alpha = 130
+
+                if(!OverMbLimitSnackbar.isShown)
+                    OverMbLimitSnackbar.show()
+            }
         }
         else {
+            OverMbLimitSnackbar.dismiss()
+
             activity?.menuInflater?.inflate(R.menu.main_menu , menu)
         }
     }
