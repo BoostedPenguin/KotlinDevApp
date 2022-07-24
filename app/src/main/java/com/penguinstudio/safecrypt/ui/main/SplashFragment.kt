@@ -1,9 +1,11 @@
 package com.penguinstudio.safecrypt.ui.main
 
 import android.Manifest
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
@@ -11,11 +13,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.common.reflect.Reflection.getPackageName
 import com.penguinstudio.safecrypt.R
@@ -42,106 +47,57 @@ class SplashFragment : Fragment() {
 
 
 
-    private val PERMISSIONS = arrayOf(
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-    )
-
-    private fun hasPermissions(permissions: Array<String>): Boolean {
-        for (permission in permissions) {
-            if (ContextCompat.checkSelfPermission(
-                    context!!,
-                    permission
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                Log.d("PERMISSIONS", "Permission is not granted: $permission")
-                return false
-            }
-            Log.d("PERMISSIONS", "Permission already granted: $permission")
-        }
-        return true
-    }
-
-    private fun askPermissions(multiplePermissionLauncher: ActivityResultLauncher<Array<String>>) {
-        if (!hasPermissions(PERMISSIONS)) {
-            Log.d(
-                "PERMISSIONS",
-                "Launching multiple contract permission launcher for ALL required permissions"
-            )
-            multiplePermissionLauncher.launch(PERMISSIONS)
-        } else {
-            Log.d("PERMISSIONS", "All permissions are already granted")
-        }
-    }
-
-    private var multiplePermissionsContract: RequestMultiplePermissions? = null
-    private var multiplePermissionLauncher: ActivityResultLauncher<Array<String>>? = null
-
-
-    val requestPermissionLauncher =
-        registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted: Boolean ->
-            if (isGranted) {
-                // Permission is granted. Continue the action or workflow in your
-                // app.
-                Log.d("PERMISSIONS", "MF FINE")
-
-
-            } else {
-                Log.d("PERMISSIONS", "MF DID NOT WANT FULL ACCESS")
-                // Explain to the user that the feature is unavailable because the
-                // features requires a permission that the user has denied. At the
-                // same time, respect the user's decision. Don't link to system
-                // settings in an effort to convince the user to change their
-                // decision.
-            }
-        }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if(hasPermissions(PERMISSIONS)) {
-            findNavController().navigate(R.id.patternUnlockFragment)
-            return
-        }
+        permissionsLauncher = registerForActivityResult(RequestMultiplePermissions()) { permissions ->
+            readPermissionGranted = permissions[Manifest.permission.READ_EXTERNAL_STORAGE] ?: readPermissionGranted
+            writePermissionGranted = permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] ?: writePermissionGranted
 
-        multiplePermissionsContract = RequestMultiplePermissions()
-        multiplePermissionLauncher = registerForActivityResult(
-            RequestMultiplePermissions()
-        ) { isGranted ->
-            Log.d("PERMISSIONS", "Launcher result: $isGranted")
-            if (isGranted.containsValue(false)) {
-                Log.d(
-                    "PERMISSIONS",
-                    "At least one of the permissions was not granted, launching again..."
-                )
-                multiplePermissionLauncher?.launch(PERMISSIONS)
-            }
-            else {
-
-                findNavController().navigate(R.id.patternUnlockFragment)
+            if(!readPermissionGranted || !writePermissionGranted) {
+                Toast.makeText(requireContext(), "This app requires read and write permissions to work", Toast.LENGTH_LONG).show()
                 return@registerForActivityResult
-                if (Environment.isExternalStorageManager()) {
-                    //todo when permission is granted
-                    Log.d("PERMISSIONS", "MF FINE")
-
-                } else {
-                    //request for the permission
-                    findNavController().navigate(R.id.patternUnlockFragment)
-                    return@registerForActivityResult
-
-                    val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                    val uri: Uri = Uri.fromParts("package", activity!!.packageName, null)
-                    intent.data = uri
-                    startActivity(intent)
-                    Log.d("PERMISSIONS", "MF DID NOT WANT FULL ACCESS")
-
-                }
             }
+            navigateToPasswordUnlock()
         }
 
-        askPermissions(multiplePermissionLauncher as ActivityResultLauncher<Array<String>>)
+        if (updateOrRequestPermissions()) {
+            navigateToPasswordUnlock()
+        }
+    }
+
+    private var readPermissionGranted = false
+    private var writePermissionGranted = false
+    private lateinit var permissionsLauncher: ActivityResultLauncher<Array<String>>
+    private lateinit var intentSenderLauncher: ActivityResultLauncher<IntentSenderRequest>
+    private fun updateOrRequestPermissions() : Boolean {
+        val hasReadPermission = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+        val hasWritePermission = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+
+        readPermissionGranted = hasReadPermission
+        writePermissionGranted = hasWritePermission
+
+        val permissionsToRequest = mutableListOf<String>()
+        if(!writePermissionGranted) {
+            permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+        if(!readPermissionGranted) {
+            permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+        if(permissionsToRequest.isNotEmpty()) {
+            permissionsLauncher.launch(permissionsToRequest.toTypedArray())
+            return false
+        }
+
+        return true
     }
 
     private fun navigateToPasswordUnlock() {
