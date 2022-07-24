@@ -94,11 +94,13 @@ class MediaFragment : Fragment(), LifecycleObserver {
 
         intentSenderLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
             if(it.resultCode == RESULT_OK) {
-                if(Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
-                    lifecycleScope.launch {
-                        deletePhotoFromExternalStorage(deletedImageUri ?: return@launch)
-                    }
-                }
+//                if(Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+//                    lifecycleScope.launch {
+//                        deletePhotoFromExternalStorage(deletedImageUri ?: return@launch)
+//                    }
+//                }
+
+                model.getMedia()
                 Toast.makeText(context, "Photo deleted successfully", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(context, "Photo couldn't be deleted", Toast.LENGTH_SHORT).show()
@@ -332,10 +334,16 @@ class MediaFragment : Fragment(), LifecycleObserver {
                 }
                 EncryptionStatus.OPERATION_COMPLETE -> {
 
+//                    deletePhotoFromExternalStorage(it.mediaUris)
+
+                    lifecycleScope.launch {
+                        it.mediaUris?.let { it1 -> deleteMultipleFilesFromExternalStorage(it1) }
+                    }
+
                     exitSelectMode()
 
                     // Fetch media, it will update adapter automatically
-                    model.getMedia()
+                    //model.getMedia()
 
                     binding.picturesProgressBar.visibility = View.GONE
 
@@ -365,27 +373,51 @@ class MediaFragment : Fragment(), LifecycleObserver {
     private lateinit var intentSenderLauncher: ActivityResultLauncher<IntentSenderRequest>
     private var deletedImageUri: Uri? = null
 
+    private suspend fun deleteMultipleFilesFromExternalStorage(media: List<Uri>) {
+        withContext(Dispatchers.IO) {
+            try {
+                MainActivity.pausePattern()
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+
+                    for(item in media) {
+                        context!!.contentResolver.delete(item, null, null)
+                    }
+                    model.getMedia()
+                    return@withContext
+                }
+                val deleteIntent = MediaStore.createDeleteRequest(context!!.contentResolver, media)
+
+                intentSenderLauncher.launch(
+                    IntentSenderRequest.Builder(deleteIntent.intentSender).build()
+                )
+            }
+            catch (e: SecurityException) {
+
+            }
+        }
+    }
+
 
     private suspend fun deletePhotoFromExternalStorage(photoUri: Uri) {
-        try {
-            val g = context!!.contentResolver.delete(photoUri, null, null)
-            val s = g
-            Log.e("FUCK", g.toString())
-        } catch (e: SecurityException) {
-            val intentSender = when {
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
-                    MediaStore.createDeleteRequest(context!!.contentResolver, listOf(photoUri)).intentSender
+        withContext(Dispatchers.IO) {
+            try {
+                context!!.contentResolver.delete(photoUri, null, null)
+            } catch (e: SecurityException) {
+                val intentSender = when {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                        MediaStore.createDeleteRequest(context!!.contentResolver, listOf(photoUri)).intentSender
+                    }
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                        val recoverableSecurityException = e as? RecoverableSecurityException
+                        recoverableSecurityException?.userAction?.actionIntent?.intentSender
+                    }
+                    else -> null
                 }
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
-                    val recoverableSecurityException = e as? RecoverableSecurityException
-                    recoverableSecurityException?.userAction?.actionIntent?.intentSender
+                intentSender?.let { sender ->
+                    intentSenderLauncher.launch(
+                        IntentSenderRequest.Builder(sender).build()
+                    )
                 }
-                else -> null
-            }
-            intentSender?.let { sender ->
-                intentSenderLauncher.launch(
-                    IntentSenderRequest.Builder(sender).build()
-                )
             }
         }
     }

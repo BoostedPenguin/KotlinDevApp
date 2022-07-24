@@ -23,7 +23,6 @@ class MediaRepository @Inject constructor(
     ) {
 
     private suspend fun encryptionProcessHandler(media: List<IPicture>, mediaTo: MediaMode) : EncryptionResource {
-        val successResponse = EncryptionResource.complete(null)
         media.forEach {
             val result = try {
                 when(mediaTo) {
@@ -34,25 +33,7 @@ class MediaRepository @Inject constructor(
                         encryptionService.encryptImage(it)
                     }
                 }
-                EncryptionResource.complete(null)
-            }
-            // Recoverable delete
-            catch (e: SecurityException) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    val recoverableSecurityException = e as?
-                            RecoverableSecurityException ?: throw RuntimeException(e.message, e)
-
-                    val intentSender =
-                        recoverableSecurityException.userAction.actionIntent.intentSender
-
-
-                    val intentSenderRequest =
-                        IntentSenderRequest.Builder(intentSender).build()
-
-                    EncryptionResource.deleteRecoverable(intentSenderRequest)
-                } else {
-                    throw RuntimeException(e.message, e)
-                }
+                EncryptionResource.complete(null, null)
             }
             // No default directory / Permissions
             catch (e: NoDefaultDirFound) {
@@ -65,7 +46,8 @@ class MediaRepository @Inject constructor(
 
             if(result.status != EncryptionStatus.OPERATION_COMPLETE) return result
         }
-        return successResponse
+
+        return EncryptionResource.complete(null, media.map { it.uri})
     }
 
     suspend fun getMedia(): Resource<CollectionResponse<AlbumModel>> {

@@ -70,8 +70,7 @@ class MediaEncryptionService @Inject constructor(
             }
 
             // Delete original non-encrypted file
-            val resultAwaited = result.await()
-            if(resultAwaited) deleteOriginalNonEncryptedFile(image.uri)
+            result.await()
         }
         Log.d("loadTime", "Time it took to encrypt media: ${System.currentTimeMillis() - startTime}ms")
         return@withContext EncryptionStatus.OPERATION_COMPLETE
