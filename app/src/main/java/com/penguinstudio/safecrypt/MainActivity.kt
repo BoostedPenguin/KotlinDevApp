@@ -9,6 +9,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.google.android.gms.ads.MobileAds
 import com.penguinstudio.safecrypt.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -27,6 +28,8 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration
             .Builder(R.id.homeFragment, R.id.splashFragment, R.id.patternUnlockFragment)
             .build()
+
+        MobileAds.initialize(this) {}
 
         val toolbar: Toolbar = findViewById(R.id.topAppBar)
         setSupportActionBar(toolbar)

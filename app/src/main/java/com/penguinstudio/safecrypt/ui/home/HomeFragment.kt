@@ -12,6 +12,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.penguinstudio.safecrypt.R
@@ -74,6 +76,9 @@ class HomeFragment : Fragment(), LifecycleObserver {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as AppCompatActivity).supportActionBar?.show()
+
+        val adRequest = AdRequest.Builder().build()
+        requireView().findViewById<AdView>(R.id.adView).loadAd(adRequest)
 
         pagerAdapter = HomeTabPagerAdapter(this)
         viewPager = view.findViewById(R.id.pager)

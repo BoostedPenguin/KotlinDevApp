@@ -4,10 +4,11 @@ plugins {
     id 'kotlin-kapt'
     id "androidx.navigation.safeargs.kotlin"
     id "dagger.hilt.android.plugin"
+    id 'com.google.gms.google-services'
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
 
     packagingOptions {
         exclude 'META-INF/native-image/**'
@@ -42,7 +43,10 @@ android {
 
 
 dependencies {
+    implementation 'com.google.android.gms:play-services-ads:21.1.0'
 
+    implementation platform('com.google.firebase:firebase-bom:30.3.0')
+    implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation (group: 'org.bytedeco', name: 'javacv', version: '1.4.2' , {
         exclude group: 'org.bytedeco.javacpp-presets', module: 'flandmark'
         exclude group: 'org.bytedeco.javacpp-presets', module: 'flycapture'

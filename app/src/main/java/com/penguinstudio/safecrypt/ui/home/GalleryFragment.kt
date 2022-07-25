@@ -6,13 +6,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import com.bumptech.glide.Glide
-import com.bumptech.glide.RequestBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.adapters.AlbumsAdapter
@@ -62,7 +59,7 @@ class GalleryFragment : Fragment() {
         }
 
 
-        model.albums.observe(viewLifecycleOwner, {
+        model.albums.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     updateUIOnResponse()
@@ -89,7 +86,7 @@ class GalleryFragment : Fragment() {
                     }
                 }
             }
-        })
+        }
     }
 
     private fun updateUIOnResponse() {
