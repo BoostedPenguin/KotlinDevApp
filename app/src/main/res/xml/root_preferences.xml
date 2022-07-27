@@ -1,4 +1,5 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory app:title="@string/ui">
 
@@ -13,11 +14,22 @@
     </PreferenceCategory>
     <PreferenceCategory>
         <Preference
-            app:key="about"
-            app:title="Send feedback"/>
-        <Preference
-            app:key="contact"
-            app:title="Contact" />
+            app:key="importKey"
+            app:title="Import encryption key"/>
+
+        <PreferenceScreen android:title="About">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="http://www.example.com"
+                />
+        </PreferenceScreen>
+
+        <PreferenceScreen android:title="Contact">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="http://www.example.com"
+                />
+        </PreferenceScreen>
     </PreferenceCategory>
 
 </PreferenceScreen>

@@ -1,11 +1,15 @@
 package com.penguinstudio.safecrypt.ui.settings
 
+import android.app.Dialog
+import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.*
+import android.widget.Button
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.app.AppOpsManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -78,6 +82,44 @@ class SettingsFragment : Fragment(),
 
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
+        }
+
+        private fun showDialog() {
+            val dialog = Dialog(requireContext())
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            dialog.setCancelable(false)
+            dialog.setContentView(R.layout.import_key_dialog)
+            dialog.show()
+
+        }
+        override fun onPreferenceTreeClick(preference: Preference?): Boolean {
+
+            if(preference?.key == "importKey") {
+
+
+                activity?.let {
+                    val builder = AlertDialog.Builder(it)
+                    // Get the layout inflater
+                    val inflater = requireActivity().layoutInflater;
+
+                    // Inflate and set the layout for the dialog
+                    // Pass null as the parent view because its going in the dialog layout
+                    val dialogView = inflater.inflate(R.layout.import_key_dialog, null)
+
+                    dialogView.findViewById<Button>(R.id.newEncryptionSave).setOnClickListener {
+                        Log.e("HEY", "eas")
+                    }
+                    builder.setView(dialogView)
+
+                    builder.show()
+
+                } ?: throw IllegalStateException("Activity cannot be null")
+
+
+
+                return true
+            }
+            return true
         }
     }
 }
