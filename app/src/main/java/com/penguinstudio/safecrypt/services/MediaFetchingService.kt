@@ -195,10 +195,10 @@ class MediaFetchingService @Inject constructor(
 
                 when {
                     isImageFile(original) -> {
-                        uris.add(EncryptedModel(it.uri, fileName, MediaType.IMAGE))
+                        uris.add(EncryptedModel(it.uri, fileName, MediaType.IMAGE, size = it.length().toString()))
                     }
                     isVideoFile(original) -> {
-                        uris.add(EncryptedModel(it.uri, fileName, MediaType.VIDEO))
+                        uris.add(EncryptedModel(it.uri, fileName, MediaType.VIDEO, size = it.length().toString()))
                     }
                     else -> return@lit
                 }

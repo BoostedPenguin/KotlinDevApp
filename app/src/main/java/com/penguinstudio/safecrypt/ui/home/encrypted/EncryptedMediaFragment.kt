@@ -51,6 +51,7 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
     private lateinit var binding: FragmentEncryptedMediaBinding
     private lateinit var encryptedMediaAdapter: EncryptedGridAdapter
     private lateinit var fullRequest: GlideRequest<Drawable>
+    private lateinit var OverMbLimitSnackbar: Snackbar
 
     @Inject
     lateinit var encryptionProcessIntentHandler: EncryptionProcessIntentHandler
@@ -102,6 +103,12 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
             .setAction("Choose") {
                 encryptionProcessIntentHandler.chooseDefaultSaveLocation()
             }
+
+        OverMbLimitSnackbar = Snackbar.make(
+            requireActivity().findViewById(android.R.id.content),
+            "Total size of selected files is more than 10mb.",
+            Snackbar.LENGTH_INDEFINITE
+        )
 
         binding.enPicturesRecyclerView.setOnTouchListener { v, event ->
             binding.enMediaSwipeToRefresh.isEnabled = event.pointerCount <= 1
@@ -175,6 +182,7 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
 
                     if(model.selectedItems.contains(media)) {
                         model.removeMediaFromSelection(position, media)
+                        activity?.invalidateOptionsMenu()
 
                         if(model.selectedItems.size == 0) {
 
@@ -189,6 +197,8 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
                     }
                     else {
                         model.addMediaToSelection(media)
+                        activity?.invalidateOptionsMenu()
+
                     }
 
                     if (model.itemSelectionMode.value == true) {
@@ -363,8 +373,13 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
         if(model.itemSelectionMode.value == true) {
             activity?.menuInflater?.inflate(R.menu.encrypted_item_selected_menu , menu)
             (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+            checkIfOverMbLimit(menu)
+
         }
         else {
+            OverMbLimitSnackbar.dismiss()
+
             activity?.menuInflater?.inflate(R.menu.main_menu , menu)
             (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
         }
@@ -386,6 +401,8 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
                 model.addAllMediaToSelection(encryptedMediaAdapter.getImages())
                 (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.size} selected"
                 encryptedMediaAdapter.notifyDataSetChanged()
+
+                activity?.invalidateOptionsMenu()
                 true
             }
             R.id.action_encrypt_delete -> {
@@ -429,5 +446,31 @@ class EncryptedMediaFragment : Fragment(), LifecycleObserver {
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.app_name)
         model.clearSelections()
         encryptedMediaAdapter.toggleSelectionMode(false)
+    }
+
+    private fun checkIfOverMbLimit(menu: Menu) {
+        val encryptMenuItem = menu.findItem(R.id.action_decrypt)
+
+        val itemsTotalSize = model.selectedItems.sumOf {
+            if(it.size == null) return@sumOf 0
+
+            return@sumOf it.size.toInt()
+        }
+
+        if(itemsTotalSize <= 10 * 1024 * 1024) {
+            encryptMenuItem.isEnabled = true;
+            encryptMenuItem.icon.alpha = 255
+
+            if(OverMbLimitSnackbar.isShown)
+                OverMbLimitSnackbar.dismiss()
+
+        }
+        else {
+            encryptMenuItem.isEnabled = false;
+            encryptMenuItem.icon.alpha = 130
+
+            if(!OverMbLimitSnackbar.isShown)
+                OverMbLimitSnackbar.show()
+        }
     }
 }

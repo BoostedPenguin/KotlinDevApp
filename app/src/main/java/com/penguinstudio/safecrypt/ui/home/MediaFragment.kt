@@ -158,6 +158,9 @@ class MediaFragment : Fragment(), LifecycleObserver {
             Snackbar.LENGTH_INDEFINITE
         )
 
+        val adRequest = AdRequest.Builder().build()
+        requireView().findViewById<AdView>(R.id.adViewPictures).loadAd(adRequest)
+
         binding.picturesRecyclerView.setOnTouchListener { v, event ->
             binding.picturesSwipeToRefresh.isEnabled = event.pointerCount <= 1
             return@setOnTouchListener v.onTouchEvent(event)
@@ -171,6 +174,8 @@ class MediaFragment : Fragment(), LifecycleObserver {
                 model.addAllMediaToSelection(photoAdapter.getImages())
                 (activity as AppCompatActivity).supportActionBar?.title = "${model.selectedItems.size} selected"
                 photoAdapter.notifyDataSetChanged()
+
+                activity?.invalidateOptionsMenu()
                 true
             }
             R.id.action_encrypt -> {
@@ -197,6 +202,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
 
                     if(model.selectedItems.contains(media)) {
                         model.removeMediaFromSelection(position, media)
+                        activity?.invalidateOptionsMenu()
 
                         if(model.selectedItems.size == 0) {
 
@@ -449,38 +455,42 @@ class MediaFragment : Fragment(), LifecycleObserver {
         menu.clear()
         super.onPrepareOptionsMenu(menu)
 
-        val g = model.selectedItems.sumOf {
-            if(it.details.size == null) return@sumOf 0
-
-            return@sumOf it.details.size.toInt()
-        }
-
 
         if(model.itemSelectionMode.value == true) {
             activity?.menuInflater?.inflate(R.menu.item_selected_menu , menu)
 
-            val encryptMenuItem = menu.findItem(R.id.action_encrypt)
-
-            if(g <= 10 * 1024 * 1024) {
-                encryptMenuItem.isEnabled = true;
-                encryptMenuItem.icon.alpha = 255
-
-                if(OverMbLimitSnackbar.isShown)
-                    OverMbLimitSnackbar.dismiss()
-
-            }
-            else {
-                encryptMenuItem.isEnabled = false;
-                encryptMenuItem.icon.alpha = 130
-
-                if(!OverMbLimitSnackbar.isShown)
-                    OverMbLimitSnackbar.show()
-            }
+            checkIfOverMbLimit(menu)
         }
         else {
             OverMbLimitSnackbar.dismiss()
 
             activity?.menuInflater?.inflate(R.menu.main_menu , menu)
+        }
+    }
+
+    private fun checkIfOverMbLimit(menu: Menu) {
+        val encryptMenuItem = menu.findItem(R.id.action_encrypt)
+
+        val itemsTotalSize = model.selectedItems.sumOf {
+            if(it.details.size == null) return@sumOf 0
+
+            return@sumOf it.details.size.toInt()
+        }
+
+        if(itemsTotalSize <= 10 * 1024 * 1024) {
+            encryptMenuItem.isEnabled = true;
+            encryptMenuItem.icon.alpha = 255
+
+            if(OverMbLimitSnackbar.isShown)
+                OverMbLimitSnackbar.dismiss()
+
+        }
+        else {
+            encryptMenuItem.isEnabled = false;
+            encryptMenuItem.icon.alpha = 130
+
+            if(!OverMbLimitSnackbar.isShown)
+                OverMbLimitSnackbar.show()
         }
     }
 }

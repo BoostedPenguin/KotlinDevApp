@@ -78,7 +78,7 @@ class HomeFragment : Fragment(), LifecycleObserver {
         (activity as AppCompatActivity).supportActionBar?.show()
 
         val adRequest = AdRequest.Builder().build()
-        requireView().findViewById<AdView>(R.id.adView).loadAd(adRequest)
+        requireView().findViewById<AdView>(R.id.adViewHome).loadAd(adRequest)
 
         pagerAdapter = HomeTabPagerAdapter(this)
         viewPager = view.findViewById(R.id.pager)

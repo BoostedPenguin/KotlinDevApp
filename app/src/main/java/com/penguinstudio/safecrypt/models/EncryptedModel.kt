@@ -7,4 +7,5 @@ data class EncryptedModel(override val uri: Uri,
                           override val mediaName: String,
                           override var mediaType: MediaType = MediaType.IMAGE,
                           override var isSelected: Boolean = false,
+                          val size: String? = null,
                           ) : IPicture
