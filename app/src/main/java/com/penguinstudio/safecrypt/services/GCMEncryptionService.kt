@@ -5,7 +5,16 @@ import android.content.Context
 import android.net.Uri
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import android.util.Base64
+import android.util.Log
+import com.penguinstudio.safecrypt.R
+import com.penguinstudio.safecrypt.models.MediaType
+import dagger.hilt.EntryPoint
+import dagger.hilt.EntryPoints
+import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import java.io.*
 import java.security.Key
 import java.security.KeyStore
 import java.security.SecureRandom
@@ -13,16 +22,10 @@ import java.security.spec.AlgorithmParameterSpec
 import javax.crypto.Cipher
 import javax.crypto.CipherInputStream
 import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
-import android.util.Log
-import com.penguinstudio.safecrypt.models.MediaType
-import dagger.hilt.EntryPoint
-import dagger.hilt.EntryPoints
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import java.io.*
-import java.lang.IllegalArgumentException
 
 class GCMEncryptionService @Inject constructor(@ApplicationContext private val context: Context) {
     companion object {
@@ -31,6 +34,17 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
         private const val GCM_IV_LENGTH = 12
         private const val KEY_ALIAS = "MyKey"
         const val ENC_FILE_EXTENSION = "enc"
+
+
+        fun generateUuidKey(context: Context) {
+            val keyStr = java.util.UUID.randomUUID().toString().substring(0, 32)
+
+            val sharedPref = context.getSharedPreferences(context.getString(R.string.main_shared_pref), Context.MODE_PRIVATE)
+            with (sharedPref.edit()) {
+                putString(context.getString(R.string.ENCRYPT_KEY), keyStr)
+                apply()
+            }
+        }
 
         fun generateKey() {
             val keyStore = KeyStore.getInstance(AndroidKeyStore)
@@ -52,6 +66,32 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
                 keyGenerator.generateKey()
             }
         }
+    }
+
+
+
+
+    fun getUuidKey() : Key {
+        val sharedPref = context.getSharedPreferences(context.getString(R.string.main_shared_pref), Context.MODE_PRIVATE)
+
+        val keyStr =
+            sharedPref.getString(context.getString(R.string.ENCRYPT_KEY), "")
+
+        if(keyStr == null) {
+            val newKeyStr = java.util.UUID.randomUUID().toString().substring(0, 32)
+
+            with (sharedPref.edit()) {
+                putString(context.getString(R.string.ENCRYPT_KEY), newKeyStr)
+                apply()
+            }
+
+            Log.e("SafeCryptKey", newKeyStr)
+
+            return SecretKeySpec(newKeyStr.toByteArray(), "AES")
+        }
+
+        Log.e("SafeCryptKey", keyStr)
+        return SecretKeySpec(keyStr.toByteArray(), "AES")
     }
 
     @EntryPoint
@@ -77,7 +117,7 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
         val decryptCipher = Cipher.getInstance(AES_MODE)
 
         decryptCipher.init(Cipher.DECRYPT_MODE,
-            getSecretKey(), GCMParameterSpec(128, iv))
+            getUuidKey(), GCMParameterSpec(128, iv))
 
 //        return CipherInputStream(inputStream, decryptCipher)
 
@@ -98,7 +138,7 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
 
         val gcmIv: AlgorithmParameterSpec = GCMParameterSpec(128, iv)
 
-        decryptCipher.init(Cipher.DECRYPT_MODE, getSecretKey(), gcmIv)
+        decryptCipher.init(Cipher.DECRYPT_MODE, getUuidKey(), gcmIv)
 
 //        val endArray = decryptCipher.doFinal(inputStream.readBytes())
 
@@ -139,7 +179,7 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
 
         val gcmIv: AlgorithmParameterSpec = GCMParameterSpec(128, iv)
 
-        decryptCipher.init(Cipher.DECRYPT_MODE, getSecretKey(), gcmIv)
+        decryptCipher.init(Cipher.DECRYPT_MODE, getUuidKey(), gcmIv)
 
         var read: Int
 
@@ -179,7 +219,7 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
         SecureRandom().nextBytes(iv)
         val parameterSpec = GCMParameterSpec(128, iv)
         val encryptCipher = Cipher.getInstance(AES_MODE)
-        encryptCipher.init(Cipher.ENCRYPT_MODE, getSecretKey(), parameterSpec)
+        encryptCipher.init(Cipher.ENCRYPT_MODE, getUuidKey(), parameterSpec)
 
 
         val inpStream = when(mediaType) {

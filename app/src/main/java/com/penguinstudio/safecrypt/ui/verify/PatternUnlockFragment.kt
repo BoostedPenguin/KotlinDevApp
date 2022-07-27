@@ -89,7 +89,7 @@ class PatternUnlockFragment : Fragment() {
 
             // Generate key for encrypting media
             // Stores securely in KeyStore
-            GCMEncryptionService.generateKey()
+            GCMEncryptionService.generateUuidKey(requireContext())
 
             binding.patternLockView.clearPattern()
             model.pattern = ""
