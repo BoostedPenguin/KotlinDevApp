@@ -1,28 +1,23 @@
 package com.penguinstudio.safecrypt.ui.main
 
 import android.Manifest
-import android.app.Activity.RESULT_OK
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.provider.Settings
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.google.common.reflect.Reflection.getPackageName
+import com.google.android.material.snackbar.Snackbar
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.databinding.FragmentSplashBinding
 
@@ -42,9 +37,18 @@ class SplashFragment : Fragment() {
         // Inflate the layout for this fragment
         binding = FragmentSplashBinding.inflate(inflater, container, false)
 
+        binding.splashGivePermissionsButton.setOnClickListener {
+            val intent = Intent()
+            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            val uri = Uri.fromParts("package", activity!!.packageName, null)
+            intent.data = uri
+            //context!!.startActivity(intent)
+
+            resultLauncher.launch(intent)
+        }
+
         return binding.root
     }
-
 
 
 
@@ -57,7 +61,6 @@ class SplashFragment : Fragment() {
             writePermissionGranted = permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] ?: writePermissionGranted
 
             if(!readPermissionGranted || !writePermissionGranted) {
-                Toast.makeText(requireContext(), "This app requires read and write permissions to work", Toast.LENGTH_LONG).show()
                 return@registerForActivityResult
             }
             navigateToPasswordUnlock()
@@ -71,7 +74,11 @@ class SplashFragment : Fragment() {
     private var readPermissionGranted = false
     private var writePermissionGranted = false
     private lateinit var permissionsLauncher: ActivityResultLauncher<Array<String>>
-    private lateinit var intentSenderLauncher: ActivityResultLauncher<IntentSenderRequest>
+    var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (updateOrRequestPermissions()) {
+            navigateToPasswordUnlock()
+        }
+    }
     private fun updateOrRequestPermissions() : Boolean {
         val hasReadPermission = ContextCompat.checkSelfPermission(
             requireContext(),
