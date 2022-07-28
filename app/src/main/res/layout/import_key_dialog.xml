@@ -13,7 +13,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toTopOf="@id/existingEncryptionDivider"
-        android:textColor="@color/black"
         android:textStyle="bold"
         android:textSize="25sp"
         android:layout_marginBottom="10dp"
@@ -57,7 +56,7 @@
             android:id="@+id/encryptionKeyTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Existing key"
+            android:text="Existing encryption key"
             app:layout_constraintBottom_toTopOf="@+id/encryptionKeyText"
             app:layout_constraintStart_toStartOf="@+id/encryptionKeyText"
             app:layout_constraintTop_toTopOf="parent" />
@@ -67,7 +66,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="The current encryption key"
-            android:textColor="@color/black"
             android:textSize="13sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/encryptionKeyCopy"
@@ -98,7 +96,7 @@
             android:id="@+id/newEncryptionKeyTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="New key"
+            android:text="Import encyption key"
             app:layout_constraintBottom_toTopOf="@+id/newEncryptionKeyText"
             app:layout_constraintStart_toStartOf="@+id/newEncryptionKeyText" />
 
@@ -107,11 +105,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:hint="Some random key"
+            android:hint="Your encryption key"
             android:inputType="text"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/encryptionKeyTooltip"
+            tools:layout_editor_absoluteY="20dp" />
 
+        <TextView
+            android:id="@+id/encryptionKeyTooltip"
+            android:layout_width="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_height="wrap_content"
+            android:text="You will not be able to use your existing encrypted media if you change your key."
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/newEncryptionKeyText" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

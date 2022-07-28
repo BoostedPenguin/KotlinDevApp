@@ -15,7 +15,7 @@
     <PreferenceCategory>
         <Preference
             app:key="importKey"
-            app:title="Import encryption key"/>
+            app:title="Encryption key manager"/>
 
         <PreferenceScreen android:title="About">
             <intent

@@ -132,7 +132,6 @@ class SettingsFragment : Fragment(),
                         .getString(requireContext().getString(R.string.ENCRYPT_KEY), "")
 
                     dialogView.findViewById<Button>(R.id.newEncryptionSave).setOnClickListener {
-                        Log.e("HEY", "eas")
 
                         val keyText =
                             dialogView.findViewById<EditText>(R.id.newEncryptionKeyText).text.toString()
