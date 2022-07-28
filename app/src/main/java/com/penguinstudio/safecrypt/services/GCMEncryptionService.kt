@@ -47,9 +47,6 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
         }
 
         fun putUuidKey(key: String, context: Context) {
-            if(key.length != 32)
-                throw IllegalArgumentException("Invalid key length. It needs to be exactly 32 characters")
-
             val sharedPref = context.getSharedPreferences(context.getString(R.string.main_shared_pref), Context.MODE_PRIVATE)
             with (sharedPref.edit()) {
                 putString(context.getString(R.string.ENCRYPT_KEY), key)

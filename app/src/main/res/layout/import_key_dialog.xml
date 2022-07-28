@@ -5,13 +5,33 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingVertical="50dp"
+    android:paddingLeft="10dp"
     android:layout_gravity="center"
     android:gravity="center">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/existingEncryptionDivider"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:textSize="25sp"
+        android:layout_marginBottom="10dp"
+        android:text="Encryption key manager" />
+
+    <View
+        android:id="@+id/existingEncryptionDivider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="20dp"
+        app:layout_constraintBottom_toTopOf="@id/existingEncryptionConstraint"
+        android:background="@android:color/darker_gray"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/existingEncryptionConstraint"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        app:layout_constraintBottom_toTopOf="@id/newEncryptionKeyConstraint"
+        android:layout_height="wrap_content">
 
         <ImageButton
             android:id="@+id/encryptionKeyCopy"
@@ -46,11 +66,9 @@
             android:id="@+id/encryptionKeyText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="28dp"
-            android:ems="10"
-            android:text="50ac3ccec3754dbb963c989ba534"
+            android:text="The current encryption key"
             android:textColor="@color/black"
-            android:textSize="15sp"
+            android:textSize="13sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/encryptionKeyCopy"
             app:layout_constraintStart_toStartOf="parent"
@@ -89,9 +107,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:layout_marginLeft="30dp"
             android:hint="Some random key"
-            android:inputType="textPersonName"
+            android:inputType="text"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
