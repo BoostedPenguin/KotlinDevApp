@@ -252,12 +252,7 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
         }
 
         private fun createMediaSourceFactory(): MediaSourceFactory {
-            val keyStore = KeyStore.getInstance("AndroidKeyStore")
-            keyStore.load(null)
-
-            val localKey = keyStore.getKey("MyKey", null)
-
-            val aesDataSource: DataSource = EncryptedDataSource(itemView.context, localKey) // Use your Cipher instance
+            val aesDataSource: DataSource = EncryptedDataSource(itemView.context) // Use your Cipher instance
 
             val factory = DataSource.Factory {
                 aesDataSource

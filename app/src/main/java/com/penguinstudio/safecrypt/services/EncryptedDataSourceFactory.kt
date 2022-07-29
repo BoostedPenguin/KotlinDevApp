@@ -25,7 +25,7 @@ import javax.crypto.CipherInputStream
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
-class EncryptedDataSource(private val context: Context, private val key: Key) : DataSource {
+class EncryptedDataSource(private val context: Context) : DataSource {
 
     @EntryPoint
     @InstallIn(SingletonComponent::class)
