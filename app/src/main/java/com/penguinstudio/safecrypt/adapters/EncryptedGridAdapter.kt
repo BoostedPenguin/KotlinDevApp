@@ -1,6 +1,7 @@
 package com.penguinstudio.safecrypt.adapters
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
@@ -18,6 +19,7 @@ import com.bumptech.glide.RequestBuilder
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.EncryptedModel
 import com.penguinstudio.safecrypt.models.MediaType
+import com.penguinstudio.safecrypt.utilities.getEncryptionKey
 import com.penguinstudio.safecrypt.utilities.loadImage
 import org.bytedeco.javacv.FFmpegFrameGrabber
 
@@ -161,8 +163,7 @@ class EncryptedGridAdapter constructor(
                 videoLayoutCard.visibility = View.GONE
             }
 
-
-            fullRequest.loadImage(encryptedModel, imageView, encryptedModel.mediaType)
+            fullRequest.loadImage(encryptedModel, imageView, true, encryptedModel.mediaType, itemView.context.getEncryptionKey())
         }
     }
 

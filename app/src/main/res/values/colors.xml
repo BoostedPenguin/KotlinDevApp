@@ -55,4 +55,6 @@
 
     <color name="black_overlay">#CC131313</color>
 
+    <color name="orange_main">#FF9900</color>
+
 </resources>

@@ -1,5 +1,6 @@
 package com.penguinstudio.safecrypt.adapters
 
+import android.content.Context
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.view.LayoutInflater
@@ -33,6 +34,7 @@ import com.google.android.exoplayer2.util.MimeTypes
 import com.penguinstudio.safecrypt.services.EncryptedDataSource
 import com.penguinstudio.safecrypt.services.glide_service.IPicture
 import com.penguinstudio.safecrypt.utilities.MediaMode
+import com.penguinstudio.safecrypt.utilities.getEncryptionKey
 import com.penguinstudio.safecrypt.utilities.loadImage
 import java.security.KeyStore
 
@@ -245,7 +247,8 @@ class SelectedMediaAdapter(private var listener: ImagePagerListeners,
             selectedVideo.controllerShowTimeoutMs = -1
 
 
-            fullRequest.loadImage(media.uri, imageView, media.mediaType)
+            fullRequest.loadImage(media.uri, imageView,
+                mediaMode == MediaMode.ENCRYPTED_MEDIA, media.mediaType, itemView.context.getEncryptionKey())
         }
 
         private fun createMediaSourceFactory(): MediaSourceFactory {

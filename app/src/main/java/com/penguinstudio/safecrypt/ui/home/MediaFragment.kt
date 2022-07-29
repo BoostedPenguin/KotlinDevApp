@@ -410,8 +410,8 @@ class MediaFragment : Fragment(), LifecycleObserver {
                     IntentSenderRequest.Builder(deleteIntent.intentSender).build()
                 )
             }
-            catch (e: SecurityException) {
-
+            catch (e: Exception) {
+                Log.e("SafeCryptCritical", "Unhandled deletion of file, error: " + e.message.toString())
             }
         }
     }
