@@ -88,7 +88,6 @@ class PatternUnlockFragment : Fragment() {
             }
 
             // Generate key for encrypting media
-            // Stores securely in KeyStore
             GCMEncryptionService.generateUuidKey(requireContext())
 
             binding.patternLockView.clearPattern()

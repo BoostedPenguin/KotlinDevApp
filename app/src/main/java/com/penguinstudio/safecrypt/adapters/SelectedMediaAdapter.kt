@@ -36,7 +36,6 @@ import com.penguinstudio.safecrypt.services.glide_service.IPicture
 import com.penguinstudio.safecrypt.utilities.MediaMode
 import com.penguinstudio.safecrypt.utilities.getEncryptionKey
 import com.penguinstudio.safecrypt.utilities.loadImage
-import java.security.KeyStore
 
 
 class SelectedMediaAdapter(private var listener: ImagePagerListeners,

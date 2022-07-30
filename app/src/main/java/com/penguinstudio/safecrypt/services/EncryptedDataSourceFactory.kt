@@ -2,28 +2,16 @@ package com.penguinstudio.safecrypt.services
 
 import android.content.Context
 import android.net.Uri
-import android.security.keystore.KeyProperties
 import android.util.Log
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DataSpec
 import com.google.android.exoplayer2.upstream.TransferListener
-import com.penguinstudio.safecrypt.services.glide_service.SafeCryptModelLoader
 import dagger.hilt.EntryPoint
-import dagger.hilt.EntryPoints
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import java.io.File
 import java.io.IOException
 import java.io.InputStream
-import java.security.Key
-import java.security.KeyStore
-import java.security.spec.AlgorithmParameterSpec
-import javax.crypto.Cipher
-import javax.crypto.CipherInputStream
-import javax.crypto.spec.GCMParameterSpec
-import javax.crypto.spec.SecretKeySpec
 
 class EncryptedDataSource(private val context: Context) : DataSource {
 

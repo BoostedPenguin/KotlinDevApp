@@ -3,9 +3,6 @@ package com.penguinstudio.safecrypt.services
 import OptimizedCipherInputStream
 import android.content.Context
 import android.net.Uri
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
-import android.util.Base64
 import android.util.Log
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.MediaType
@@ -16,23 +13,18 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import java.io.*
 import java.security.Key
-import java.security.KeyStore
 import java.security.SecureRandom
 import java.security.spec.AlgorithmParameterSpec
 import javax.crypto.Cipher
 import javax.crypto.CipherInputStream
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
 
 class GCMEncryptionService @Inject constructor(@ApplicationContext private val context: Context) {
     companion object {
-        private const val AndroidKeyStore = "AndroidKeyStore"
         private const val AES_MODE = "AES/GCM/NoPadding"
         private const val GCM_IV_LENGTH = 12
-        private const val KEY_ALIAS = "MyKey"
         const val ENC_FILE_EXTENSION = "enc"
 
 
@@ -51,27 +43,6 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
             with (sharedPref.edit()) {
                 putString(context.getString(R.string.ENCRYPT_KEY), key)
                 apply()
-            }
-        }
-
-        fun generateKey() {
-            val keyStore = KeyStore.getInstance(AndroidKeyStore)
-            keyStore.load(null)
-
-            if (!keyStore.containsAlias(KEY_ALIAS)) {
-                val keyGenerator: KeyGenerator =
-                    KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, AndroidKeyStore)
-                keyGenerator.init(
-                    KeyGenParameterSpec.Builder(
-                        KEY_ALIAS,
-                        KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-                    )
-                        .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                        .setRandomizedEncryptionRequired(false)
-                        .build()
-                )
-                keyGenerator.generateKey()
             }
         }
     }
@@ -108,12 +79,7 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
         fun getService(): ImageCompressor
     }
 
-    fun getSecretKey(): Key {
-        val keyStore = KeyStore.getInstance(AndroidKeyStore)
-        keyStore.load(null)
 
-        return keyStore.getKey(KEY_ALIAS, null)
-    }
 
     fun getCipherInputStream(uri: Uri): InputStream {
         val inputStream = context.contentResolver?.openInputStream(uri)
