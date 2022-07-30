@@ -48,7 +48,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         app:adSize="FULL_WIDTHx50"
-        app:adUnitId="@string/adUnitIdPictures"
+        app:adUnitId="@string/adUnitIdPicturesTest"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
