@@ -111,6 +111,7 @@ dependencies {
     // Dagger Hilt
     implementation("com.google.dagger:hilt-android:2.35")
     kapt("com.google.dagger:hilt-android-compiler:2.35")
+    implementation 'me.zhanghai.android.fastscroll:library:1.1.8'
 
     // Video ext
     implementation 'com.google.android.exoplayer:exoplayer:2.14.2'

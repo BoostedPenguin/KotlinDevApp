@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +22,7 @@ import com.bumptech.glide.signature.MediaStoreSignature
 import com.penguinstudio.safecrypt.R
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.models.MediaType
+import me.zhanghai.android.fastscroll.PopupTextProvider
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -31,7 +33,7 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners,
                                     private var fullRequest: RequestBuilder<Drawable>,
                                     ) :
     RecyclerView.Adapter<AlbumMediaAdapter.ImageHolder>(),
-    ListPreloader.PreloadModelProvider<MediaModel> {
+    ListPreloader.PreloadModelProvider<MediaModel>, PopupTextProvider {
 
     init {
         setHasStableIds(true)
@@ -188,10 +190,12 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners,
         }
     }
 
-    fun getPopupText(position: Int): String {
+    override fun getPopupText(position: Int): String {
+        Log.e("ERR", images[position].details.dateAdded.toString())
         if(images[position].details.dateAdded != null) {
+
             return SimpleDateFormat("MMM y", Locale.US)
-                .format(images[position].details.dateAdded)
+                .format((images[position].details.dateAdded?.toLong() ?: 0) * 1000)
         }
         return ""
     }

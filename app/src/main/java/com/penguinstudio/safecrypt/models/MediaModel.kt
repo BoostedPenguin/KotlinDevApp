@@ -20,7 +20,7 @@ data class MediaModel(
 ) : IPicture
 
 data class MediaModelDetails(
-    val dateAdded: Long? = null,
+    val dateAdded: String? = null,
     val relativePath: String? = null,
     val size: String? = null,
     val width: String? = null,

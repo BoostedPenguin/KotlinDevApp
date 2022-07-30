@@ -1,6 +1,5 @@
 package com.penguinstudio.safecrypt.services
 
-import android.app.RecoverableSecurityException
 import android.content.ContentUris
 import android.content.Context
 import android.content.SharedPreferences
@@ -17,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.lang.IllegalArgumentException
 import java.net.URLConnection
+import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,6 +36,7 @@ class MediaFetchingService @Inject constructor(
             val projection = arrayOf(
                 MediaStore.Files.FileColumns._ID,
                 MediaStore.Files.FileColumns.DATE_TAKEN,
+                MediaStore.Files.FileColumns.DATE_ADDED,
                 MediaStore.Files.FileColumns.MEDIA_TYPE,
                 MediaStore.Files.FileColumns.MIME_TYPE,
                 MediaStore.Files.FileColumns.TITLE,
@@ -64,21 +65,27 @@ class MediaFetchingService @Inject constructor(
                 MediaStore.Files.FileColumns.DATE_TAKEN + " DESC" // Sort order.
             )
 
-            query?.use {
+            query?.use { it ->
                 val bucketNameColumn: Int = it.getColumnIndex(
                     MediaStore.Files.FileColumns.BUCKET_DISPLAY_NAME
                 )
-                val dateAddedColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_TAKEN)
-                val mediaNameColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME)
+                val dateTakenColumn =
+                    it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_TAKEN)
+                val dateAddedColumn =
+                    it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATE_ADDED)
+                val mediaNameColumn =
+                    it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME)
                 val idColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
-                val mediaTypeColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)
+                val mediaTypeColumn =
+                    it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)
                 val durationColumn: Int =
                     it.getColumnIndex(MediaStore.Video.VideoColumns.DURATION)
 
                 val itemSizeColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE)
                 val itemWidthColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.WIDTH)
                 val itemHeightColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.HEIGHT)
-                val relativePathColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.RELATIVE_PATH)
+                val relativePathColumn =
+                    it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.RELATIVE_PATH)
 
 
                 while (it.moveToNext()) {
@@ -86,11 +93,16 @@ class MediaFetchingService @Inject constructor(
                     val bucketName = it.getString(bucketNameColumn)
                     val imageId = it.getLong(idColumn)
                     val mediaName = it.getString(mediaNameColumn)
+
                     val dateAdded = it.getLongOrNull(dateAddedColumn)
+                    val dateTaken =
+                        it.getLongOrNull(dateTakenColumn) // Has 3 extra 0's, make sure to * 1000 for it
+
                     val size = it.getStringOrNull(itemSizeColumn)
                     val width = it.getStringOrNull(itemWidthColumn)
                     val height = it.getStringOrNull(itemHeightColumn)
                     val relativePath = it.getStringOrNull(relativePathColumn)
+
 
                     val contentUri = when {
                         Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
@@ -110,7 +122,7 @@ class MediaFetchingService @Inject constructor(
 
                     var media: MediaModel
 
-                    when(it.getInt(mediaTypeColumn)) {
+                    when (it.getInt(mediaTypeColumn)) {
                         MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE -> {
 
                             media = MediaModel(
@@ -120,8 +132,19 @@ class MediaFetchingService @Inject constructor(
                                 MediaType.IMAGE,
                                 null,
                                 mediaName,
-                                MediaModelDetails(dateAdded, relativePath, size, width, height)
+                                MediaModelDetails(
+                                    it.getStringOrNull(dateTakenColumn) ?: it.getLongOrNull(
+                                        dateAddedColumn
+                                    ).let { dateAddedValue ->
+                                        if (dateAddedValue == null) return@let ""
+                                        return@let dateAddedValue.toString()
+                                    },
+                                    relativePath,
+                                    size,
+                                    width,
+                                    height
                                 )
+                            )
                         }
                         MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO -> {
                             media = MediaModel(
@@ -131,7 +154,16 @@ class MediaFetchingService @Inject constructor(
                                 MediaType.VIDEO,
                                 it.getLong(durationColumn),
                                 mediaName,
-                                MediaModelDetails(dateAdded, relativePath, size)
+                                MediaModelDetails(
+                                    it.getStringOrNull(dateTakenColumn) ?: it.getLongOrNull(
+                                        dateAddedColumn
+                                    ).let { dateAddedValue ->
+                                        if (dateAddedValue == null) return@let ""
+                                        return@let dateAddedValue.toString()
+                                    },
+                                    relativePath,
+                                    size
+                                )
                             )
                         }
                         else -> {
@@ -159,6 +191,7 @@ class MediaFetchingService @Inject constructor(
                     }
                 }
             }
+
             return@withContext allAlbums
         }
     }

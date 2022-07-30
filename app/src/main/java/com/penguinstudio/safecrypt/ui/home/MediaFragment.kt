@@ -26,8 +26,6 @@ import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import com.bumptech.glide.Glide
-import com.bumptech.glide.RequestBuilder
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
 import com.google.android.material.snackbar.Snackbar
@@ -37,7 +35,6 @@ import com.penguinstudio.safecrypt.adapters.AlbumMediaAdapter
 import com.penguinstudio.safecrypt.databinding.FragmentPicturesBinding
 import com.penguinstudio.safecrypt.models.MediaModel
 import com.penguinstudio.safecrypt.services.EncryptionProcessIntentHandler
-import com.penguinstudio.safecrypt.services.glide_service.GlideApp
 import com.penguinstudio.safecrypt.services.glide_service.GlideRequest
 import com.penguinstudio.safecrypt.utilities.EncryptionStatus
 import com.penguinstudio.safecrypt.utilities.Status
@@ -46,6 +43,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import me.zhanghai.android.fastscroll.FastScroller
+import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import javax.inject.Inject
 
 
@@ -255,6 +254,8 @@ class MediaFragment : Fragment(), LifecycleObserver {
         binding.picturesRecyclerView.adapter = photoAdapter
         
         binding.picturesRecyclerView.setHasFixedSize(true)
+
+        FastScrollerBuilder(binding.picturesRecyclerView).build()
     }
 
     private fun registerEvents() {
