@@ -354,9 +354,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
 
 //                    deletePhotoFromExternalStorage(it.mediaUris)
 
-                    lifecycleScope.launch {
-                        it.mediaUris?.let { it1 -> deleteMultipleFilesFromExternalStorage(it1) }
-                    }
+                    it.mediaUris?.let { it1 -> deleteMultipleFilesFromExternalStorage(it1) }
 
                     exitSelectMode()
 
@@ -393,27 +391,48 @@ class MediaFragment : Fragment(), LifecycleObserver {
     private lateinit var intentSenderLauncher: ActivityResultLauncher<IntentSenderRequest>
     private var deletedImageUri: Uri? = null
 
-    private suspend fun deleteMultipleFilesFromExternalStorage(media: List<Uri>) {
-        withContext(Dispatchers.IO) {
-            try {
-                MainActivity.pausePattern()
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+    private  fun deleteMultipleFilesFromExternalStorage(media: List<Uri>) {
+        try {
+            MainActivity.pausePattern()
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
 
-                    for(item in media) {
-                        context!!.contentResolver.delete(item, null, null)
-                    }
-                    model.getMedia()
-                    return@withContext
+                for(item in media) {
+                    context!!.contentResolver.delete(item, null, null)
                 }
-                val deleteIntent = MediaStore.createDeleteRequest(context!!.contentResolver, media)
+                model.getMedia()
+                return
+            }
+            val deleteIntent = MediaStore.createDeleteRequest(context!!.contentResolver, media)
 
-                intentSenderLauncher.launch(
-                    IntentSenderRequest.Builder(deleteIntent.intentSender).build()
-                )
-            }
-            catch (e: Exception) {
-                Log.e("SafeCryptCritical", "Unhandled deletion of file, error: " + e.message.toString())
-            }
+            intentSenderLauncher.launch(
+                IntentSenderRequest.Builder(deleteIntent.intentSender).build()
+            )
+        }
+        catch(recoverableSecurityException: RecoverableSecurityException) {
+            binding.picturesProgressBar.visibility = View.GONE
+
+            val sender =
+                IntentSenderRequest.Builder(recoverableSecurityException.userAction.actionIntent.intentSender).build()
+
+            encryptionProcessIntentHandler.deleteOriginalFile(sender)
+                .observe(viewLifecycleOwner) { result ->
+                    when (result) {
+                        Activity.RESULT_OK -> {
+                            //Successfully deleted
+                        }
+                        Activity.RESULT_CANCELED -> {
+                            Snackbar.make(
+                                binding.root,
+                                "Original media item wasn't deleted. Please delete it manually.",
+                                Snackbar.LENGTH_INDEFINITE
+                            ).show()
+                        }
+                    }
+                }
+        }
+        catch (e: Exception) {
+            Toast.makeText(context, "Error deleting files! Please delete them manually.", Toast.LENGTH_LONG).show()
+            Log.e("SafeCryptCritical", "Unhandled deletion of file, error: " + e.message.toString())
         }
     }
 
