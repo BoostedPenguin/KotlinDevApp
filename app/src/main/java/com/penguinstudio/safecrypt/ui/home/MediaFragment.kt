@@ -96,11 +96,11 @@ class MediaFragment : Fragment(), LifecycleObserver {
 
         intentSenderLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
             if(it.resultCode == RESULT_OK) {
-//                if(Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
-//                    lifecycleScope.launch {
-//                        deletePhotoFromExternalStorage(deletedImageUri ?: return@launch)
-//                    }
-//                }
+                if(Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+                    lifecycleScope.launch {
+                        deletePhotoFromExternalStorage(deletedImageUri ?: return@launch)
+                    }
+                }
 
                 model.getMedia()
                 Toast.makeText(context, "Photo deleted successfully", Toast.LENGTH_SHORT).show()
@@ -394,7 +394,7 @@ class MediaFragment : Fragment(), LifecycleObserver {
     private  fun deleteMultipleFilesFromExternalStorage(media: List<Uri>) {
         try {
             MainActivity.pausePattern()
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
 
                 for(item in media) {
                     context!!.contentResolver.delete(item, null, null)

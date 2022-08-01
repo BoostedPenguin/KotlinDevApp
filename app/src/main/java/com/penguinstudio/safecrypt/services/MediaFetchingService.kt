@@ -107,7 +107,11 @@ class MediaFetchingService @Inject constructor(
                     val contentUri = when {
                         Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
                             ContentUris.withAppendedId(
-                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                if (it.getInt(mediaTypeColumn) == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO)
+                                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                                else
+                                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                                ,
                                 imageId
                             )
                         }
