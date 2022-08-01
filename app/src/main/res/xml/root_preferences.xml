@@ -17,18 +17,18 @@
             app:key="importKey"
             app:title="Encryption key manager"/>
 
-        <PreferenceScreen android:title="About">
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:data="http://www.example.com"
-                />
+        <PreferenceScreen android:title="About" app:key="about">
+<!--            <intent-->
+<!--                android:action="android.intent.action.VIEW"-->
+<!--                android:data="http://www.example.com"-->
+<!--                />-->
         </PreferenceScreen>
 
-        <PreferenceScreen android:title="Contact">
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:data="http://www.example.com"
-                />
+        <PreferenceScreen android:title="Contact"  app:key="contact">
+<!--            <intent-->
+<!--                android:action="android.intent.action.VIEW"-->
+<!--                android:data="http://www.example.com"-->
+<!--                />-->
         </PreferenceScreen>
     </PreferenceCategory>
 

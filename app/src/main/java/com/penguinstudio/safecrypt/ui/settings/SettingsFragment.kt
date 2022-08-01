@@ -89,14 +89,6 @@ class SettingsFragment : Fragment(),
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
         }
 
-        private fun showDialog() {
-            val dialog = Dialog(requireContext())
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-            dialog.setCancelable(false)
-            dialog.setContentView(R.layout.import_key_dialog)
-            dialog.show()
-
-        }
         override fun onPreferenceTreeClick(preference: Preference?): Boolean {
 
             if(preference?.key == "importKey") {
@@ -157,6 +149,16 @@ class SettingsFragment : Fragment(),
 
 
 
+                return true
+            }
+
+            if(preference?.key == "about") {
+                Toast.makeText(context, "About page will be implemented at a later date!", Toast.LENGTH_SHORT).show()
+                return true
+            }
+
+            if(preference?.key == "contact") {
+                Toast.makeText(context, "Contact page will be implemented at a later date!", Toast.LENGTH_SHORT).show()
                 return true
             }
             return true
