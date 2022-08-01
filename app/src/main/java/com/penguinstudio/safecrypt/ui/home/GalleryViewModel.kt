@@ -104,7 +104,7 @@ class GalleryViewModel @Inject constructor(
             _encryptionStatus.postValue(EncryptionResource.loading())
 
             val selectedItems = selectedItems.toList()
-            clearSelections()
+            //clearSelections()
 
             try {
                 mediaRepository.encryptSelectedMedia(selectedItems).let {
