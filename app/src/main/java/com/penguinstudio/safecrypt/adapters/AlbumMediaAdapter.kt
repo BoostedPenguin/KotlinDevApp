@@ -194,7 +194,7 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners,
         if(images[position].details.dateAdded != null) {
 
             return SimpleDateFormat("MMM y", Locale.US)
-                .format((images[position].details.dateAdded?.toLong() ?: 0) * 1000)
+                .format((images[position].details.dateAdded?.toLong() ?: 0))
         }
         return ""
     }

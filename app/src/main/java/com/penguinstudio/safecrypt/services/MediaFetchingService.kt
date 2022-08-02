@@ -141,7 +141,7 @@ class MediaFetchingService @Inject constructor(
                                         dateAddedColumn
                                     ).let { dateAddedValue ->
                                         if (dateAddedValue == null) return@let ""
-                                        return@let dateAddedValue.toString()
+                                        return@let (dateAddedValue * 1000).toString()
                                     },
                                     relativePath,
                                     size,
@@ -163,7 +163,7 @@ class MediaFetchingService @Inject constructor(
                                         dateAddedColumn
                                     ).let { dateAddedValue ->
                                         if (dateAddedValue == null) return@let ""
-                                        return@let dateAddedValue.toString()
+                                        return@let (dateAddedValue * 1000).toString()
                                     },
                                     relativePath,
                                     size
