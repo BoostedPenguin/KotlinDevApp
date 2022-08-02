@@ -156,7 +156,7 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners,
 
             fullRequest
                 .load(media.uri)
-                .override(200)
+                .override(500)
                 .placeholder(R.drawable.ic_baseline_image_24)
                 .fitCenter()
                 .into(imageView)
@@ -191,7 +191,6 @@ class AlbumMediaAdapter constructor(private var listener: AdapterListeners,
     }
 
     override fun getPopupText(position: Int): String {
-        Log.e("ERR", images[position].details.dateAdded.toString())
         if(images[position].details.dateAdded != null) {
 
             return SimpleDateFormat("MMM y", Locale.US)

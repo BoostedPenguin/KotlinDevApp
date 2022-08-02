@@ -198,11 +198,16 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
 
         val inpStream = when(mediaType) {
             MediaType.IMAGE -> {
-                val compressed = imageCompressor.getBitmapFormUri(uri)
-                    ?: throw IllegalArgumentException("Couldn't open an input stream")
 
-                val degree = imageCompressor.getBitmapDegree(uri)
-                imageCompressor.rotateBitmapByDegree(compressed, degree.toFloat())
+                // Compression image before encrypting it
+//                val compressed = imageCompressor.getBitmapFormUri(uri)
+//                    ?: throw IllegalArgumentException("Couldn't open an input stream")
+//
+//                val degree = imageCompressor.getBitmapDegree(uri)
+//                imageCompressor.rotateBitmapByDegree(compressed, degree.toFloat())
+
+                context.contentResolver.openInputStream(uri)
+                    ?: throw IllegalArgumentException("Couldn't open an input stream")
             }
             MediaType.VIDEO -> {
                 context.contentResolver.openInputStream(uri)
