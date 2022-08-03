@@ -21,7 +21,6 @@ data class MediaModel(
 
 data class MediaModelDetails(
     val dateAdded: String? = null,
-    val relativePath: String? = null,
     val size: String? = null,
     val width: String? = null,
     val height: String? = null,

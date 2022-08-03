@@ -297,7 +297,6 @@ class SelectedMediaFragment : Fragment(), LifecycleObserver {
             SimpleDateFormat("dd MMMM yyyy hh:mm", Locale.US)
                 .format(mediaModel.details.dateAdded.toLong())
         }
-        popupView.findViewById<TextView>(R.id.detailsPathValue).text = "${mediaModel.details.relativePath}"
     }
 
     override fun onDestroy() {

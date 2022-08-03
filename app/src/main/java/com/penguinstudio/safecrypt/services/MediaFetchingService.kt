@@ -46,7 +46,6 @@ class MediaFetchingService @Inject constructor(
                 MediaStore.Files.FileColumns.SIZE,
                 MediaStore.Files.FileColumns.WIDTH,
                 MediaStore.Files.FileColumns.HEIGHT,
-                MediaStore.Files.FileColumns.RELATIVE_PATH
             )
             val selection = (MediaStore.Files.FileColumns.MEDIA_TYPE + "="
                     + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
@@ -84,8 +83,6 @@ class MediaFetchingService @Inject constructor(
                 val itemSizeColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.SIZE)
                 val itemWidthColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.WIDTH)
                 val itemHeightColumn = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.HEIGHT)
-                val relativePathColumn =
-                    it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.RELATIVE_PATH)
 
 
                 while (it.moveToNext()) {
@@ -101,7 +98,6 @@ class MediaFetchingService @Inject constructor(
                     val size = it.getStringOrNull(itemSizeColumn)
                     val width = it.getStringOrNull(itemWidthColumn)
                     val height = it.getStringOrNull(itemHeightColumn)
-                    val relativePath = it.getStringOrNull(relativePathColumn)
 
 
                     val contentUri = when {
@@ -143,7 +139,6 @@ class MediaFetchingService @Inject constructor(
                                         if (dateAddedValue == null) return@let ""
                                         return@let (dateAddedValue * 1000).toString()
                                     },
-                                    relativePath,
                                     size,
                                     width,
                                     height
@@ -165,7 +160,6 @@ class MediaFetchingService @Inject constructor(
                                         if (dateAddedValue == null) return@let ""
                                         return@let (dateAddedValue * 1000).toString()
                                     },
-                                    relativePath,
                                     size
                                 )
                             )

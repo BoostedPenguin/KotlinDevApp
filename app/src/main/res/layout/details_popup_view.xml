@@ -60,43 +60,23 @@
                 android:id="@+id/detailsDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/detailsDimensions"
-                app:layout_constraintStart_toStartOf="parent"
                 android:layout_margin="20dp"
+                android:text="Date:"
                 android:textSize="16sp"
-                android:text="Date:" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/detailsDimensions" />
 
             <TextView
                 android:id="@+id/detailsDateValue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/detailsDimensionsValue"
-                app:layout_constraintEnd_toEndOf="parent"
                 android:layout_margin="20dp"
+                android:text="Date:"
                 android:textSize="16sp"
-                android:text="Date:" />
-
-            <TextView
-                android:id="@+id/detailsPath"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/detailsDate"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_margin="20dp"
-                android:textSize="16sp"
-                android:text="File path:" />
-
-            <TextView
-                android:id="@+id/detailsPathValue"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/detailsDateValue"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_margin="20dp"
-                android:textSize="16sp"
-                android:text="File path:" />
+                app:layout_constraintTop_toBottomOf="@+id/detailsDimensionsValue" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
