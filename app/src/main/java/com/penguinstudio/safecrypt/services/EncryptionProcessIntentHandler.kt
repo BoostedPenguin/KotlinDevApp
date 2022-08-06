@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -73,11 +74,17 @@ class EncryptionProcessIntentHandler @Inject constructor (
 
             contentResolver.takePersistableUriPermission(it.data?.data!!, takeFlags)
 
+            val selectedFolderPathUri = it.data!!.data!!
+
             val sp: SharedPreferences =
                 context.getSharedPreferences("DirPermission", Context.MODE_PRIVATE)
             val editor = sp.edit()
 
-            editor.putString("uriTree", it.data?.data!!.toString())
+            val root = DocumentFile.fromTreeUri(context, selectedFolderPathUri)
+            val path = root?.createDirectory("Encrypted")
+
+
+            editor.putString("uriTree", path?.uri.toString())
             editor.apply()
         }
         _saveLocationResult.value = it.resultCode
