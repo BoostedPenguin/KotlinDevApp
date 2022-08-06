@@ -1,5 +1,6 @@
 package com.penguinstudio.safecrypt.ui.settings
 
+import android.app.Activity
 import android.app.Dialog
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -14,17 +15,25 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
+import com.google.android.material.snackbar.Snackbar
 import com.penguinstudio.safecrypt.MainActivity
 import com.penguinstudio.safecrypt.R
+import com.penguinstudio.safecrypt.services.EncryptionProcessIntentHandler
 import com.penguinstudio.safecrypt.services.GCMEncryptionService
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
-
+@AndroidEntryPoint
 class SettingsFragment : Fragment(),
     SharedPreferences.OnSharedPreferenceChangeListener, Preference.SummaryProvider<ListPreference> {
+
+    @Inject
+    lateinit var encryptionProcessIntentHandler: EncryptionProcessIntentHandler
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,7 +57,7 @@ class SettingsFragment : Fragment(),
         if (savedInstanceState == null) {
             parentFragmentManager
                 .beginTransaction()
-                .replace(R.id.settings, SettingsFragment())
+                .replace(R.id.settings, SettingsFragment(encryptionProcessIntentHandler))
                 .commit()
         }
 
@@ -83,7 +92,7 @@ class SettingsFragment : Fragment(),
         }
     }
 
-    class SettingsFragment : PreferenceFragmentCompat() {
+    class SettingsFragment(private val encryptionProcessIntentHandler: EncryptionProcessIntentHandler) : PreferenceFragmentCompat() {
 
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
@@ -147,14 +156,35 @@ class SettingsFragment : Fragment(),
 
                 } ?: throw IllegalStateException("Activity cannot be null")
 
-
-
                 return true
             }
 
             if(preference?.key == "about") {
                 Toast.makeText(context, "About page will be implemented at a later date!", Toast.LENGTH_SHORT).show()
                 return true
+            }
+
+            if(preference?.key == "encryptFileDirectory") {
+                encryptionProcessIntentHandler.chooseDefaultSaveLocation().observe(viewLifecycleOwner) {
+                    when (it) {
+                        Activity.RESULT_OK -> {
+                            Snackbar.make(
+                                requireView(),
+                                "Successfully changed encryption file directory.",
+                                Snackbar.LENGTH_SHORT
+                            )
+                                .show()
+                        }
+                        Activity.RESULT_CANCELED -> {
+                            Snackbar.make(
+                                requireView(),
+                                "You did not change your existing file encryption directory.",
+                                Snackbar.LENGTH_SHORT
+                            )
+                                .show()
+                        }
+                    }
+                }
             }
 
             if(preference?.key == "contact") {

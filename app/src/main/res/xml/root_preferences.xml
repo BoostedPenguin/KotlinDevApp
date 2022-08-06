@@ -17,6 +17,10 @@
             app:key="importKey"
             app:title="Encryption key manager"/>
 
+        <Preference
+            app:key="encryptFileDirectory"
+            app:title="Change file directory"/>
+
         <PreferenceScreen android:title="About" app:key="about">
 <!--            <intent-->
 <!--                android:action="android.intent.action.VIEW"-->

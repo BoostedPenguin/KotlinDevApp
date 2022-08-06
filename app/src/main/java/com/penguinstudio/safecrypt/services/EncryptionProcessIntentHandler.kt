@@ -81,8 +81,13 @@ class EncryptionProcessIntentHandler @Inject constructor (
             val editor = sp.edit()
 
             val root = DocumentFile.fromTreeUri(context, selectedFolderPathUri)
-            val path = root?.createDirectory("Encrypted")
 
+            val path = if(root?.findFile("Encrypted") == null) {
+                root?.createDirectory("Encrypted")
+            }
+            else {
+                root.findFile("Encrypted")
+            }
 
             editor.putString("uriTree", path?.uri.toString())
             editor.apply()

@@ -64,12 +64,10 @@ class GCMEncryptionService @Inject constructor(@ApplicationContext private val c
                 apply()
             }
 
-            Log.e("SafeCryptKey", newKeyStr)
 
             return SecretKeySpec(newKeyStr.toByteArray(), "AES")
         }
 
-        Log.e("SafeCryptKey", keyStr)
         return SecretKeySpec(keyStr.toByteArray(), "AES")
     }
 
