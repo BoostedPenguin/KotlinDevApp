@@ -14,6 +14,7 @@ buildscript {
         // SafeArgs for navigation component
         classpath("androidx.navigation:navigation-safe-args-gradle-plugin:2.3.5")
         classpath "com.google.dagger:hilt-android-gradle-plugin:2.35"
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.1'
 
     }
 }
