@@ -32,8 +32,7 @@ import javax.inject.Inject
 class SettingsFragment : Fragment(),
     SharedPreferences.OnSharedPreferenceChangeListener, Preference.SummaryProvider<ListPreference> {
 
-    @Inject
-    lateinit var encryptionProcessIntentHandler: EncryptionProcessIntentHandler
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,7 +56,7 @@ class SettingsFragment : Fragment(),
         if (savedInstanceState == null) {
             parentFragmentManager
                 .beginTransaction()
-                .replace(R.id.settings, SettingsFragment(encryptionProcessIntentHandler))
+                .replace(R.id.settings, ChildSettingsFragment())
                 .commit()
         }
 
@@ -91,8 +90,11 @@ class SettingsFragment : Fragment(),
             }
         }
     }
+    @AndroidEntryPoint
+    class ChildSettingsFragment : PreferenceFragmentCompat() {
 
-    class SettingsFragment(private val encryptionProcessIntentHandler: EncryptionProcessIntentHandler) : PreferenceFragmentCompat() {
+        @Inject
+        lateinit var encryptionProcessIntentHandler: EncryptionProcessIntentHandler
 
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
