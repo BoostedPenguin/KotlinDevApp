@@ -36,4 +36,6 @@
     <string name="ENC_STORAGE_DIR_PERMISSIONS">DirPermission</string>
     <string name="ENCRYPT_KEY">EncryptionKey</string>
     <string name="ENC_DIR_ROOT_TREE">uriTree</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

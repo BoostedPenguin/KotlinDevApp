@@ -45,6 +45,9 @@
         <action
             android:id="@+id/action_patternUnlockFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
+        <action
+            android:id="@+id/action_patternUnlockFragment_to_selectEncryptionFolderFragment"
+            app:destination="@id/selectEncryptionFolderFragment" />
     </fragment>
     <fragment
         android:id="@+id/homeFragment"
@@ -80,5 +83,14 @@
             android:name="media_mode"
             app:argType="com.penguinstudio.safecrypt.utilities.MediaMode"
             android:defaultValue="NORMAL_MEDIA" />
+    </fragment>
+    <fragment
+        android:id="@+id/selectEncryptionFolderFragment"
+        android:name="com.penguinstudio.safecrypt.ui.registerFolder.SelectEncryptionFolderFragment"
+        android:label="EncryptionFolder"
+        tools:layout="@layout/fragment_select_encryption_folder" >
+        <action
+            android:id="@+id/action_selectEncryptionFolderFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
     </fragment>
 </navigation>

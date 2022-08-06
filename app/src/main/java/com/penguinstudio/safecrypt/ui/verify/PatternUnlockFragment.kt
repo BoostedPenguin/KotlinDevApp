@@ -1,6 +1,7 @@
 package com.penguinstudio.safecrypt.ui.verify
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -43,6 +44,9 @@ class PatternUnlockFragment : Fragment() {
 
         val sp = activity?.getPreferences(Context.MODE_PRIVATE)
         val storedPattern = sp?.getString(getString(R.string.pattern), null)
+
+
+
 
         model.isRegistering = storedPattern == null
 
@@ -92,7 +96,7 @@ class PatternUnlockFragment : Fragment() {
 
             binding.patternLockView.clearPattern()
             model.pattern = ""
-            findNavController().navigate(R.id.action_patternUnlockFragment_to_homeFragment)
+            findNavController().navigate(R.id.selectEncryptionFolderFragment)
         }
 
         if(pattern.length < 4) {
@@ -141,6 +145,16 @@ class PatternUnlockFragment : Fragment() {
             //binding.patternLockView.setViewMode(PatternLockView.PatternViewMode.CORRECT)
             binding.patternLockView.clearPattern()
             model.pattern = ""
+
+            // If person skipped (closed app) during selecting encrypted directory
+            // Redirect him there before continuing with app
+            val saveDirectoryPath =
+                requireContext().getSharedPreferences("DirPermission", Context.MODE_PRIVATE).getString("uriTree", "")
+
+            if(saveDirectoryPath == null || saveDirectoryPath.isEmpty()) {
+                findNavController().navigate(R.id.selectEncryptionFolderFragment)
+                return
+            }
 
             findNavController().navigate(R.id.action_patternUnlockFragment_to_homeFragment)
         }
