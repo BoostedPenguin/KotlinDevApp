@@ -1,13 +1,10 @@
 package com.penguinstudio.safecrypt.ui.settings
 
 import android.app.Activity
-import android.app.Dialog
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.SharedPreferences
+import android.content.*
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
+import android.provider.Settings
 import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
@@ -15,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -27,6 +23,7 @@ import com.penguinstudio.safecrypt.services.EncryptionProcessIntentHandler
 import com.penguinstudio.safecrypt.services.GCMEncryptionService
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class SettingsFragment : Fragment(),
@@ -161,9 +158,17 @@ class SettingsFragment : Fragment(),
                 return true
             }
 
-            if(preference?.key == "about") {
-                Toast.makeText(context, "About page will be implemented at a later date!", Toast.LENGTH_SHORT).show()
-                return true
+            if(preference?.key == "privacy") {
+                return try {
+                    val url = "https://atodorov.netlify.app/#/safecrypt"
+                    val uri: Uri = Uri.parse(url)
+                    val intent = Intent(Intent.ACTION_VIEW, uri)
+                    startActivity(intent);
+                    true
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Error opening link!", Toast.LENGTH_SHORT).show()
+                    false
+                }
             }
 
             if(preference?.key == "encryptFileDirectory") {
@@ -189,10 +194,6 @@ class SettingsFragment : Fragment(),
                 }
             }
 
-            if(preference?.key == "contact") {
-                Toast.makeText(context, "Contact page will be implemented at a later date!", Toast.LENGTH_SHORT).show()
-                return true
-            }
             return true
         }
     }

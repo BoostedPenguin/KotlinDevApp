@@ -21,19 +21,19 @@
             app:key="encryptFileDirectory"
             app:title="Change file directory"/>
 
-        <PreferenceScreen android:title="About" app:key="about">
+        <PreferenceScreen android:title="Privacy policy" app:key="privacy">
 <!--            <intent-->
 <!--                android:action="android.intent.action.VIEW"-->
-<!--                android:data="http://www.example.com"-->
+<!--                android:data="https://atodorov.netlify.app/#/safecrypt"-->
 <!--                />-->
         </PreferenceScreen>
 
-        <PreferenceScreen android:title="Contact"  app:key="contact">
-<!--            <intent-->
-<!--                android:action="android.intent.action.VIEW"-->
-<!--                android:data="http://www.example.com"-->
-<!--                />-->
-        </PreferenceScreen>
+<!--        <PreferenceScreen android:title="Contact"  app:key="contact">-->
+<!--&lt;!&ndash;            <intent&ndash;&gt;-->
+<!--&lt;!&ndash;                android:action="android.intent.action.VIEW"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:data="http://www.example.com"&ndash;&gt;-->
+<!--&lt;!&ndash;                />&ndash;&gt;-->
+<!--        </PreferenceScreen>-->
     </PreferenceCategory>
 
 </PreferenceScreen>

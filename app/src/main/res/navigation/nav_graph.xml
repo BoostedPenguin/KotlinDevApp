@@ -64,7 +64,7 @@
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.penguinstudio.safecrypt.ui.settings.SettingsFragment"
-        android:label="SettingsFragment" />
+        android:label="Settings" />
     <fragment
         android:id="@+id/picturesFragment"
         android:name="com.penguinstudio.safecrypt.ui.home.MediaFragment"
