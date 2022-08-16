@@ -17,6 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SafeCrypt">
         <activity
+            android:exported="true"
             android:excludeFromRecents="true"
             android:name=".MainActivity"
             android:configChanges="screenSize|layoutDirection"

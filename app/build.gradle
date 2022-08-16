@@ -18,8 +18,8 @@ android {
     defaultConfig {
         applicationId "com.penguinstudio.safecrypt"
         minSdkVersion 23
-        targetSdkVersion 30
-        versionCode 6
+        targetSdkVersion 31
+        versionCode 7
         versionName "1.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
