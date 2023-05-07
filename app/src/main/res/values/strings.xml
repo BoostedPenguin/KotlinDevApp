@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SafeCrypt</string>
+    <string name="app_name">Mobile Encrypter</string>
     <string name="main_shared_pref">Shared Preferences</string>
 
     <!-- Key for shared preferences   -->
